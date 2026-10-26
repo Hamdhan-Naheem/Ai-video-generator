@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/manrope";
 import "./globals.css";
 import "./workspace-pages.css";
+import "./form-controls.css";
 
 export const metadata: Metadata = {
   title: { default: "AI Video Studio — Development preview", template: "%s | AI Video Studio" },

@@ -2,7 +2,7 @@
 
 **Last updated:** 26 October 2026  
 **Current phase:** Incremental application implementation authorized. First milestone: web scaffold and shared responsive foundation; cloud integration remains planned.
-**Current milestone:** Create video selection, My videos and Settings visual previews implemented and verified against Stitch references with the compact Dashboard shell; built-result review pending. Next: shared form fields/validation and Education input-form UI, followed by Software and Branding forms. Backend milestones remain Planned.
+**Current milestone:** W-02 shared UI foundation completed and verified against Stitch Education/Settings references. Next: implement the Education input-form UI using these controls, then Software and Branding forms. Backend contracts/auth/persistence/generation remain Planned.
 **Approved requirements:** [PRD](PRD.md)  
 **Project instructions:** [AGENTS.md](../AGENTS.md)
 
@@ -29,7 +29,7 @@ This is the single progress source. Visual approval and implementation completio
 | W-01 | Next.js workspace, shared palette/font and shell preview | Complete | Web lint/typecheck/build passed; six desktop/mobile browser checks passed; 18 pipeline tests passed. Local preview only. |
 | W-01V | Dashboard desktop/mobile and shared-shell visual alignment | Complete — user accepted compact refinement | Confirmed Stitch layout, original static SVG illustrations, responsive cards/chrome; screenshots reviewed; eight browser checks and production build passed. Sample data only. |
 | W-01P | Create video/My videos/Settings visual layouts | Complete — visual previews; user review pending | Stitch-based selection/library/settings layouts, desktop/mobile screenshots, 16 Chrome checks, production build; sample data only. Mode input forms and backend remain planned. |
-| W-02 | Shared buttons, fields, status/error messages and accessible dialogs | In progress | Button/notice/modal primitives and local profile validation verified. Shared reusable fields and async loading/failure states remain for creation forms. |
+| W-02 | Shared buttons, fields, status/error messages and accessible dialogs | Complete — shared UI foundation | Stitch-based text/textarea/select/password/checkbox/radio fields; associated hints/errors; pending/disabled buttons; status/notice/retry components; Settings integration. 26 desktop/mobile browser checks, lint/typecheck/build and 18 pipeline tests passed. Loading/retry verified with explicitly local simulations; real backend operations remain Planned. |
 | W-03 | Browser-safe shared input/auth/job contracts | Planned | Mode schemas, display name, intended use, acknowledgments, budgets and error DTO tests |
 | W-04 | Supabase local schema, migrations and ownership policies | Planned | Two-user RLS/transaction tests; no browser privileged credentials |
 | W-05 | Email signup/signin and editable display name | Planned | Real session flow, generic errors, configured password policy, no verification/reset email |
@@ -144,7 +144,7 @@ This is the single progress source. Visual approval and implementation completio
 
 ## 6. Current limitations and dependencies
 
-- A real local education video now exists. TypeScript orchestration, local artifacts, Gemini narration, Whisper captions, Rhubarb cues, original vector teacher and Remotion rendering have been exercised. Frontend, database integration and deployment remain unimplemented.
+- A real local education video now exists. TypeScript orchestration, local artifacts, Gemini narration, Whisper captions, Rhubarb cues, original vector teacher and Remotion rendering have been exercised. Web visual previews and shared controls are implemented; real account/data integration and deployment remain unimplemented.
 - Live script generation passed with gemini-3.5-flash-lite; live narration passed with gemini-3.8-flash-tts/Kore. The larger planner returned timeouts/HTTP 503 and was replaced by the verified smaller configurable planner.
 - The fallback voice is Alice, a British English female voice. Full solar narration succeeded and the user accepted the sample; Sri Lankan English suitability remains unverified.
 - The fallback key expires 30 days after 23 October 2026 and is capped at 1,000 credits per refresh period. Do not silently renew, expand or purchase credits.
@@ -374,3 +374,14 @@ Added a separate short-showcase schema/renderer/CLI with exact source-quote vali
 - Changed files grouped: four page/control components (create-video.tsx, video-library.tsx, settings.tsx, ui.tsx), workspace-pages.css, shared icons/chrome, app layout/section route, two browser-test files, four local SVG assets; documentation updated in PROJECT-TRACKER.md, UI-PAGE-HANDOFF.md, WEB-DEVELOPMENT.md and the historical UI-IMPLEMENTATION-AUDIT.md status banner. AGENTS.md was not edited.
 - Next: user reviews these three implemented visual previews. Complete reusable creation fields/validation and implement the Education input form first, then the Software/Branding forms; keep backend contracts/auth/persistence separate and mark features complete only with actual acceptance evidence.
 
+
+## W-02 shared controls completed — 26 October 2026
+
+- Retrieved live Stitch Education desktop/mobile (95651f3752184e0bbe8544e097b813ab / 594496ae09684f1881d4a67d67288791) and Settings desktop (8438188bc1b943b3b0e170260c961155). Inspected source and the mobile screenshot. Used the desktop labels and approved handoff corrections where the mobile export has missing labels; retained the compact shell and identical #F7F6F2 desktop/mobile canvas. No Stitch designs changed.
+- Added reusable labeled text, textarea, select, password, checkbox and native radio-card fields with required semantics, linked hints/errors, controlled textarea counters, readable read-only/disabled states and keyboard selection. Settings now uses the shared text fields while retaining page-local sample name behavior.
+- Extended shared buttons with pending labels/spinner and disabled handling; notices support info/success/warning/error and retry callbacks; status badges combine text and icons. Accessible native dialogs retain forward/reverse focus trapping, initial focus, Escape/close and focus return. Password visibility retains input value and keyboard focus. Reduced motion disables the spinner animation.
+- Added /preview/controls as an explicitly labeled component review page, separate from the Education form and regular navigation. Async failure/retry is a local simulation with preserved inputs; no backend request, draft save, account change, voice playback or video generation is claimed.
+- Browser verification caught a validation-induced layout shift that cancelled dialog clicks and a password toggle below the 44px touch target. Fixed submission timing and the touch target. Removed unsupported radio aria-invalid; the group retains error semantics and descriptions.
+- Final validation: web lint with zero warnings, standalone web TypeScript and production build passed; root TypeScript and all 18 pipeline regression tests passed (provider requests mocked). All 26 Chrome desktop/mobile checks passed, including validation associations/limits, native keyboard choices, pending/disabled states, simulated failure/retry without mutation requests, password visibility, dialog focus/close/discard, reduced motion, palette parity and 320px short-viewport checks. Desktop/mobile screenshots reviewed. Runtime used Node 24.22.1.
+- Scope: W-02 is complete as shared UI infrastructure. W-10 Education form and the other complete product features remain Planned. No dependency changes, live provider calls, cloud configuration, deployment, Git commit or push.
+- Exact next feature: Education input-form UI at /preview/create?mode=education, matching the recorded Stitch structure with required intended use, settings, optional details and unchecked acknowledgments. Reuse W-02 controls; keep real save/generation unavailable until contracts/auth/persistence are implemented.

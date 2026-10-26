@@ -41,7 +41,7 @@ Setup references: [Next.js installation](https://nextjs.org/docs/app/getting-sta
 
 ## Next small feature
 
-Next: reusable creation fields/validation and the Education input-form UI, then Software/Branding forms. W-02 already includes basic buttons/notices/dialogs and profile validation; remaining shared fields and asynchronous states are not complete. Shared schemas and persistence/auth integration follow incrementally. Mark Complete only after the milestone's actual checks pass. Visual placeholders never count as implemented authentication, uploads, project data or generation.
+Next: the Education input-form UI using the completed W-02 controls, then Software/Branding forms. W-02 shared fields, buttons, notices, status badges, dialogs and loading/failure/retry presentation are implemented and verified. Shared schemas and persistence/auth integration follow incrementally. Mark Complete only after the milestone's actual checks pass. Visual placeholders never count as implemented authentication, uploads, project data or generation.
 
 ## Local runtime and dependency follow-up
 
@@ -58,3 +58,11 @@ Pop-Location
 The 26 October audit reports eight high-severity package entries sharing one Zod advisory (GHSA-mrhx-c7xc-m3w5) in the existing Remotion dependency tree. The proposed automatic fix downgrades the renderer; it has not been applied. Resolve with a compatible renderer/dependency update and rendering regression checks before release. ESLint 9 is retained for the React lint plugin's declared peer compatibility; its deprecation and a compatible tooling upgrade are tracked release work. Neither issue is evidence that the application is production-ready.
 
 The machine-specific command above invokes Node 24 directly: Windows npm wrappers can use the older Node beside their own installation even after PATH changes. With a normal system Node 24 installation, the root npm commands remain the standard workflow. The final web build/browser checks for the three-page milestone used the bundled Node 24 executable directly.
+
+## Shared controls (W-02)
+
+Open http://127.0.0.1:3001/preview/controls on the current local preview (use your configured port on a fresh server). This developer component review is not a new product navigation destination or the Education form. It demonstrates Stitch-based fields, native choices, password visibility, notices/statuses, dialogs and explicitly simulated loading/failure/retry. Nothing is persisted or sent to providers.
+
+Reuse components from apps/web/src/components/form-fields.tsx and ui.tsx. Pass field errors after validation; hints/errors are associated with controls automatically. Textarea counters require a controlled value. Pass pending and pendingLabel to Button during an actual async operation; pending disables repeat activation. Notice accepts tone and optional onRetry/retrying. Callers supply operation state and persistence; primitives do not invent backend behavior. Settings consumes TextField for its sample profile.
+
+Acceptance coverage is in apps/web/e2e/shared-controls.spec.ts alongside the existing page tests. W-02 passed 26 desktop/mobile browser checks in total, web lint/typecheck/build, and the 18 existing pipeline tests. The next feature is the full Education form UI; real auth, saves, uploads and generation remain separate planned work.

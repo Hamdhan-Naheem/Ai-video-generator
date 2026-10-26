@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { TextField } from "@/components/form-fields";
 import { Icon } from "@/components/icons";
 import { Button, Modal, Notice, PreviewNote } from "@/components/ui";
 
@@ -16,8 +17,8 @@ export function Settings() {
   return <div className="settings-page">
     <div className="settings-heading"><p className="eyebrow">Account &amp; preferences</p><h1>Settings</h1><p>Manage your profile and account security.</p></div>
     <section className="settings-panel ui-panel" aria-labelledby="profile-title"><div className="settings-panel-heading"><h2 id="profile-title">Profile</h2><p>Your personal identity inside AI Video Studio workspaces.</p></div><form onSubmit={save} noValidate>
-      <div className="settings-field"><label htmlFor="profile-name">Full name</label><input id="profile-name" autoComplete="name" maxLength={80} value={name} aria-invalid={touched && !valid} aria-describedby={touched && !valid ? "profile-name-error" : "profile-name-hint"} onBlur={() => setTouched(true)} onChange={event => { setName(event.target.value); setMessage(""); }} /><p id="profile-name-hint">Used as your account display name.</p>{touched && !valid && <p id="profile-name-error" className="field-error" role="alert">Enter a full name of 1–80 characters.</p>}</div>
-      <div className="settings-field"><label htmlFor="profile-email">Email <span className="fixed-label"><Icon name="lock" width="12" height="12" />Fixed</span></label><div className="readonly-field"><input id="profile-email" value="alex@example.com" readOnly aria-describedby="profile-email-hint" /><Icon name="lock" width="16" height="16" /></div><p id="profile-email-hint">Email changes aren’t available in this version.</p></div>
+      <TextField className="settings-field" id="profile-name" label="Full name" autoComplete="name" maxLength={80} value={name} hint="Used as your account display name." error={touched && !valid ? "Enter a full name of 1–80 characters." : undefined} onBlur={() => setTouched(true)} onChange={event => { setName(event.target.value); setMessage(""); }} />
+      <TextField className="settings-field" id="profile-email" label={<>Email <span className="fixed-label"><Icon name="lock" width="12" height="12" />Fixed</span></>} value="alex@example.com" readOnly hint="Email changes aren’t available in this version." />
       <div className="settings-save"><Button type="submit" disabled={!changed || !valid}><Icon name="check" width="17" height="17" />Save changes</Button><span>Saves full name only</span></div>{message && <Notice>{message}</Notice>}
     </form></section>
     <section className="settings-panel ui-panel" aria-labelledby="security-title"><div className="settings-panel-heading"><h2 id="security-title">Account security</h2><p>Credentials and access safeguards for your account.</p></div><div className="settings-security-row"><div className="security-method"><span className="settings-icon"><Icon name="key" /></span><div><p>Sign-in method: Email and password</p><small>You’ll need your current password.</small></div></div><Button variant="secondary" onClick={() => setDialog("password")}><Icon name="key" width="17" height="17" />Change password</Button></div><p className="settings-help"><Icon name="info" width="16" height="16" />Password-reset emails aren’t available in this version. Keep your password somewhere safe.</p></section>
