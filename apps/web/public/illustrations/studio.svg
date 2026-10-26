@@ -1,0 +1,32 @@
+<svg fill="none" viewBox="0 0 240 140" xmlns="http://www.w3.org/2000/svg">
+
+<rect fill="#FFFFFF" height="112" rx="8" stroke="#DCDDD5" stroke-width="1.5" width="204" x="18" y="14"></rect>
+
+<line stroke="#DCDDD5" stroke-width="1.5" x1="18" x2="222" y1="32" y2="32"></line>
+<circle cx="30" cy="23" fill="#DCDDD5" r="3"></circle>
+<circle cx="40" cy="23" fill="#DCDDD5" r="3"></circle>
+<circle cx="50" cy="23" fill="#DCDDD5" r="3"></circle>
+
+<rect fill="#E9F0EB" height="74" rx="5" width="104" x="28" y="42"></rect>
+
+<circle cx="80" cy="62" fill="#F4EFE6" r="14" stroke="#235B4E" stroke-dasharray="2 2" stroke-width="1.5"></circle>
+
+<path d="M28 106C46 88 68 84 84 94C98 102 116 100 132 90V116H28V106Z" fill="#235B4E" fill-opacity="0.18"></path>
+<path d="M28 112C52 98 84 100 102 108C114 112 124 110 132 106V116H28V112Z" fill="#235B4E"></path>
+
+<rect fill="#FFFFFF" height="34" rx="6" stroke="#DCDDD5" stroke-width="1.2" width="70" x="144" y="44"></rect>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="154" x2="154" y1="61" y2="61"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="160" x2="160" y1="56" y2="66"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="166" x2="166" y1="52" y2="70"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="172" x2="172" y1="55" y2="67"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="178" x2="178" y1="58" y2="64"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="184" x2="184" y1="50" y2="72"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="190" x2="190" y1="57" y2="65"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2.5" x1="196" x2="196" y1="60" y2="62"></line>
+
+<rect fill="#F7F6F2" height="28" rx="6" stroke="#DCDDD5" stroke-width="1.2" width="70" x="144" y="88"></rect>
+<circle cx="160" cy="102" fill="#235B4E" r="7"></circle>
+<polygon fill="#FFFFFF" points="159,99 164,102 159,105"></polygon>
+<rect fill="#DCDDD5" height="3" rx="1.5" width="30" x="174" y="99"></rect>
+<rect fill="#DCDDD5" height="3" rx="1.5" width="20" x="174" y="105"></rect>
+</svg>

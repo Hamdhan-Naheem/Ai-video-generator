@@ -1,0 +1,430 @@
+<!DOCTYPE html><html class="h-full bg-[#F7F6F2]" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>AI Video Studio - Dashboard</title>
+<!-- Google Fonts: Manrope -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#235B4E',
+              hover: '#1b473d',
+              badge: '#E9F0EB',
+              text: '#202722',
+              secondary: '#5E665F',
+              border: '#DCDDD5',
+              surface: '#FFFFFF',
+              canvas: '#F7F6F2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="base-resets">
+    /* Support iOS Safe Area spacing */
+    .safe-area-pb {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+    }
+    
+    /* Touch optimization and accessibility */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-full font-sans bg-[#F7F6F2] text-[#202722] antialiased selection:bg-[#E9F0EB] selection:text-[#235B4E]">
+<!-- Main Mobile Container (Centered on wider viewports, native mobile width) -->
+<div class="relative min-h-screen w-full max-w-[430px] mx-auto bg-[#F7F6F2] pb-28 flex flex-col">
+<!-- BEGIN: TopAppBar -->
+<header class="sticky top-0 z-40 bg-[#FFFFFF] border-b border-[#DCDDD5] px-4 py-3 flex items-center justify-between shadow-xs">
+<!-- Brand Logo & Name -->
+<div class="flex items-center gap-2.5">
+<div aria-hidden="true" class="w-8 h-8 rounded-lg bg-[#235B4E] flex items-center justify-center shrink-0 shadow-xs">
+<svg class="w-4 h-4 text-white fill-current ml-0.5" viewBox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+</div>
+<span class="font-bold text-base tracking-tight text-[#202722]">AI Video Studio</span>
+</div>
+<!-- User Profile Avatar Button -->
+<button aria-label="User profile Alex Morgan" class="w-11 h-11 rounded-full bg-[#E9F0EB] border border-[#DCDDD5] flex items-center justify-center text-[#235B4E] font-bold text-xs active:scale-95 transition-transform" data-purpose="user-profile-toggle" type="button">
+        AM
+      </button>
+</header>
+<!-- END: TopAppBar -->
+<!-- BEGIN: StatusPillStrip -->
+<aside class="bg-[#FFFFFF] border-b border-[#DCDDD5] px-4 py-2 flex items-center justify-between">
+<div class="flex items-center gap-2 text-xs font-medium text-[#5E665F]">
+<span aria-hidden="true" class="inline-block w-2 h-2 rounded-full bg-[#235B4E] animate-pulse"></span>
+<span class="">Processing available</span>
+</div>
+
+</aside>
+<!-- END: StatusPillStrip -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 pt-4 flex-1 flex flex-col gap-5">
+<!-- BEGIN: WelcomeSection -->
+<section class="bg-[#FFFFFF] border border-[#DCDDD5] rounded-2xl p-4 shadow-sm" data-purpose="welcome-banner">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E9F0EB] text-[#235B4E] text-[11px] font-semibold tracking-wide uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-[#235B4E]"></span>
+          Studio Workspace
+        </div>
+<h1 class="text-2xl font-bold text-[#202722] leading-snug mt-2">
+          Bring your next idea to life.
+        </h1>
+<p class="text-sm text-[#5E665F] mt-1.5 leading-relaxed">
+          Turn an idea or product into a narrated video with crafted visuals and natural pacing.
+        </p>
+<!-- Compact Illustration Preview Banner -->
+<div aria-hidden="true" class="mt-3.5 h-24 bg-[#F7F6F2] border border-[#DCDDD5] rounded-xl relative overflow-hidden flex items-center justify-between px-4">
+<!-- Abstract Mini UI Representation -->
+<div class="w-24 h-16 bg-white rounded-lg border border-[#DCDDD5] p-1.5 flex flex-col justify-between shadow-2xs">
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#DCDDD5]"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-[#DCDDD5]"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-[#DCDDD5]"></span>
+</div>
+<div class="w-7 h-7 mx-auto rounded-full border border-dashed border-[#235B4E]/60 flex items-center justify-center">
+<span class="w-3.5 h-3.5 rounded-full bg-[#235B4E]/20"></span>
+</div>
+<div class="h-1.5 w-full bg-[#E9F0EB] rounded-xs"></div>
+</div>
+<!-- Waveform & Audio Track representation -->
+<div class="flex flex-col gap-2 items-end">
+<div class="flex items-center gap-0.5">
+<span class="w-1 h-3 bg-[#235B4E]/40 rounded-full"></span>
+<span class="w-1 h-5 bg-[#235B4E] rounded-full"></span>
+<span class="w-1 h-7 bg-[#235B4E] rounded-full"></span>
+<span class="w-1 h-4 bg-[#235B4E]/60 rounded-full"></span>
+<span class="w-1 h-6 bg-[#235B4E] rounded-full"></span>
+<span class="w-1 h-3 bg-[#235B4E]/50 rounded-full"></span>
+</div>
+<div class="h-4 w-14 bg-white border border-[#DCDDD5] rounded flex items-center px-1 gap-1">
+<span class="w-2 h-2 rounded-full bg-[#235B4E]"></span>
+<span class="h-1 w-6 bg-[#DCDDD5] rounded-full"></span>
+</div>
+</div>
+</div>
+<!-- Primary Call to Action -->
+<button class="w-full mt-4 min-h-[44px] bg-[#235B4E] hover:bg-[#1b473d] active:scale-[0.98] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-xs transition-all" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Create video</span>
+</button>
+</section>
+<!-- END: WelcomeSection -->
+<!-- BEGIN: VideoTypesSection -->
+<section class="flex flex-col gap-2.5" data-purpose="video-type-selection">
+<div class="flex items-center justify-between px-0.5">
+<h2 class="text-xs font-bold uppercase tracking-wider text-[#5E665F]">Choose a video type</h2>
+<span class="text-[11px] text-[#5E665F]">AI handles the rest.</span>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Card 1: Education -->
+<article class="bg-[#FFFFFF] border border-[#DCDDD5] rounded-xl p-3 flex items-center gap-3 active:bg-[#F7F6F2] transition-colors cursor-pointer" role="button" tabindex="0">
+<!-- SVG Thumbnail Container -->
+<div aria-hidden="true" class="w-18 h-16 w-[72px] h-[64px] bg-[#F7F6F2] rounded-lg border border-[#DCDDD5] flex items-center justify-center shrink-0 overflow-hidden relative">
+<svg class="w-10 h-10 text-[#235B4E]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 48 48">
+<!-- Sun -->
+<circle cx="16" cy="14" r="5" stroke="#235B4E" stroke-dasharray="2 2"></circle>
+<!-- Solar panel -->
+<polygon fill="#E9F0EB" points="12,32 24,32 28,42 16,42" stroke="#235B4E"></polygon>
+<line stroke="#235B4E" x1="16" x2="26" y1="37" y2="37"></line>
+<line stroke="#235B4E" x1="20" x2="22" y1="32" y2="42"></line>
+<!-- Teacher Figure -->
+<circle cx="36" cy="22" fill="#235B4E" r="3"></circle>
+<line x1="36" x2="36" y1="25" y2="38"></line>
+<line x1="36" x2="26" y1="29" y2="24"></line>
+<line x1="36" x2="33" y1="38" y2="44"></line>
+<line x1="36" x2="39" y1="38" y2="44"></line>
+</svg>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between">
+<h3 class="font-semibold text-sm text-[#202722]">Education</h3>
+<span class="text-sm font-semibold text-[#235B4E] ml-2">→</span>
+</div>
+<p class="text-xs text-[#5E665F] mt-0.5 line-clamp-2 leading-relaxed">
+                Explain an idea through illustrated scenes and calm narration.
+              </p>
+</div>
+</article>
+<!-- Card 2: Software showcase -->
+<article class="bg-[#FFFFFF] border border-[#DCDDD5] rounded-xl p-3 flex items-center gap-3 active:bg-[#F7F6F2] transition-colors cursor-pointer" role="button" tabindex="0">
+<!-- SVG Thumbnail Container -->
+<div aria-hidden="true" class="w-[72px] h-[64px] bg-[#F7F6F2] rounded-lg border border-[#DCDDD5] flex items-center justify-center shrink-0 overflow-hidden relative">
+<svg class="w-10 h-10 text-[#235B4E]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 48 48">
+<!-- Browser Window -->
+<rect fill="#FFFFFF" height="28" rx="3" stroke="#235B4E" width="32" x="8" y="10"></rect>
+<line stroke="#DCDDD5" stroke-width="1.5" x1="8" x2="40" y1="18" y2="18"></line>
+<circle cx="13" cy="14" fill="#235B4E" r="1.5" stroke="none"></circle>
+<circle cx="18" cy="14" fill="#235B4E" r="1.5" stroke="none"></circle>
+<!-- UI wireframe element -->
+<rect fill="#E9F0EB" height="10" rx="1.5" stroke="#235B4E" width="8" x="13" y="23"></rect>
+<rect fill="#235B4E" height="3" rx="1" stroke="none" width="12" x="24" y="24"></rect>
+<rect fill="#DCDDD5" height="2.5" rx="1" stroke="none" width="9" x="24" y="30"></rect>
+</svg>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between">
+<h3 class="font-semibold text-sm text-[#202722]">Software showcase</h3>
+<span class="text-sm font-semibold text-[#235B4E] ml-2">→</span>
+</div>
+<p class="text-xs text-[#5E665F] mt-0.5 line-clamp-2 leading-relaxed">
+                Show what your application can do with clean UI wireframes.
+              </p>
+</div>
+</article>
+<!-- Card 3: Product branding -->
+<article class="bg-[#FFFFFF] border border-[#DCDDD5] rounded-xl p-3 flex items-center gap-3 active:bg-[#F7F6F2] transition-colors cursor-pointer" role="button" tabindex="0">
+<!-- SVG Thumbnail Container -->
+<div aria-hidden="true" class="w-[72px] h-[64px] bg-[#F7F6F2] rounded-lg border border-[#DCDDD5] flex items-center justify-center shrink-0 overflow-hidden relative">
+<svg class="w-10 h-10 text-[#235B4E]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 48 48">
+<!-- Pedestal / Ring Dome -->
+<ellipse cx="24" cy="38" rx="14" ry="4" stroke="#DCDDD5"></ellipse>
+<path d="M14 36 C14 24, 34 24, 34 36" stroke="#E9F0EB" stroke-width="3"></path>
+<!-- Bottle Silhouette -->
+<rect fill="#235B4E" height="16" rx="2" stroke="#235B4E" width="8" x="20" y="19"></rect>
+<rect fill="#235B4E" height="5" stroke="#235B4E" width="4" x="22" y="14"></rect>
+<!-- Dropper Cap -->
+<line stroke="#235B4E" stroke-width="2" x1="24" x2="24" y1="11" y2="14"></line>
+<line stroke="#FFFFFF" stroke-width="1.5" x1="22" x2="26" y1="25" y2="25"></line>
+</svg>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between">
+<h3 class="font-semibold text-sm text-[#202722]">Product branding</h3>
+<span class="text-sm font-semibold text-[#235B4E] ml-2">→</span>
+</div>
+<p class="text-xs text-[#5E665F] mt-0.5 line-clamp-2 leading-relaxed">
+                Bring your physical or digital product into focus with narrative depth.
+              </p>
+</div>
+</article>
+</div>
+</section>
+<!-- END: VideoTypesSection -->
+<!-- BEGIN: RecentProjectsSection -->
+<section class="flex flex-col gap-3 pt-1" data-purpose="recent-projects">
+<!-- Section Header Row -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-lg font-bold text-[#202722]">Recent projects</h2>
+<span class="text-[11px] font-medium bg-[#E9F0EB] text-[#235B4E] px-2 py-0.5 rounded-full">
+              Sample project data
+            </span>
+</div>
+<a class="text-xs font-semibold text-[#235B4E] flex items-center gap-0.5 hover:underline" href="#all-projects">
+<span class="">View all</span>
+<span aria-hidden="true" class="">→</span>
+</a>
+</div>
+<!-- Project Cards Stack -->
+<div class="flex flex-col gap-4">
+<!-- PROJECT CARD 1: Solar Panels (Landscape 16:9) -->
+<article class="bg-[#FFFFFF] border border-[#DCDDD5] rounded-2xl overflow-hidden shadow-xs">
+<!-- 16:9 Aspect Ratio Illustrated Container -->
+<div class="relative w-full aspect-[16/9] bg-[#EAF0EC] border-b border-[#DCDDD5] flex items-center justify-center overflow-hidden">
+<!-- Flat Vector Scene from SCREEN_2 -->
+<svg aria-hidden="true" class="absolute inset-0 w-full h-full" fill="none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 360 202.5">
+<!-- Warm ivory sky background -->
+<rect fill="#F4F4EE" height="202.5" width="360"></rect>
+<!-- Sun Aperture Circle -->
+<circle cx="95" cy="65" fill="#FFFFFF" r="24"></circle>
+<!-- Sage rolling ground hill -->
+<path d="M0 155 Q130 140 260 165 T360 150 L360 203 L0 203 Z" fill="#D3DFD7"></path>
+<!-- Small Tree Beside House -->
+<circle cx="120" cy="142" fill="#316356" r="14"></circle>
+<line stroke="#202722" stroke-width="2.5" x1="124" x2="124" y1="145" y2="165"></line>
+<!-- Main House Silhouette -->
+<!-- Roof -->
+<polygon fill="#202722" points="125,130 168,85 210,130"></polygon>
+<!-- Wall -->
+<rect fill="#FFFFFF" height="35" stroke="#202722" stroke-width="2" width="66" x="135" y="130"></rect>
+<!-- Door -->
+<rect fill="#235B4E" height="23" stroke="#202722" stroke-width="1.5" width="11" x="160" y="142"></rect>
+<circle cx="163" cy="153" fill="#FFFFFF" r="1"></circle>
+<!-- Window -->
+<rect fill="#FFFFFF" height="12" stroke="#202722" stroke-width="1.5" width="12" x="178" y="140"></rect>
+</svg>
+<!-- Central Play Button -->
+<button aria-label="Play How solar panels power a home preview" class="relative z-10 w-11 h-11 rounded-full bg-white shadow-md border border-[#DCDDD5] flex items-center justify-center text-[#202722] active:scale-90 transition-transform" type="button">
+<svg class="w-4 h-4 fill-current ml-0.5 text-[#202722]" viewBox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+</button>
+<!-- Ready Status Pill (Top Left) -->
+<div class="absolute top-3 left-3 z-10">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E9F0EB] text-[#235B4E] border border-[#235B4E]/15 shadow-2xs">
+<span class="w-1.5 h-1.5 rounded-full bg-[#235B4E]"></span>
+                  Ready
+                </span>
+</div>
+<!-- Aspect Badge (Bottom Right) -->
+<div class="absolute bottom-2.5 right-2.5 z-10">
+<span class="px-2 py-0.5 rounded bg-[#202722]/80 text-white text-[10px] font-mono tracking-wider font-semibold">
+                  16:9
+                </span>
+</div>
+</div>
+<!-- Card Body & Metadata -->
+<div class="p-4">
+<h3 class="font-bold text-base text-[#202722] tracking-tight">How solar panels power a home</h3>
+<p class="text-xs text-[#5E665F] mt-1">Education · 60 sec · Landscape · 720p</p>
+<div class="flex items-center gap-1.5 mt-2.5 text-xs font-medium text-[#235B4E]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#235B4E]"></span>
+<span class="">Available for 6 more days</span>
+</div>
+<!-- Button Action -->
+<button class="w-full mt-3.5 min-h-[44px] border border-[#DCDDD5] bg-[#F7F6F2] hover:bg-[#E9F0EB] active:scale-[0.98] text-[#202722] text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors" type="button">
+<svg class="w-4 h-4 text-[#202722]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<polygon points="6 4 18 12 6 20 6 4" stroke-linejoin="round"></polygon>
+</svg>
+<span class="">Open video</span>
+</button>
+</div>
+</article>
+<!-- PROJECT CARD 2: Make My Marriage (Portrait Specimen 9:16) -->
+<article class="bg-[#FFFFFF] border border-[#DCDDD5] rounded-2xl overflow-hidden shadow-xs">
+<!-- 16:9 Container framing a 9:16 centered phone mockup (matching screenshot) -->
+<div class="relative w-full aspect-[16/9] bg-[#F2F1EC] border-b border-[#DCDDD5] flex items-center justify-center overflow-hidden">
+<!-- 9:16 Framed Phone Mockup (Letterboxed) -->
+<div aria-hidden="true" class="w-[84px] h-[148px] bg-white rounded-xl border-[2px] border-[#202722] shadow-sm flex flex-col p-1.5 justify-between relative overflow-hidden">
+<!-- Phone top bar -->
+<div class="w-full flex items-center justify-between pb-1 border-b border-[#DCDDD5]">
+<span class="text-[5px] font-bold text-[#202722]">MakeMyMarriage</span>
+<svg class="w-2 h-2 text-[#5E665F]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+</div>
+<!-- Centered Profile Badge inside mini phone -->
+<div class="flex flex-col items-center gap-1 my-auto">
+<div class="w-7 h-7 rounded-full bg-[#E9F0EB] border border-[#235B4E]/30 flex items-center justify-center">
+<svg class="w-3.5 h-3.5 text-[#235B4E]" fill="currentColor" viewBox="0 0 24 24">
+<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path>
+</svg>
+</div>
+<div class="w-10 h-1.5 bg-[#DCDDD5] rounded-full"></div>
+</div>
+<!-- Feed item lines -->
+<div class="flex flex-col gap-1 w-full">
+<div class="w-full h-1 bg-[#E9F0EB] rounded"></div>
+<div class="w-3/4 h-1 bg-[#E9F0EB] rounded"></div>
+<div class="w-1/2 h-1 bg-[#DCDDD5] rounded"></div>
+</div>
+<!-- Home bar indicator -->
+<div class="w-7 h-0.5 bg-[#202722] rounded-full mx-auto mt-1"></div>
+</div>
+<!-- Draft Status Pill (Top Left) -->
+<div class="absolute top-3 left-3 z-10">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FDF4E7] text-[#9A6715] border border-[#9A6715]/15 shadow-2xs">
+<span class="w-1.5 h-1.5 rounded-full bg-[#9A6715]"></span>
+                  Draft
+                </span>
+</div>
+<!-- Aspect Badge (Bottom Right) -->
+<div class="absolute bottom-2.5 right-2.5 z-10">
+<span class="px-2 py-0.5 rounded bg-[#202722]/80 text-white text-[10px] font-mono tracking-wider font-semibold">
+                  9:16
+                </span>
+</div>
+</div>
+<!-- Card Body & Metadata -->
+<div class="p-4">
+<h3 class="font-bold text-base text-[#202722] tracking-tight">Make My Marriage overview</h3>
+<p class="text-xs text-[#5E665F] mt-1">Software · 60 sec · Portrait · 720p</p>
+<div class="flex items-center gap-1.5 mt-2.5 text-xs font-medium text-[#9A6715]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#9A6715]"></span>
+<span class="">Draft · Continue setup.</span>
+</div>
+<!-- Button Action -->
+<button class="w-full mt-3.5 min-h-[44px] bg-[#235B4E] hover:bg-[#1b473d] active:scale-[0.98] text-white text-sm font-semibold rounded-lg flex items-center justify-center gap-2 shadow-xs transition-colors" type="button">
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Continue</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- END: RecentProjectsSection -->
+<!-- BEGIN: AvailabilityFooter -->
+<footer class="mt-2 text-center text-[#5E665F] flex flex-col items-center gap-1 pb-4 text-sm" data-purpose="usage-summary">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-[#235B4E]/60 inline-block"></span>
+<span class="">1 of 3 saved-video slots used</span>
+</div>
+<div class="flex items-center gap-1 text-[#5E665F] text-sm">
+<svg class="w-3.5 h-3.5 text-[#5E665F]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+<span class="">Videos are kept for 7 days</span>
+</div>
+</footer>
+<!-- END: AvailabilityFooter -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<nav aria-label="Bottom Navigation" class="fixed bottom-0 inset-x-0 w-full max-w-[430px] mx-auto bg-[#FFFFFF] border-t border-[#DCDDD5] z-50 px-2 py-1.5 safe-area-pb flex justify-around items-center shadow-lg" data-purpose="mobile-bottom-tabs">
+<!-- Destination 1: Dashboard (Active) -->
+<a aria-current="page" class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-[#235B4E] transition-colors" href="#dashboard">
+<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+<path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0-18v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"></path>
+</svg>
+<span class="text-[11px] font-bold mt-1 tracking-tight">Dashboard</span>
+</a>
+<!-- Destination 2: Create video -->
+<a class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-[#5E665F] hover:text-[#202722] active:text-[#235B4E] transition-colors" href="#create">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 8v8m-4-4h8" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1 tracking-tight">Create video</span>
+</a>
+<!-- Destination 3: My videos -->
+<a class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-[#5E665F] hover:text-[#202722] active:text-[#235B4E] transition-colors" href="#my-videos">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="15" rx="2" stroke-linecap="round" width="20" x="2" y="4"></rect>
+<polygon fill="currentColor" points="10 8 16 11.5 10 15 10 8" stroke="none"></polygon>
+</svg>
+<span class="text-[11px] font-medium mt-1 tracking-tight">My videos</span>
+</a>
+<!-- Destination 4: Settings -->
+<a class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-[#5E665F] hover:text-[#202722] active:text-[#235B4E] transition-colors" href="#settings">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1 tracking-tight">Settings</span>
+</a>
+</nav>
+<!-- END: BottomNavigation -->
+</div>
+
+
+</body></html>

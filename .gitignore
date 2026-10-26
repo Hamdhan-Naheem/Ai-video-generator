@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env.*
+!.env.example
+local-runs/
+.cache/
+*.log
+.DS_Store
+
+whisper-bin-x64.zip
+
+# Web application build/test output
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+playwright-report/
+test-results/
+.vercel/

@@ -1,0 +1,28 @@
+<svg fill="none" viewBox="0 0 160 88" xmlns="http://www.w3.org/2000/svg">
+
+<circle cx="34" cy="24" fill="#F4EFE6" r="10" stroke="#235B4E" stroke-width="1.5"></circle>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="1.5" x1="34" x2="34" y1="8" y2="11"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="1.5" x1="34" x2="34" y1="37" y2="40"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="1.5" x1="18" x2="21" y1="24" y2="24"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="1.5" x1="47" x2="50" y1="24" y2="24"></line>
+
+<polygon fill="#E9F0EB" points="56,66 94,66 104,44 68,44" stroke="#235B4E" stroke-width="1.5"></polygon>
+
+<line stroke="#235B4E" stroke-width="1" x1="75" x2="75" y1="44" y2="66"></line>
+<line stroke="#235B4E" stroke-width="1" x1="85" x2="85" y1="44" y2="66"></line>
+<line stroke="#235B4E" stroke-width="1" x1="62" x2="99" y1="55" y2="55"></line>
+<line stroke="#5E665F" stroke-width="1.5" x1="78" x2="74" y1="66" y2="76"></line>
+<line stroke="#5E665F" stroke-width="1.5" x1="82" x2="86" y1="66" y2="76"></line>
+
+
+<circle cx="128" cy="34" fill="#FFFFFF" r="7" stroke="#202722" stroke-width="1.5"></circle>
+
+<path d="M120 48 C120 44 124 43 128 43 C132 43 136 44 136 48 L134 68 L122 68 Z" fill="#235B4E"></path>
+
+<path d="M122 47 L108 41" stroke="#202722" stroke-linecap="round" stroke-width="1.5"></path>
+
+<line stroke="#202722" stroke-linecap="round" stroke-width="1.5" x1="125" x2="125" y1="68" y2="78"></line>
+<line stroke="#202722" stroke-linecap="round" stroke-width="1.5" x1="131" x2="131" y1="68" y2="78"></line>
+
+<line stroke="#DCDDD5" stroke-linecap="round" stroke-width="1.5" x1="16" x2="148" y1="78" y2="78"></line>
+</svg>

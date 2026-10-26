@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#235B4E" stroke-width="1.8" viewBox="0 0 48 48">
+<!-- Sun -->
+<circle cx="16" cy="14" r="5" stroke="#235B4E" stroke-dasharray="2 2"></circle>
+<!-- Solar panel -->
+<polygon fill="#E9F0EB" points="12,32 24,32 28,42 16,42" stroke="#235B4E"></polygon>
+<line stroke="#235B4E" x1="16" x2="26" y1="37" y2="37"></line>
+<line stroke="#235B4E" x1="20" x2="22" y1="32" y2="42"></line>
+<!-- Teacher Figure -->
+<circle cx="36" cy="22" fill="#235B4E" r="3"></circle>
+<line x1="36" x2="36" y1="25" y2="38"></line>
+<line x1="36" x2="26" y1="29" y2="24"></line>
+<line x1="36" x2="33" y1="38" y2="44"></line>
+<line x1="36" x2="39" y1="38" y2="44"></line>
+</svg>

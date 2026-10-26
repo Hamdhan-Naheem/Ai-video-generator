@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#235B4E" stroke-width="1.8" viewBox="0 0 48 48">
+<!-- Pedestal / Ring Dome -->
+<ellipse cx="24" cy="38" rx="14" ry="4" stroke="#DCDDD5"></ellipse>
+<path d="M14 36 C14 24, 34 24, 34 36" stroke="#E9F0EB" stroke-width="3"></path>
+<!-- Bottle Silhouette -->
+<rect fill="#235B4E" height="16" rx="2" stroke="#235B4E" width="8" x="20" y="19"></rect>
+<rect fill="#235B4E" height="5" stroke="#235B4E" width="4" x="22" y="14"></rect>
+<!-- Dropper Cap -->
+<line stroke="#235B4E" stroke-width="2" x1="24" x2="24" y1="11" y2="14"></line>
+<line stroke="#FFFFFF" stroke-width="1.5" x1="22" x2="26" y1="25" y2="25"></line>
+</svg>

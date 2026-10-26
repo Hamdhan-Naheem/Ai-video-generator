@@ -1,0 +1,8 @@
+{
+  "topic": "How solar energy powers a home",
+  "audience": "beginners",
+  "durationSeconds": 60,
+  "format": "landscape",
+  "visualStyle": "solar-energy",
+  "referenceNotes": "Sunlight carries energy. Solar photovoltaic cells convert some incoming light into electrical energy, producing direct current (DC). Panels do not store electricity. An inverter converts DC into alternating current (AC) suitable for household use. Appliances convert electrical energy into light, motion or heat. Solar output varies with available sunlight; panels do not generate solar power at night. Batteries and the grid are separate parts of a wider system. No wiring instructions. Use only the four approved visual beats: sunlight, rooftop cells, inverter, powered home."
+}

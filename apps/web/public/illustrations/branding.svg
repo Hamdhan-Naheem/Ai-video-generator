@@ -1,0 +1,21 @@
+<svg fill="none" viewBox="0 0 160 88" xmlns="http://www.w3.org/2000/svg">
+
+<path d="M52 74V34C52 20 64 12 80 12C96 12 108 20 108 34V74" fill="#E9F0EB" stroke="#DCDDD5" stroke-width="1"></path>
+
+<ellipse cx="80" cy="70" fill="#FFFFFF" rx="38" ry="8" stroke="#DCDDD5" stroke-width="1.5"></ellipse>
+<path d="M42 70V76C42 80.4 59 84 80 84C101 84 118 80.4 118 76V70" fill="#FFFFFF" stroke="#DCDDD5" stroke-width="1.5"></path>
+
+
+<rect fill="#202722" height="6" rx="1.5" width="8" x="76" y="24"></rect>
+<rect fill="#235B4E" height="4" rx="1" width="12" x="74" y="30"></rect>
+
+<rect fill="#235B4E" height="4" width="8" x="76" y="34"></rect>
+
+<rect fill="#235B4E" height="28" rx="3" width="20" x="70" y="38"></rect>
+
+<rect fill="#FFFFFF" height="15" rx="1" width="14" x="73" y="44"></rect>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="1" x1="75" x2="85" y1="48" y2="48"></line>
+<line stroke="#5E665F" stroke-linecap="round" stroke-width="1" x1="75" x2="82" y1="52" y2="52"></line>
+
+<path d="M48 42C62 34 98 34 112 42" stroke="#235B4E" stroke-dasharray="2 3" stroke-linecap="round" stroke-width="1.2"></path>
+</svg>

@@ -1,0 +1,15 @@
+<svg aria-hidden="true" fill="none" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+
+<ellipse cx="100" cy="94" fill="#E9F0EB" rx="48" ry="11" stroke="#235B4E" stroke-width="2"></ellipse>
+<path d="M52 94V102C52 108 73 113 100 113C127 113 148 108 148 102V94" fill="#FFFFFF" stroke="#235B4E" stroke-width="2"></path>
+
+<rect fill="#FFFFFF" height="44" rx="4" stroke="#235B4E" stroke-width="2" width="24" x="88" y="44"></rect>
+<rect fill="#E9F0EB" height="12" rx="2" stroke="#235B4E" stroke-width="2" width="12" x="94" y="32"></rect>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="1.5" x1="94" x2="106" y1="62" y2="62"></line>
+
+<path d="M72 82C66 70 66 56 76 50C76 62 76 74 72 82Z" fill="#E9F0EB" stroke="#235B4E" stroke-width="1.5"></path>
+<path d="M68 66C72 65 74 61 76 50" stroke="#235B4E" stroke-linecap="round" stroke-width="1.2"></path>
+
+<path d="M128 36L130 42L136 44L130 46L128 52L126 46L120 44L126 42L128 36Z" fill="#235B4E"></path>
+<circle cx="138" cy="62" fill="#235B4E" r="2"></circle>
+</svg>

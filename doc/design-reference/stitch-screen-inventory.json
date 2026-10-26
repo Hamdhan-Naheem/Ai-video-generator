@@ -1,0 +1,727 @@
+{
+  "capturedOn": "2026-10-26",
+  "projectId": "11898319746861427028",
+  "note": "Read-only inventory; individual final-approval identity must be checked against conversation screenshots. Download URLs omitted.",
+  "screens": [
+    {
+      "name": "projects/11898319746861427028/screens/3972bbaede59458883046400525f0632",
+      "title": "AI Video Studio / Mobile Delete account dialog - Google Verified",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2476",
+      "htmlResource": "projects/11898319746861427028/screens/3972bbaede59458883046400525f0632/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/3972bbaede59458883046400525f0632/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/a956f8471eee4d40a682dce7f227337b",
+      "title": "AI Video Studio / Mobile Create software showcase (Validation & Upload Error)",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "5238",
+      "htmlResource": "projects/11898319746861427028/screens/a956f8471eee4d40a682dce7f227337b/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/a956f8471eee4d40a682dce7f227337b/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/28b89829ddec47eb9da1dadc9922c0df",
+      "title": "AI Video Studio / Mobile Landing page",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "5178",
+      "htmlResource": "projects/11898319746861427028/files/8764511227731071364",
+      "screenshotResource": "projects/11898319746861427028/files/4626521412029270024"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/62fa9f13aaa541d48addc2db2729ae7a",
+      "title": "AI Video Studio / Mobile Settings",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2738",
+      "htmlResource": "projects/11898319746861427028/files/13358109203429055916",
+      "screenshotResource": "projects/11898319746861427028/files/3794328304334518934"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/310986568ea94b92a20a92c1c5fc0145",
+      "title": "AI Video Studio / Mobile Create software showcase",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "4896",
+      "htmlResource": "projects/11898319746861427028/files/5561861269871373727",
+      "screenshotResource": "projects/11898319746861427028/files/10969307581870179591"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/a0cc162a91df4b309c0808854a0bfce0",
+      "title": "AI Video Studio / Mobile Session expired",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/screens/a0cc162a91df4b309c0808854a0bfce0/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/a0cc162a91df4b309c0808854a0bfce0/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/d46ad290e7fe43b0a37358e3d80251fb",
+      "title": "AI Video Studio / Mobile We couldn’t finish this video",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2406",
+      "htmlResource": "projects/11898319746861427028/files/1805346592568197232",
+      "screenshotResource": "projects/11898319746861427028/files/533582992920983514"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/f3e054977e1744b2b0db645885ce880e",
+      "title": "AI Video Studio / Mobile Sign up - Validation Errors",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1912",
+      "htmlResource": "projects/11898319746861427028/files/10521544411115759113",
+      "screenshotResource": "projects/11898319746861427028/files/3710844081469355781"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/a3d548aa117343abb99e4fcc7dc98a5b",
+      "title": "AI Video Studio / Page unavailable (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/6447558447369336820",
+      "screenshotResource": "projects/11898319746861427028/files/17420779752111625812"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/21637938d4454fb8b2879e5ef22945a0",
+      "title": "AI Video Studio / Landing page (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "4868",
+      "htmlResource": "projects/11898319746861427028/files/965556338964568762",
+      "screenshotResource": "projects/11898319746861427028/files/8766296462430237099"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/dba5e0a04c6f469788b38f8a79d5d3fd",
+      "title": "AI Video Studio / Delete video version dialog (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/4006492706320674745",
+      "screenshotResource": "projects/11898319746861427028/files/10055801220072208751"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/bc3abee0c7a746f5a5899b74b80348c4",
+      "title": "AI Video Studio / Mobile Generation cancelled",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2366",
+      "htmlResource": "projects/11898319746861427028/screens/bc3abee0c7a746f5a5899b74b80348c4/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/bc3abee0c7a746f5a5899b74b80348c4/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/499d958b5d6c4b6983d91342f3ca5558",
+      "title": "AI Video Studio / Visual directions",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2892",
+      "htmlResource": "projects/11898319746861427028/files/5c46ec9b514740ad89f96a78c5b5a296",
+      "screenshotResource": "projects/11898319746861427028/files/5114913d05f349799fbc4ffb3d06bf8e"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/e277d5182e5d48f1976e70b2e4207b53",
+      "title": "AI Video Studio / Delete account dialog - Google Unverified (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2636",
+      "htmlResource": "projects/11898319746861427028/files/719553032341502099",
+      "screenshotResource": "projects/11898319746861427028/files/18405296098572904174"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/594496ae09684f1881d4a67d67288791",
+      "title": "AI Video Studio / Mobile Create Education Video",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "4344",
+      "htmlResource": "projects/11898319746861427028/files/11163445458957739029",
+      "screenshotResource": "projects/11898319746861427028/files/13801104347912160648"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/b43c4b94bf5a444a8ce6a7ed00812c58",
+      "title": "AI Video Studio / Needs input",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2516",
+      "htmlResource": "projects/11898319746861427028/files/8574194004752036711",
+      "screenshotResource": "projects/11898319746861427028/files/7021540713191564970"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/8665ce88a1424f4b922cca3c337c9161",
+      "title": "AI Video Studio / Waiting for processing computer",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2064",
+      "htmlResource": "projects/11898319746861427028/files/4869486538480952955",
+      "screenshotResource": "projects/11898319746861427028/files/13816555705507954951"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/00185a8d111d4a60bd2c434e7dee9ca7",
+      "title": "AI Video Studio / Change password dialog (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2772",
+      "htmlResource": "projects/11898319746861427028/screens/00185a8d111d4a60bd2c434e7dee9ca7/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/00185a8d111d4a60bd2c434e7dee9ca7/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/3b729b133a024a2595b7f02c3011abe4",
+      "title": "AI Video Studio / Mobile Delete account dialog",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2688",
+      "htmlResource": "projects/11898319746861427028/screens/3b729b133a024a2595b7f02c3011abe4/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/3b729b133a024a2595b7f02c3011abe4/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/949fd8b5c9ea451abcd5786b8a651458",
+      "title": "AI Video Studio / Session expired (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/949fd8b5c9ea451abcd5786b8a651458/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/949fd8b5c9ea451abcd5786b8a651458/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/437e01e02d964117b6e75ada0c981ced",
+      "title": "AI Video Studio / Mobile Needs input",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2598",
+      "htmlResource": "projects/11898319746861427028/files/5495163731451809166",
+      "screenshotResource": "projects/11898319746861427028/files/10393980276962810507"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/ae1d2e521d4e46919c47334a9ef97def",
+      "title": "AI Video Studio / Mobile Dashboard",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3546",
+      "htmlResource": "projects/11898319746861427028/files/14904284217351315868",
+      "screenshotResource": "projects/11898319746861427028/files/13046439471482299949"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/d91fc14fad564356b26a0992dfff955f",
+      "title": "AI Video Studio / Generation temporarily paused",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2284",
+      "htmlResource": "projects/11898319746861427028/files/12227416596889636632",
+      "screenshotResource": "projects/11898319746861427028/files/16135351885525709295"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/07962e4a653f4f7c86e2b3b0982a7610",
+      "title": "AI Video Studio / Sign up - Validation Errors (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/2301311697517664677",
+      "screenshotResource": "projects/11898319746861427028/files/12457732197852025038"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/6aba4e5151c749cca63d86f854cd73d8",
+      "title": "AI Video Studio / Visual directions",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2928",
+      "htmlResource": "projects/11898319746861427028/files/e3b3aed98b10474c97174a9b8294f361",
+      "screenshotResource": "projects/11898319746861427028/files/7b6e6e2e26cc44a5b7ffd2cce0204b42"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/3ad265c656b940c88afe4e0c612caa40",
+      "title": "AI Video Studio / Stopping generation",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/1829442137546560954",
+      "screenshotResource": "projects/11898319746861427028/files/14777428621617537388"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/0197ddea4c71433bab2f43b83a0c8f22",
+      "title": "AI Video Studio / Mobile Account deleted",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/screens/0197ddea4c71433bab2f43b83a0c8f22/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/0197ddea4c71433bab2f43b83a0c8f22/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/057e2c7cad29471dbd43d03b8fbdcef2",
+      "title": "AI Video Studio / Mobile Captioned MP4 export failed",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3796",
+      "htmlResource": "projects/11898319746861427028/screens/057e2c7cad29471dbd43d03b8fbdcef2/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/057e2c7cad29471dbd43d03b8fbdcef2/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/7ffc106b97554969b3790f8bec200c60",
+      "title": "AI Video Studio / Mobile Create a product branding video",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "4926",
+      "htmlResource": "projects/11898319746861427028/screens/7ffc106b97554969b3790f8bec200c60/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/7ffc106b97554969b3790f8bec200c60/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/fff89f69d00449c89b7e795793c9e57d",
+      "title": "AI Video Studio / Captioned MP4 - Waiting for computer (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2664",
+      "htmlResource": "projects/11898319746861427028/files/5420851801312671186",
+      "screenshotResource": "projects/11898319746861427028/files/15141953223537342954"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/1de721e7c46442d381cd8061a4547bdd",
+      "title": "AI Video Studio / Mobile My videos",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3254",
+      "htmlResource": "projects/11898319746861427028/files/10753582043248793051",
+      "screenshotResource": "projects/11898319746861427028/files/14112561227224709925"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/ec6ead9df6f2477aac121aa93746dd66",
+      "title": "AI Video Studio / Mobile Delete draft dialog",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/screens/ec6ead9df6f2477aac121aa93746dd66/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/ec6ead9df6f2477aac121aa93746dd66/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/a41815e2d0ce4683b015936a28a77d99",
+      "title": "AI Video Studio / Generation cancelled",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/15329273895372764892",
+      "screenshotResource": "projects/11898319746861427028/files/14589645723174727076"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/24e58892fc16428ba086d339d2e4bf73",
+      "title": "AI Video Studio / Prepare MP4 with captions (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2714",
+      "htmlResource": "projects/11898319746861427028/screens/24e58892fc16428ba086d339d2e4bf73/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/24e58892fc16428ba086d339d2e4bf73/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/6a776b6b4f704a40a4e06b8ec181cda9",
+      "title": "AI Video Studio / Sign in - Email or Password Error (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/6a776b6b4f704a40a4e06b8ec181cda9/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/6a776b6b4f704a40a4e06b8ec181cda9/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/75fe45f187d5413cbc0d53fd607d47df",
+      "title": "AI Video Studio / Mobile My videos - Empty state",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/screens/75fe45f187d5413cbc0d53fd607d47df/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/75fe45f187d5413cbc0d53fd607d47df/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/bcac397a0f514c6991151cd300fd89a3",
+      "title": "AI Video Studio / Your video is ready",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2714",
+      "htmlResource": "projects/11898319746861427028/files/2179511684851290763",
+      "screenshotResource": "projects/11898319746861427028/files/6563977483685097473"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/9b950626453547c79c17a3e698fad392",
+      "title": "AI Video Studio / Dashboard",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2824",
+      "htmlResource": "projects/11898319746861427028/files/7948450522513043158",
+      "screenshotResource": "projects/11898319746861427028/files/16530135721774690720"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/f8ea332ec1de499bb3f6fbdd4e5f21a4",
+      "title": "AI Video Studio / Captioned MP4 is ready (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2510",
+      "htmlResource": "projects/11898319746861427028/screens/f8ea332ec1de499bb3f6fbdd4e5f21a4/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/f8ea332ec1de499bb3f6fbdd4e5f21a4/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/da42dff0f3934e2c98e49976c53bc6c2",
+      "title": "AI Video Studio / Delete draft dialog (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/da42dff0f3934e2c98e49976c53bc6c2/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/da42dff0f3934e2c98e49976c53bc6c2/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/08b309b6ead04966bb23ffe7bbcb8fb4",
+      "title": "AI Video Studio / Create a product branding video",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "3144",
+      "htmlResource": "projects/11898319746861427028/screens/08b309b6ead04966bb23ffe7bbcb8fb4/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/08b309b6ead04966bb23ffe7bbcb8fb4/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/f6eee9e592874634966214300b886cc1",
+      "title": "AI Video Studio / Create software showcase (Validation & Upload Error)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "3200",
+      "htmlResource": "projects/11898319746861427028/screens/f6eee9e592874634966214300b886cc1/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/f6eee9e592874634966214300b886cc1/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/e78a4c6becea4329ad4af970bbbe370e",
+      "title": "AI Video Studio / Mobile Delete account dialog - Google Unverified",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2476",
+      "htmlResource": "projects/11898319746861427028/files/4253690623765708401",
+      "screenshotResource": "projects/11898319746861427028/files/15674667183858121259"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/18fb288800fd4b57bbf7baee8758318a",
+      "title": "AI Video Studio / Mobile Waiting for processing computer",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2512",
+      "htmlResource": "projects/11898319746861427028/files/1522108544236795739",
+      "screenshotResource": "projects/11898319746861427028/files/11978549105085824799"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/4fa2b3d707e94884b8c29904b950273d",
+      "title": "AI Video Studio / Mobile Page unavailable",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/files/10577544563725228236",
+      "screenshotResource": "projects/11898319746861427028/files/15911363307875385415"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/d88d988cccb9490da9572de2030c1074",
+      "title": "AI Video Studio / Mobile Change password dialog",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2688",
+      "htmlResource": "projects/11898319746861427028/screens/d88d988cccb9490da9572de2030c1074/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/d88d988cccb9490da9572de2030c1074/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/279428d651e54f639d25609fb6eb004b",
+      "title": "AI Video Studio / Delete account dialog (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2772",
+      "htmlResource": "projects/11898319746861427028/screens/279428d651e54f639d25609fb6eb004b/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/279428d651e54f639d25609fb6eb004b/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/109c5c85e18344ab8922dbc50bdcb3f1",
+      "title": "AI Video Studio / Delete account dialog - Google Verified (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2636",
+      "htmlResource": "projects/11898319746861427028/screens/109c5c85e18344ab8922dbc50bdcb3f1/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/109c5c85e18344ab8922dbc50bdcb3f1/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/e958353ff5f04975bb419a64c77786df",
+      "title": "AI Video Studio / Sign in - Google Sign-in Error (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/e958353ff5f04975bb419a64c77786df/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/e958353ff5f04975bb419a64c77786df/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/25aedd1d3ce4432b9b3e4cc7d56994c7",
+      "title": "AI Video Studio / My videos - Empty state (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/25aedd1d3ce4432b9b3e4cc7d56994c7/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/25aedd1d3ce4432b9b3e4cc7d56994c7/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/480e74e1afa244dfb8b638899ba08a6c",
+      "title": "AI Video Studio / Mobile Your video is ready",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3390",
+      "htmlResource": "projects/11898319746861427028/files/250652388081247768",
+      "screenshotResource": "projects/11898319746861427028/files/552883471707767005"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/7a0f7e38c3874f5c99c5223cf879895a",
+      "title": "AI Video Studio / Captioned MP4 export failed (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2548",
+      "htmlResource": "projects/11898319746861427028/screens/7a0f7e38c3874f5c99c5223cf879895a/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/7a0f7e38c3874f5c99c5223cf879895a/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/57a17853321a46f9ba6bfb916d3b670a",
+      "title": "AI Video Studio / Mobile Captioned MP4 - Waiting for computer",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3598",
+      "htmlResource": "projects/11898319746861427028/screens/57a17853321a46f9ba6bfb916d3b670a/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/57a17853321a46f9ba6bfb916d3b670a/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/3023b53b566a42728b06eaf10caac7bf",
+      "title": "AI Video Studio / Mobile My videos - Expired video",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2646",
+      "htmlResource": "projects/11898319746861427028/files/6248800308865948000",
+      "screenshotResource": "projects/11898319746861427028/files/9826479478100515241"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/88a558648765467bbc01dc6b5c920da1",
+      "title": "AI Video Studio / Mobile Sign in - Google Sign-in Error",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/screens/88a558648765467bbc01dc6b5c920da1/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/88a558648765467bbc01dc6b5c920da1/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/33c75fddb40a4ef7860fc00bc6a7cc50",
+      "title": "AI Video Studio / Mobile Cancel Generation Dialog",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/screens/33c75fddb40a4ef7860fc00bc6a7cc50/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/33c75fddb40a4ef7860fc00bc6a7cc50/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/2d539f4ac81c41039b905326071bb0c6",
+      "title": "AI Video Studio / Cancel Generation Dialog (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/2d539f4ac81c41039b905326071bb0c6/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/2d539f4ac81c41039b905326071bb0c6/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/45a1af645d8e4fc7aab4e484210e75e9",
+      "title": "AI Video Studio / Mobile Delete video version dialog",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3056",
+      "htmlResource": "projects/11898319746861427028/files/465795860772271058",
+      "screenshotResource": "projects/11898319746861427028/files/15807302465371495730"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/83b0c4dc004f4c3eb8176baef0c78630",
+      "title": "AI Video Studio / Mobile Sign up",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1824",
+      "htmlResource": "projects/11898319746861427028/files/17199088462100099097",
+      "screenshotResource": "projects/11898319746861427028/files/9405713191660166030"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/9108c0f6bdf4447088fa3c965dc59808",
+      "title": "AI Video Studio / Mobile Password recovery",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/files/16817920336983173753",
+      "screenshotResource": "projects/11898319746861427028/files/5573586286360416461"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/50e20563e8a74f6c8e2ff44341c46980",
+      "title": "AI Video Studio / Mobile Sign in - Email or Password Error",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/files/15793489378276394161",
+      "screenshotResource": "projects/11898319746861427028/files/11200625937806174218"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/7608f3f0eae44dbd95137665e6159078",
+      "title": "AI Video Studio / Password recovery (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/7073674849490020366",
+      "screenshotResource": "projects/11898319746861427028/files/15050361735595214589"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/bc825c5c16254b32bad525d2962f062e",
+      "title": "AI Video Studio / Settings - Google Account (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2640",
+      "htmlResource": "projects/11898319746861427028/screens/bc825c5c16254b32bad525d2962f062e/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/bc825c5c16254b32bad525d2962f062e/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/2c0c91b734e24603b77cdffc5a3d3787",
+      "title": "AI Video Studio / We couldn’t finish this video",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/13671259910238938890",
+      "screenshotResource": "projects/11898319746861427028/files/1584290226705739974"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/8438188bc1b943b3b0e170260c961155",
+      "title": "AI Video Studio / Settings (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2772",
+      "htmlResource": "projects/11898319746861427028/files/13364096220937858865",
+      "screenshotResource": "projects/11898319746861427028/files/15138276881861340802"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/079052382c314b0893e63b3685d3b963",
+      "title": "AI Video Studio / Mobile Sign in",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "1768",
+      "htmlResource": "projects/11898319746861427028/files/11657574531020601842",
+      "screenshotResource": "projects/11898319746861427028/files/992967990292439168"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/c2adcae58e004abe98e19013f86007e6",
+      "title": "AI Video Studio / Mobile Generation temporarily paused",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2340",
+      "htmlResource": "projects/11898319746861427028/files/3591847668024309800",
+      "screenshotResource": "projects/11898319746861427028/files/10063694332147271092"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/3eb38b9cf9ab4597ac14b67f1aff251b",
+      "title": "AI Video Studio / Account deleted (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/screens/3eb38b9cf9ab4597ac14b67f1aff251b/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/3eb38b9cf9ab4597ac14b67f1aff251b/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/e624bbaa01c74d2a976c58d9a8f88b4b",
+      "title": "AI Video Studio / Mobile Settings - Google Account",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2564",
+      "htmlResource": "projects/11898319746861427028/screens/e624bbaa01c74d2a976c58d9a8f88b4b/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/e624bbaa01c74d2a976c58d9a8f88b4b/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/42b9e012f321469b80a055778b1e77ca",
+      "title": "AI Video Studio / My videos (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/70844808857798136",
+      "screenshotResource": "projects/11898319746861427028/files/13826181622504648098"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/242e88e990e743d8aa2c8819cc809d3e",
+      "title": "AI Video Studio / Preparing captioned MP4 (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "3280",
+      "htmlResource": "projects/11898319746861427028/files/14018744941790677153",
+      "screenshotResource": "projects/11898319746861427028/files/18080057333210130458"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/1d2c73159bc9477c9218064fe0530040",
+      "title": "AI Video Studio / Sign in (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/1650692557821293573",
+      "screenshotResource": "projects/11898319746861427028/files/17471067246921624543"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/f51be9d19089425896510a679b986ce4",
+      "title": "AI Video Studio / Mobile Stopping generation",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "2608",
+      "htmlResource": "projects/11898319746861427028/files/3977618502474981706",
+      "screenshotResource": "projects/11898319746861427028/files/9460047551813820787"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/71dd02771711433982e03077a0fd8a55",
+      "title": "AI Video Studio / Sign up (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/16580697586501442598",
+      "screenshotResource": "projects/11898319746861427028/files/1895294663373199611"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/95651f3752184e0bbe8544e097b813ab",
+      "title": "AI Video Studio / Create education video",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2142",
+      "htmlResource": "projects/11898319746861427028/files/5881212310539907132",
+      "screenshotResource": "projects/11898319746861427028/files/14304595997749711987"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/c5ea88f670ae4cb6aa24d49954700b27",
+      "title": "AI Video Studio / Mobile Prepare MP4 with captions",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3390",
+      "htmlResource": "projects/11898319746861427028/screens/c5ea88f670ae4cb6aa24d49954700b27/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/c5ea88f670ae4cb6aa24d49954700b27/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/aaa87e0462b54349a56cdd92839e0e63",
+      "title": "AI Video Studio / Mobile Preparing captioned MP4",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3698",
+      "htmlResource": "projects/11898319746861427028/files/8856559765595028757",
+      "screenshotResource": "projects/11898319746861427028/files/11721345283473928118"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/3be608542dbb4ddcac76777dd62b49bb",
+      "title": "AI Video Studio / My videos - Expired video (Desktop)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2048",
+      "htmlResource": "projects/11898319746861427028/files/5759441824567329705",
+      "screenshotResource": "projects/11898319746861427028/files/17878017233811647"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/e56dcb5487ae4aadb63745ed699cb60a",
+      "title": "AI Video Studio / Create software showcase",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2868",
+      "htmlResource": "projects/11898319746861427028/screens/e56dcb5487ae4aadb63745ed699cb60a/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/e56dcb5487ae4aadb63745ed699cb60a/fileEntries/screenshot"
+    },
+    {
+      "name": "projects/11898319746861427028/screens/e38fca6bfc1e44ac8e2bc51964564e5e",
+      "title": "AI Video Studio / Mobile Captioned MP4 is ready",
+      "deviceType": "MOBILE",
+      "width": "780",
+      "height": "3580",
+      "htmlResource": "projects/11898319746861427028/screens/e38fca6bfc1e44ac8e2bc51964564e5e/fileEntries/html",
+      "screenshotResource": "projects/11898319746861427028/screens/e38fca6bfc1e44ac8e2bc51964564e5e/fileEntries/screenshot"
+    }
+  ]
+}

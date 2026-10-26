@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#235B4E" stroke-width="1.8" viewBox="0 0 48 48">
+<!-- Browser Window -->
+<rect fill="#FFFFFF" height="28" rx="3" stroke="#235B4E" width="32" x="8" y="10"></rect>
+<line stroke="#DCDDD5" stroke-width="1.5" x1="8" x2="40" y1="18" y2="18"></line>
+<circle cx="13" cy="14" fill="#235B4E" r="1.5" stroke="none"></circle>
+<circle cx="18" cy="14" fill="#235B4E" r="1.5" stroke="none"></circle>
+<!-- UI wireframe element -->
+<rect fill="#E9F0EB" height="10" rx="1.5" stroke="#235B4E" width="8" x="13" y="23"></rect>
+<rect fill="#235B4E" height="3" rx="1" stroke="none" width="12" x="24" y="24"></rect>
+<rect fill="#DCDDD5" height="2.5" rx="1" stroke="none" width="9" x="24" y="30"></rect>
+</svg>

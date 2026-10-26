@@ -1,0 +1,18 @@
+<svg aria-hidden="true" fill="none" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+
+<rect fill="#FFFFFF" height="74" rx="4" stroke="#235B4E" stroke-width="2" width="112" x="70" y="20"></rect>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2" x1="82" x2="140" y1="36" y2="36"></line>
+<line stroke="#DCDDD5" stroke-linecap="round" stroke-width="2" x1="82" x2="168" y1="46" y2="46"></line>
+
+<rect fill="#E9F0EB" height="18" rx="2" stroke="#235B4E" stroke-width="1.5" width="12" x="84" y="66"></rect>
+<rect fill="#E9F0EB" height="28" rx="2" stroke="#235B4E" stroke-width="1.5" width="12" x="102" y="56"></rect>
+<rect fill="#235B4E" height="23" rx="2" width="12" x="120" y="61"></rect>
+
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2" x1="90" x2="80" y1="94" y2="108"></line>
+<line stroke="#235B4E" stroke-linecap="round" stroke-width="2" x1="162" x2="172" y1="94" y2="108"></line>
+
+<circle cx="42" cy="40" fill="#E9F0EB" r="13" stroke="#235B4E" stroke-width="2"></circle>
+<path d="M26 84C26 68 33 60 42 60C51 60 58 68 58 84" fill="#FFFFFF" stroke="#235B4E" stroke-width="2"></path>
+
+<path d="M52 68L76 56" stroke="#235B4E" stroke-linecap="round" stroke-width="2"></path>
+</svg>

@@ -1,0 +1,59 @@
+{
+  "name": "ai-video-generator",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "setup:check": "node --env-file-if-exists=.env scripts/check-setup.mjs",
+    "setup:providers": "node --env-file-if-exists=.env scripts/check-setup.mjs --providers",
+    "pipeline": "tsx --env-file-if-exists=.env src/cli.ts",
+    "pipeline:doctor": "tsx --env-file-if-exists=.env src/cli.ts doctor",
+    "pipeline:tools": "tsx --env-file-if-exists=.env src/cli.ts tools",
+    "pipeline:plan": "tsx --env-file-if-exists=.env src/cli.ts plan --input examples/education.json --run education-demo",
+    "pipeline:generate": "tsx --env-file-if-exists=.env src/cli.ts generate --input examples/education.json --run education-demo --captions",
+    "pipeline:portrait": "tsx --env-file-if-exists=.env src/cli.ts render --run education-demo --format portrait --captions",
+    "pipeline:clean": "tsx --env-file-if-exists=.env src/cli.ts render --run education-demo --format landscape",
+    "pipeline:layout-test": "tsx scripts/render-layout-fixture.ts",
+    "pipeline:verify": "tsx scripts/verify-demo.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "pipeline:solar": "tsx --env-file-if-exists=.env src/cli.ts generate --input examples/solar.json --run solar-demo --captions",
+    "pipeline:solar:verify": "tsx scripts/verify-solar.ts",
+    "pipeline:showcase:plan": "tsx --env-file-if-exists=.env scripts/showcase-pipeline.ts plan",
+    "pipeline:showcase": "tsx --env-file-if-exists=.env scripts/showcase-pipeline.ts generate",
+    "pipeline:showcase:render": "tsx scripts/showcase-pipeline.ts render",
+    "pipeline:showcase:verify": "tsx scripts/showcase-pipeline.ts verify",
+    "web:dev": "npm run dev --workspace=@ai-video-studio/web",
+    "web:build": "npm run build --workspace=@ai-video-studio/web",
+    "web:start": "npm run start --workspace=@ai-video-studio/web",
+    "web:typecheck": "npm run typecheck --workspace=@ai-video-studio/web",
+    "web:lint": "npm run lint --workspace=@ai-video-studio/web",
+    "web:test": "npm run test:e2e --workspace=@ai-video-studio/web",
+    "check": "npm run typecheck && npm test && npm run web:lint && npm run web:typecheck && npm run web:build"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.538",
+    "@remotion/captions": "4.0.538",
+    "@remotion/install-whisper-cpp": "4.0.538",
+    "@remotion/renderer": "4.0.538",
+    "ffmpeg-static": "5.3.0",
+    "ffprobe-static": "3.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "4.0.538",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tsx": "4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
+}
