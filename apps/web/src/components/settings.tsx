@@ -1,5 +1,6 @@
 "use client";
 
+import { DisplayNameSchema, LIMITS } from "@contracts";
 import { useState, type FormEvent } from "react";
 import { TextField } from "@/components/form-fields";
 import { Icon } from "@/components/icons";
@@ -11,13 +12,13 @@ export function Settings() {
   const [message, setMessage] = useState("");
   const [touched, setTouched] = useState(false);
   const [dialog, setDialog] = useState<"password" | "signout" | "delete" | null>(null);
-  const valid = name.trim().length > 0 && name.trim().length <= 80;
+  const valid = DisplayNameSchema.safeParse(name).success;
   const changed = name.trim() !== previewName;
   function save(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setTouched(true); if (valid && changed) { setPreviewName(name.trim()); setName(name.trim()); setMessage("Sample name updated for this page only. Account saving is not connected; refreshing restores the sample."); } }
   return <div className="settings-page">
     <div className="settings-heading"><p className="eyebrow">Account &amp; preferences</p><h1>Settings</h1><p>Manage your profile and account security.</p></div>
     <section className="settings-panel ui-panel" aria-labelledby="profile-title"><div className="settings-panel-heading"><h2 id="profile-title">Profile</h2><p>Your personal identity inside AI Video Studio workspaces.</p></div><form onSubmit={save} noValidate>
-      <TextField className="settings-field" id="profile-name" label="Full name" autoComplete="name" maxLength={80} value={name} hint="Used as your account display name." error={touched && !valid ? "Enter a full name of 1–80 characters." : undefined} onBlur={() => setTouched(true)} onChange={event => { setName(event.target.value); setMessage(""); }} />
+      <TextField className="settings-field" id="profile-name" label="Full name" autoComplete="name" maxLength={LIMITS.displayName * 2} value={name} hint="Used as your account display name." error={touched && !valid ? "Enter a full name of 1–80 characters." : undefined} onBlur={() => setTouched(true)} onChange={event => { setName(event.target.value); setMessage(""); }} />
       <TextField className="settings-field" id="profile-email" label={<>Email <span className="fixed-label"><Icon name="lock" width="12" height="12" />Fixed</span></>} value="alex@example.com" readOnly hint="Email changes aren’t available in this version." />
       <div className="settings-save"><Button type="submit" disabled={!changed || !valid}><Icon name="check" width="17" height="17" />Save changes</Button><span>Saves full name only</span></div>{message && <Notice>{message}</Notice>}
     </form></section>

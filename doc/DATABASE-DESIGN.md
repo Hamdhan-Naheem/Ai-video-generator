@@ -121,7 +121,7 @@ Input snapshot includes source-rights/AI-processing acknowledgment booleans, pol
 
 `plan_versions`: `id uuid`, `revision_id uuid`, `project_id uuid`, `owner_id uuid`, `version integer`, `dependency_hash text`, `status text` (candidate/validated/rejected), `model_id text`, `prompt_version text`, `source_inventory jsonb`, `validation_summary jsonb`, `created_by_job_id uuid`; unique(revision_id,version), unique(id,revision_id,project_id,owner_id).
 
-`scenes`: `id uuid`, `plan_id uuid`, `revision_id uuid`, `project_id uuid`, `owner_id uuid`, `ordinal smallint` (0–5), `narration text`, `visual jsonb`, `evidence jsonb`, `script_hash text`; unique(plan_id,ordinal), unique(id,plan_id,revision_id,project_id,owner_id). A validated plan has 4–6 consecutive scenes. A changed script creates another plan version, not a mutation of validated scenes. Bounded corrections can therefore happen without rewriting the history or invalidating unchanged scene content hashes.
+`scenes`: `id uuid`, `plan_id uuid`, `revision_id uuid`, `project_id uuid`, `owner_id uuid`, `ordinal smallint` (0–5), `narration text`, `visual jsonb`, `evidence jsonb`, `script_hash text`; unique(plan_id,ordinal), unique(id,plan_id,revision_id,project_id,owner_id). A scene belongs to one plan for its lifetime: plan_id updates/reparenting are prohibited, including while both plans are candidates. Reusing content in a new plan requires a new scene row/identity. A validated plan has 4–6 consecutive scenes. A changed script creates another plan version, not a mutation of validated scenes. Bounded corrections can therefore happen without rewriting the history or invalidating unchanged scene content hashes.
 
 `scene_timings`: PK `(job_id,checkpoint_id,scene_id)`, composite scope references, `start_frame integer >=0`, `duration_frames integer >0`, `audio_asset_id uuid`, `captions_asset_id uuid`, `mouth_cues_asset_id uuid?`, `measured_audio_ms bigint`. Selected timeline checkpoint defines active timing. Education requires mouth cues for voiced scenes; other modes do not. Database validates basic ranges/references, worker validates actual speech/caption/cue intervals and global continuity.
 
@@ -380,7 +380,7 @@ Do not store signed URLs, passwords or bearer tokens in replay responses. Replay
 
 ## 12. Migration strategy
 
-Only this design is being created now. During implementation use timestamped SQL files in `supabase/migrations`; do not paste untracked dashboard SQL or modify applied migrations. SQL owns schema/functions/policies; TypeScript/Zod owns boundary validation, and contract tests check agreement. Supabase documents local migration development and deployment history. [Database migrations](https://supabase.com/docs/guides/deployment/database-migrations).
+W-04 implements the initial local schema, integrity guards, ownership policies and narrow profile/draft SQL primitives in ten timestamped migrations; see [local database setup](LOCAL-DATABASE.md) and the tracker for tested evidence. Full transactional admission/worker/publication/cleanup logic remains assigned to later numbered milestones. Use timestamped SQL files in `supabase/migrations`; do not paste untracked dashboard SQL or modify migrations already applied to a shared environment. SQL owns schema/functions/policies; TypeScript/Zod owns boundary validation, and contract tests check agreement. Supabase documents local migration development and deployment history. [Database migrations](https://supabase.com/docs/guides/deployment/database-migrations).
 
 ### 12.0 API replay fields and bounded repair records
 
@@ -468,3 +468,13 @@ No migrations have run yet, so omit invitation tables/indexes/creation-hook gate
 - Library reads join owned immutable revision snapshots, exports and metadata to render VideoSummary, and list active unfinished drafts separately. Expired revisions retain safe metadata, with no downloadable media URL. Later draft edits never rename existing versions.
 - Account deletion lifecycle remains requested/cancelling/cleaning/purging/completed/blocked. A 202 is only requested, with immediate authorization denial/signout. Do not mark completed before cleanup/Auth purge. The signed-out UI must acknowledge the request rather than claim physical cleanup completed. Keep nonidentifying operational state for repair; no public lookup by email.
 - Migration/contract tests must cover draft removal with shared assets, last version deletion, retained metadata after expiry, incomplete draft title fallback, display-name validation and caption-export failures not mutating Ready revision status.
+
+
+## W-04 review implementation note — 27 October 2026
+
+Migration 008 preserves validated-content immutability while permitting scoped terminal account purge through the server-only purge_revision_plans SQL primitive. It requires profile/deletion/project/revision lifecycle gates and no active work, preserves dependent timing FKs, and clears the selected-plan pointer before deleting scenes/plans. The W-26 orchestration must still authenticate fresh reauthentication, cancel/clean dependencies and purge remaining records/Auth identity in order. OAuth destinations are constrained to the shared request allowlist, including new/existing project paths; legacy /create values are normalized during the forward migration.
+
+
+### Latest-result expiry and draft edits (4 November 2026)
+
+Migration 20261104000001_latest_result_expiry checks freshness when assigning a latest-ready pointer. Keeping the same pointer during metadata edits does not require unexpired media; ready status, nondeleted revision and matching project/owner still apply. Deferred assignment events validate the final row, so clearing/reassigning an expired pointer followed by another update cannot bypass the guard. The trigger uses a fixed-search-path security-definer read because expired revisions are correctly invisible to the authenticated caller at deferred commit time; browser execution is revoked. Read/access expiry policies and immutable seven-day retention are unchanged. Cleanup remains a separate milestone.

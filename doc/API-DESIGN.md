@@ -614,3 +614,8 @@ Backend returns server-computed availableActions with enabled flags and safe rea
 ### 14.4 Deletion acknowledgment and returns
 
 POST /me/deletion stays asynchronous 202. The completion-looking mockup must instead say “Account deletion requested” and “You’ve been signed out and can no longer access this account. Your stored data is being removed.” Keep the downloaded-files notice. No unauthenticated polling endpoint is added. Password/Google reauth grant is consumed on the explicit destructive action; confirmation:"DELETE" is a fixed client request value for that action, not a typed confirmation input. Preserve account/session on reauth cancellation or wrong-identity failure. Ordinary Google login cancellation returns to the normal sign-in form without an alarming banner. return paths are allowlisted same-origin paths; authorize again after login and never replay pending mutations.
+
+
+## W-05 implementation slice — 3 November 2026
+
+Local email signup/signin, verified session reads and display-name updates implement the auth/settings contracts. The initial GET /me/settings projection contains displayName, email, authMethods and settingsVersion only; defaults and usage are intentionally deferred until their real data features exist. PATCH accepts exactly the shared DisplayNamePatchSchema (expectedVersion, displayName), returning displayName/settingsVersion; stale writes return 409 STATE_CONFLICT. The SQL RPC locks the current Auth UID's active profile and increments its settings version. No client-supplied owner, role, email or Auth metadata is authority. Google, explicit refresh/signout flows, password changes and deletion remain later tracker milestones. See WEB-DEVELOPMENT.md for local setup and the validation evidence in PROJECT-TRACKER.md.

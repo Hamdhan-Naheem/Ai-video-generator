@@ -17,3 +17,11 @@ next-env.d.ts
 playwright-report/
 test-results/
 .vercel/
+
+# Supabase local state and private local credentials
+supabase/.temp/
+supabase/.branches/
+supabase/signing_keys.json
+supabase/.env*
+
+supabase/snippets/

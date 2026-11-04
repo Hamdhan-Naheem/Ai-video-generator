@@ -1,0 +1,23 @@
+.auth-page { min-height: 100dvh; display: grid; place-items: center; padding: 32px 16px; background: var(--canvas); }
+.auth-card { width: 100%; max-width: 440px; padding: 32px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.auth-card .brand { margin-bottom: 20px; font-size: 16px; }
+.auth-card .brand-mark { width: 36px; height: 36px; border-radius: 10px; }
+.auth-heading { margin: 0 0 24px; }
+.auth-heading h1 { font-size: 24px; margin-bottom: 8px; }
+.auth-heading p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+.auth-card .button { width: 100%; min-height: 44px; }
+.auth-help { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: var(--muted); font-size: 10px; text-transform: uppercase; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+.auth-form { display: grid; gap: 18px; }
+.auth-form .form-field { margin: 0; }
+.auth-form .ui-notice { margin: 0; }
+.auth-card > .ui-notice { margin-bottom: 18px; }
+.auth-card .form-control { background: var(--surface); }
+.auth-switch { margin-top: 24px; text-align: center; font-size: 12px; color: var(--muted); }
+.auth-switch a, .auth-access-link, .account-inline-link { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.auth-access-link { float: right; font-size: 11px; position: relative; z-index: 1; padding-top: 2px; }
+.account-intro { font-size: 13px; color: var(--muted); margin: 12px 0; overflow-wrap: anywhere; }
+.settings-panel .ui-notice { margin-top: 16px; }
+.sidebar-footer p { overflow-wrap: anywhere; }
+@media(max-width: 600px) { .auth-page { padding: 24px 16px; } .auth-card { padding: 24px; } .auth-heading h1 { font-size: 22px; } }

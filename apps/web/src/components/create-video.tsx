@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { EducationForm } from "@/components/education-form";
+import { SoftwareForm } from "@/components/software-form";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/icons";
@@ -16,6 +18,8 @@ export function CreateVideo() {
   const params = useSearchParams();
   const selected = params.get("mode");
   const mode = modes.find(item => item.key === selected);
+  if (mode?.key === "education") return <EducationForm />;
+  if (mode?.key === "software") return <SoftwareForm />;
   if (mode) return <div className="mode-destination">
     <Link className="back-link" href="/preview/create"><Icon name="arrow-left" width="17" height="17" />All video types</Link>
     <section className="mode-intro ui-panel"><div><span className="studio-label">{mode.title}</span><h1>{mode.heading}</h1><p>{mode.description}</p></div><Image src={`/illustrations/select-${mode.key}.svg`} width={200} height={120} alt="" /></section>
@@ -31,6 +35,6 @@ export function CreateVideo() {
       <Link className="button button-primary selection-action" href={`/preview/create?mode=${item.key}`}>{item.action}<Icon name="arrow-right" width="18" height="18" /></Link>
     </article>)}</div>
     <div className="selection-guidance"><Icon name="info" width="18" height="18" /><p>You can review your details and video settings before generating.</p></div>
-    <PreviewNote>Choose a type to preview its destination. Input forms and generation are upcoming features.</PreviewNote>
+    <PreviewNote>Education and Software open their form previews. The Branding form, uploads, draft saving and generation are upcoming features.</PreviewNote>
   </div>;
 }

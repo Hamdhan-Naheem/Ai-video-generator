@@ -1,6 +1,6 @@
 # Create video, My videos and Settings reference review
 
-> Current status: the three Stitch-based visual previews are implemented and verified; built-result user review is pending. Mode-specific input forms and backend features remain planned. See PROJECT-TRACKER.md.
+> Current status: the three Stitch-based visual previews are implemented and verified; built-result user review is pending. Education (W-10U) and Software (W-12U) form UIs are implemented and verified; Branding and backend features remain planned. See PROJECT-TRACKER.md.
 
 26 October 2026. User accepted the compact Dashboard and requested the remaining three placeholder pages be matched to their Stitch designs, after confirming the references. This handoff records reference discovery, not completed page implementation or backend features.
 
@@ -56,3 +56,11 @@ Create entry is /preview/create; mode links preserve ?mode=education|software|br
 
 All 16 browser checks and the final web/pipeline checks passed; screenshots reviewed at desktop/mobile widths, with 320px checks. User review of the built result remains pending. W-02 is partially implemented, not complete. See PROJECT-TRACKER.md for exact limits and next feature.
 
+
+## Education form implementation — 26 October 2026
+
+Education now opens its interactive form UI at /preview/create?mode=education. It follows the Education references above using shared W-02 controls, restores missing mobile labels and adds Intended use according to reconciliation. Source/Settings columns stack into mobile reading and keyboard order with identical desktop/mobile tokens. Inputs are blank, defaults are Beginner/60 seconds/Landscape/Kore English, acknowledgments unchecked. Draft saving, voice playback and generation remain visibly unavailable; page-local values reset on leaving/refresh. W-10U UI checks passed; W-10 integration and the other two input forms remain unfinished. See PROJECT-TRACKER.md for evidence and the next feature.
+
+## Software form implementation — 26 October 2026
+
+Software now opens its form preview at /preview/create?mode=software, based on the desktop/mobile references above. It preserves source/settings columns and stacked mobile reading order with shared tokens. Input text and files start empty; descriptions/features share the reconciled 4,000-character budget, Intended use is required, and mobile labels are restored. File selection/upload, Save draft, Preview voice and Generate remain visibly unavailable. V1 file limits/privacy are shown; dropped files are not read or uploaded. VideoSettings is reused by Software and Education. All 42 browser checks passed; W-12U UI completion is separate from W-11 upload and W-12 backend integration. Product branding UI is next.

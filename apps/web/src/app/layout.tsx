@@ -3,6 +3,10 @@ import "@fontsource-variable/manrope";
 import "./globals.css";
 import "./workspace-pages.css";
 import "./form-controls.css";
+import "./education-form.css";
+import "./software-form.css";
+import "./auth.css";
+import "./auth.css";
 
 export const metadata: Metadata = {
   title: { default: "AI Video Studio — Development preview", template: "%s | AI Video Studio" },

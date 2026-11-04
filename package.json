@@ -32,7 +32,19 @@
     "web:typecheck": "npm run typecheck --workspace=@ai-video-studio/web",
     "web:lint": "npm run lint --workspace=@ai-video-studio/web",
     "web:test": "npm run test:e2e --workspace=@ai-video-studio/web",
-    "check": "npm run typecheck && npm test && npm run web:lint && npm run web:typecheck && npm run web:build"
+    "check": "npm run typecheck && npm test && npm run contracts:check && npm run web:lint && npm run web:typecheck && npm run web:build",
+    "contracts:generate": "tsx scripts/export-contracts.ts",
+    "contracts:check": "tsx scripts/export-contracts.ts --check",
+    "db:start": "node scripts/database.mjs start",
+    "db:stop": "node scripts/database.mjs stop",
+    "db:status": "node scripts/database.mjs status",
+    "db:reset": "node scripts/database.mjs reset",
+    "db:test": "node scripts/database.mjs test",
+    "db:types": "node scripts/database.mjs types",
+    "db:types:check": "node scripts/database.mjs types-check",
+    "db:verify-migrations": "node scripts/database.mjs verify-migrations",
+    "db:migrate": "node scripts/database.mjs migrate",
+    "web:auth:local": "node scripts/configure-web-auth.mjs"
   },
   "dependencies": {
     "@remotion/bundler": "4.0.538",
@@ -50,6 +62,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "supabase": "2.122.0",
     "tsx": "4.23.15",
     "typescript": "^5.9.3"
   },

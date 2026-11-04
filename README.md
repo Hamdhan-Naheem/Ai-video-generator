@@ -8,7 +8,7 @@
 
 A local education-video prototype implemented in TypeScript/Node.js. It turns a topic and audience into a Gemini storyboard and narration, measured captions, Rhubarb teacher mouth cues, and a Remotion MP4. No Python, background music, Supabase, or web deployment is required for this prototype.
 
-A Next.js/Tailwind scaffold now lives in apps/web. Authentication, cloud storage, and complete application generation flows remain later milestones. See the [project tracker](doc/PROJECT-TRACKER.md) for implementation status and remaining validation.
+A Next.js/Tailwind scaffold now lives in apps/web. Local email signup/signin and profile-name persistence are implemented. Google sign-in, cloud media integration and complete application generation remain later milestones. See the [project tracker](doc/PROJECT-TRACKER.md) for implementation status and remaining validation.
 
 ## Run in VS Code
 
@@ -76,6 +76,15 @@ Provider configuration checks remain available as `npm run setup:providers`. The
 The incremental Next.js application lives in `apps/web`. Start the local scaffold with `npm run web:dev` and open http://127.0.0.1:3000. This milestone is a labeled layout preview, not functional authentication or generation. See [web development](doc/WEB-DEVELOPMENT.md) for commands and [project tracker](doc/PROJECT-TRACKER.md) for feature status and the next task. Existing root pipeline commands remain available.
 
 
+## Local application database
+
+W-04 adds a separate local Supabase/PostgreSQL Docker stack. Start Docker Desktop, then run `npm run db:start`. Open Studio at http://127.0.0.1:55423. See [local database setup](doc/LOCAL-DATABASE.md) for pgAdmin, migrations, tests and safe reset commands. The preview UI is not yet connected; real authentication begins with W-05. The standalone CLI pipeline still needs no database.
+
 ## Repository and documentation map
 
 See [document map](doc/README.md) for current specifications and historical references, and [what belongs in GitHub](doc/REPOSITORY-CONTENTS.md) for source folders, generated files and local-only staging material.
+
+
+## Local email authentication
+
+After npm run db:start, run npm run web:auth:local to configure ignored web-only local settings, then npm run web:dev. Open http://127.0.0.1:3000/sign-up or /sign-in; /settings saves the signed-in user's full name. Google, explicit sign-out/expiry handling and generation integration remain later milestones. See doc/WEB-DEVELOPMENT.md for exact setup, API boundaries and opt-in local Auth browser checks. Never commit .env.local.

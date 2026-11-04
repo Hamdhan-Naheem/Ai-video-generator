@@ -10,6 +10,7 @@ Keep the useful project documents in GitHub so a fresh checkout includes the req
 | [PRD.md](PRD.md) | Approved product requirements |
 | [SYSTEM-ARCHITECTURE.md](SYSTEM-ARCHITECTURE.md) | Current application architecture |
 | [DATABASE-DESIGN.md](DATABASE-DESIGN.md) | Data model and ownership rules |
+| [LOCAL-DATABASE.md](LOCAL-DATABASE.md) | Local Supabase commands, pgAdmin connection, migrations and ownership tests |
 | [API-DESIGN.md](API-DESIGN.md) | API contracts and behavior |
 | [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Approved desktop/mobile colors, typography and components |
 | [UI-RECONCILIATION.md](UI-RECONCILIATION.md) | Reviewed flows and corrections for implementation |

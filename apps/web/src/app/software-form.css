@@ -1,0 +1,30 @@
+.software-intro { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.software-intro h1 { font-size: 30px; }
+.software-intro p { color: var(--muted); font-size: 14px; margin-top: 10px; }
+.software-intro .education-mode, .software-intro > img { display: none; }
+.software-source .software-details > .form-field { margin-bottom: 24px; }
+.software-source .software-details > .form-field:last-child { margin-bottom: 28px; }
+.software-budget { margin: -12px 0 24px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.software-media h2 { font-size: 14px; font-weight: 600; }
+.software-media-description { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.8; }
+.software-privacy { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; padding: 12px; background: var(--canvas); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; line-height: 1.8; color: var(--muted); }
+.software-privacy > svg { flex: none; margin-top: 3px; color: var(--primary); }
+.software-file-limits { font-size: 12px; line-height: 1.9; color: var(--muted); margin: 0 0 16px; padding-left: 18px; }
+.software-upload-zone { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; background: var(--canvas); border: 1px dashed var(--control-border); border-radius: 12px; padding: 24px 16px; }
+.software-upload-icon { width: 44px; height: 44px; display: grid; place-items: center; background: var(--selection); color: var(--primary); border-radius: 50%; }
+.software-upload-zone h3 { font-size: 14px; }
+.software-upload-zone p, .software-upload-status { font-size: 11px; line-height: 1.8; color: var(--muted); }
+.software-upload-status { margin: 12px 0 24px; }
+@media (max-width: 767px) {
+ .software-intro { padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+ .software-intro h1 { font-size: 25px; }
+ .software-intro p { font-size: 13px; }
+ .software-intro .education-mode { display: inline-flex; }
+ .software-intro > img { display: block; width: 64px; height: auto; flex: none; }
+ .software-details { order: 1; }
+ .software-media { order: 2; }
+ .software-source .software-details > .form-field:last-child { margin-bottom: 0; }
+ .software-media .software-upload-status { margin-bottom: 0; }
+ .software-budget { margin-bottom: 20px; }
+}
+@media (max-width: 359px) { .software-intro { padding: 16px; gap: 10px; } .software-intro h1 { font-size: 23px; } .software-intro > img { width: 48px; } }
