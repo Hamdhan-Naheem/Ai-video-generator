@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("shared navigation works and preserves the approved canvas", async ({ page, isMobile }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/");
+  await page.goto("/preview");
   await expect(page).toHaveURL(/\/preview\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Bring your next idea to life.", exact: true })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
@@ -72,4 +72,9 @@ test("Dashboard follows the design and labels fixture data", async ({ page, isMo
   expect(broken).toBe(false);
   await cards.nth(0).click();
   await expect(page).toHaveURL(/mode=education$/);
+});
+
+test("homepage enters the live app and design previews remain explicit",async({request})=>{
+ const live=await request.get("/",{maxRedirects:0});expect(live.status()).toBe(307);expect(live.headers().location).toBe("/dashboard");
+ const preview=await request.get("/preview",{maxRedirects:0});expect(preview.status()).toBe(307);expect(preview.headers().location).toBe("/preview/dashboard");
 });

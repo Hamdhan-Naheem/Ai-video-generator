@@ -33,7 +33,7 @@ To use pgAdmin, register a new server named **AI Video Studio — local**. On Co
 
 SQL migrations under `supabase/migrations` are the source of truth; commit them with `config.toml`, SQL tests, the database command script, generated types and this guide. Do not commit `.temp`, `.branches`, signing keys, `.env` files, Docker volumes, caches or CLI logs. The nonsecret local configuration is not production configuration.
 
-The ten migration batches cover:
+The twelve migration batches cover:
 
 1. Profiles, protected signup trigger, OAuth/reauthentication records and deletion lifecycle.
 2. Owned projects and immutable revision requests, optimistic draft versions and scoped relationships.
@@ -45,6 +45,8 @@ The ten migration batches cover:
 8. Restricted terminal account-purge support for validated plans and OAuth destination alignment.
 9. Immutable scene-plan membership, closing concurrent validation/reparenting races.
 10. Permit draft metadata edits after an unchanged latest result expires; preserve fresh pointer assignment checks.
+11. Read-only authenticated dashboard projection: owned summaries/usage and coarse worker availability.
+12. Owned draft read/atomic save snapshots, transactional create receipts and editable-draft dashboard flags.
 
 Every application table enables RLS at creation. Anonymous users have no application reads/writes. Active users can read only their own nondeleted data and safe job/event columns. The operator role does not grant access to other users' private media. Internal tables have no browser read policy or grant. Direct application DML is denied to browsers. Authorization uses immutable Auth user IDs, never email matching.
 
@@ -119,3 +121,9 @@ db:test now includes a deterministic two-session validation/move regression in a
 
 
 The November 4 expiry regression also runs through db:test: scripts/check-draft-expiry.mjs commits a valid synthetic ready result, waits for its real short remaining retention to expire, and saves through the authenticated draft RPC before any cleanup. It verifies persistence, expired-result read denial, optimistic conflicts, rejected expired reassignment and tombstone checks, then removes its own random-UUID metadata fixtures. No triggers are disabled, no retention is rewritten, and no Storage bytes or AI calls are involved.
+
+
+W-08 adds 30 rollback-only pgTAP checks (164 SQL assertions total) for the dashboard projection. public.get_dashboard() accepts no owner argument and grants execution only to authenticated, deriving the active Auth UID internally. Raw accounting/worker tables remain private; the result excludes source data, object paths and worker identifiers. Byte counters use decimal strings, absent accounting remains null, and live-result counts enforce clock expiry before cleanup. The real-clock expiry regression additionally verifies dashboard state/count when the unchanged latest pointer expires. Apply the eleventh migration with db:migrate, not a reset; db:types updates the generated server-only signature.
+
+
+W-09 adds 29 rollback-only SQL assertions (193 total) covering scoped read/create/update snapshots, per-owner request keys, original receipt replay, optimistic conflicts, deleted/removed/disabled handling and no generation-side effects. Creation and update reuse the existing profile-before-project lock order and save_project_draft primitive; public table grants are unchanged. Idempotency receipts stay private. The UI/API performs additional mode-specific shared-schema validation. Apply pending migrations with db:migrate without resetting local data.

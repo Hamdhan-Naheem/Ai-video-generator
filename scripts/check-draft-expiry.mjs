@@ -43,6 +43,9 @@ select status='ready' and expires_at<=now() from public.revisions where id='${re
   assert.equal(state.out.trim(),'t\nt','Persist edits without cleanup or extending result retention');
   const visibility=await sql(`begin; ${claims} select count(*) from public.revisions where id='${revision}'; rollback;`);
   assert.match(visibility.out,/\n0\nROLLBACK/,'Expired output remains hidden by RLS');
+  const dashboard=await sql(`begin; ${claims} select concat(public.get_dashboard()->'usage'->>'retainedOutputs','|',public.get_dashboard()->'recentProjects'->0->>'state'); rollback;`);
+  assert.equal(dashboard.code,0,dashboard.err);
+  assert.match(dashboard.out,/\n0\|expired\nROLLBACK/,'Dashboard expires old ready pointer without cleanup');
   const stale=await sql(`begin; ${claims} ${save(1,'Stale overwrite')} commit;`);
   assert.notEqual(stale.code,0);
   assert.match(stale.err,/40001/,'Optimistic concurrency remains enforced');

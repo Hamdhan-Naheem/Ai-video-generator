@@ -8,14 +8,16 @@ import { CheckboxField, SelectField, TextAreaField, TextField } from "@/componen
 import { VideoSettings } from "@/components/video-settings";
 import { Icon } from "@/components/icons";
 import { Button, PreviewNote } from "@/components/ui";
+import type { DraftFormBinding } from "@/components/draft-form";
 
-export function SoftwareForm() {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [features, setFeatures] = useState("");
-  const [intendedUse, setIntendedUse] = useState("");
-  const [duration, setDuration] = useState("60");
-  const [orientation, setOrientation] = useState("landscape");
+export function SoftwareForm({draft}: {draft?:DraftFormBinding}={}) {
+  const saved=draft?.input.mode==="software" ? draft.input : undefined;
+  const [name, setName] = useState(saved?.softwareName??"");
+  const [description, setDescription] = useState(saved?.brief??"");
+  const [features, setFeatures] = useState(saved?.featureHighlights??"");
+  const [intendedUse, setIntendedUse] = useState<string>(saved?.intendedUse??"");
+  const [duration, setDuration] = useState(String(draft?.preferences.targetSeconds??60));
+  const [orientation, setOrientation] = useState<string>(draft?.preferences.orientation??"landscape");
   const [rights, setRights] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -28,12 +30,14 @@ export function SoftwareForm() {
     setTouched({ name: true, description: true, intendedUse: true, rights: true, processing: true });
   }
   return <div className="software-page education-page">
-    <Link className="back-link" href="/preview/create"><Icon name="arrow-left" width="17" height="17" />All video types</Link>
+    <Link className="back-link" href={draft ? "/projects/new" : "/preview/create"}><Icon name="arrow-left" width="17" height="17" />All video types</Link>
     <section className="software-intro" aria-labelledby="software-title"><div><span className="education-mode"><Icon name="layout" width="14" height="14" />Software showcase</span><h1 id="software-title">Create a software showcase</h1><p>Add your software details and visuals. We’ll turn them into a narrated walkthrough.</p></div><Image src="/illustrations/select-software.svg" width={200} height={120} alt="" /></section>
-    <p className="education-preview-label">Form preview · Inputs stay on this page only. Leaving or refreshing clears them.</p>
-    <form className="education-workspace software-workspace" onSubmit={preventSubmission} noValidate aria-label="Software showcase details">
+    <p className="education-preview-label">{draft ? "Save incomplete details as a draft. Changes are saved only when you choose Save draft." : "Form preview · Inputs stay on this page only. Leaving or refreshing clears them."}</p>
+    <form className="education-workspace software-workspace" onSubmit={preventSubmission} onChange={draft?.onDirty} noValidate aria-label="Software showcase details">
+      <fieldset className="draft-fields" disabled={draft?.pending}>
       <div className="education-source ui-panel software-source">
         <section className="education-section software-details" aria-label="Software details">
+          {draft && <TextField label="Project title" value={draft.title} maxLength={LIMITS.title} onChange={event=>draft.onTitleChange(event.target.value)} hint="Optional. A blank title is saved as Untitled software showcase."/>}
           <TextField id="software-name" name="softwareName" label="Software name" required maxLength={LIMITS.name} value={name} onChange={event => setName(event.target.value)} onBlur={() => touch("name")} error={touched.name && !NameSchema.safeParse(name).success ? "Enter your software name." : undefined} placeholder="e.g. Acme Studio" hint="Maximum 120 characters." />
           <TextAreaField id="software-description" name="brief" label="What does your software do?" required maxLength={LIMITS.brief} rows={4} value={description} onChange={event => setDescription(event.target.value)} onBlur={() => touch("description")} error={touched.description && !RequiredBriefSchema.safeParse(description).success ? "Describe what your software does and who it helps." : undefined} hint="Describe its purpose and who it helps." aria-describedby="software-text-budget" placeholder="Explain the problem your software solves and its main workflow." />
           <TextAreaField id="software-features" name="featureHighlights" label="Features to highlight" maxLength={LIMITS.brief} rows={4} value={features} onChange={event => setFeatures(event.target.value)} error={budgetError} hint="Optional. Include only claims supported by your details and visuals." aria-describedby="software-text-budget" placeholder="Describe the features or workflow you want to demonstrate…" />
@@ -60,8 +64,9 @@ export function SoftwareForm() {
         <CheckboxField id="software-processing" name="processingAcknowledged" label="I understand my inputs are processed by external AI services." required checked={processing} onChange={event => setProcessing(event.target.checked)} onBlur={() => touch("processing")} error={touched.processing && !processing ? "Acknowledge external AI processing before generating." : undefined} />
         <p className="education-retention"><Icon name="clock" width="16" height="16" />Generated media is kept for 7 days.</p>
       </section>
-      <div className="education-actions"><div className="education-action-buttons"><Button variant="secondary" disabled aria-describedby="software-action-hint">Save draft</Button><Button type="submit" disabled aria-describedby="software-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div><p className="field-hint" id="software-action-hint">Uploads, draft saving and generation are not connected in this preview, even when text fields are valid.</p></div>
+      <div className="education-actions"><div className="education-action-buttons"><Button variant="secondary" pending={draft?.pending} pendingLabel="Saving draft…" disabled={!draft || draft.conflict} onClick={()=>draft?.onSave({...saved,mode:"software",softwareName:name,brief:description,featureHighlights:features,intendedUse:intendedUse||undefined,sources:saved?.sources??[]},{...draft.preferences,targetSeconds:Number(duration),orientation})} aria-describedby="software-action-hint">Save draft</Button><Button type="submit" disabled aria-describedby="software-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div><p className="field-hint" id="software-action-hint">{draft ? "Save your text and settings now. Uploads, voice playback and generation are not connected yet." : "Uploads, draft saving and generation are not connected in this preview, even when text fields are valid."}</p></div>
+      </fieldset>
     </form>
-    <PreviewNote>Software form UI only. No account, stored files, saved draft or generation service is connected.</PreviewNote>
+    {!draft && <PreviewNote>Software form UI only. No account, stored files, saved draft or generation service is connected.</PreviewNote>}
   </div>;
 }

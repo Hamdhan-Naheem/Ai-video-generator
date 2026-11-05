@@ -25,3 +25,6 @@ supabase/signing_keys.json
 supabase/.env*
 
 supabase/snippets/
+
+# Private, explicitly reviewed voice samples; never publish demo outputs automatically
+apps/web/voice-samples/

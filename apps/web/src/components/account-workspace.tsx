@@ -9,33 +9,61 @@ import { TextField } from "@/components/form-fields";
 import { Button, Notice } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { AccountError, accountRequest } from "@/lib/auth-browser";
+import { LiveDashboard } from "@/components/live-dashboard";
+import { DraftWorkspace } from "@/components/draft-workspace";
 
 type Profile = {displayName:string;email:string;authMethods:string[];settingsVersion:number};
-export function AccountWorkspace({settings=false}: {settings?:boolean}) {
+export function AccountWorkspace({settings=false,projectId,createMode}: {settings?:boolean;projectId?:string;createMode?:string}) {
   const router = useRouter();
   const [user,setUser] = useState<UserDto|null>(null);
   const [profile,setProfile] = useState<Profile|null>(null);
   const [error,setError] = useState("");
+  const [backgroundError,setBackgroundError]=useState(false);
+  const [checkingSession,setCheckingSession]=useState(false);
+  const retrySession=useRef<(()=>void)|null>(null);
   const [reload,setReload] = useState(0);
+  const verifiedUser=useRef<string|null>(null);
+  const [processingLabel,setProcessingLabel]=useState("Checking processing status…");
   useEffect(()=>{
-    let active=true;
-    async function load() {
+    let active=true,checking=false;
+    const next=settings ? "/settings" : projectId ? `/projects/${projectId}` : createMode!==undefined ? "/projects/new" : "/dashboard";
+    function expired() {
+      if (!active) return;
+      setUser(null);setProfile(null);
+      router.replace(`${verifiedUser.current ? "/session-expired" : "/sign-in"}?next=${encodeURIComponent(next)}`);
+    }
+    async function load(initial=true) {
+      if(checking)return;checking=true;
+      if(!initial)setCheckingSession(true);
       try {
         const session = await accountRequest("auth/session");
-        const data = settings ? await accountRequest("me/settings") : null;
-        if (active) { setUser(session.user); setProfile(data); }
+        if (!active) return;
+        if (verifiedUser.current && verifiedUser.current!==session.user.id) {expired();return;}
+        const data = initial && settings ? await accountRequest("me/settings") : null;
+        if(active)setBackgroundError(false);
+        if (active && initial) { verifiedUser.current=session.user.id;setUser(session.user); setProfile(data); }
       } catch(cause) {
         if (!active) return;
-        if (cause instanceof AccountError && cause.status===401) { router.replace("/sign-in"); return; }
+        if (cause instanceof AccountError && (cause.status===401 || (cause.status===403 && cause.code==="ACCOUNT_DISABLED"))) { expired(); return; }
+        if(!initial){setBackgroundError(true);return;}
         setError(cause instanceof Error ? cause.message : "We couldn’t connect. Try again.");
-      }
+      } finally {checking=false;if(active)setCheckingSession(false);}
     }
-    void load(); return ()=>{active=false;};
-  },[settings,reload,router]);
+    retrySession.current=()=>{void load(false);};
+    const check=()=>{if(document.visibilityState==="visible")void load(false);};
+    const channel=typeof BroadcastChannel!=="undefined" ? new BroadcastChannel("account-session") : null;
+    if(channel) channel.onmessage=()=>check();
+    window.addEventListener("account-session-expired",expired);
+    window.addEventListener("focus",check);document.addEventListener("visibilitychange",check);
+    const timer=window.setInterval(check,60_000);
+    void load(); return ()=>{active=false;retrySession.current=null;clearInterval(timer);channel?.close();window.removeEventListener("account-session-expired",expired);window.removeEventListener("focus",check);document.removeEventListener("visibilitychange",check);};
+  },[settings,reload,router,projectId,createMode]);
   if (error) return <main className="auth-page"><section className="auth-card"><Notice error>{error}</Notice><Button onClick={()=>{setError("");setReload(value=>value+1);}}>Try again</Button><Link href="/sign-in">Back to sign in</Link></section></main>;
   if (!user || (settings && !profile)) return <main className="auth-page"><p role="status">Loading your account…</p></main>;
-  return <AppShell active={settings ? "settings" : "dashboard"} identity={user}>
-    {settings && profile ? <ProfileSettings initial={profile} onSave={name=>setUser({...user,displayName:name})} /> : <div className="settings-page"><div className="settings-heading"><p className="eyebrow">Your account</p><h1>Welcome, {user.displayName}</h1><p>You’re signed in to AI Video Studio.</p></div><section className="settings-panel ui-panel"><h2>Your studio is taking shape</h2><p className="account-intro">Your account is connected. Project data and video generation will be connected in the next milestones.</p><Link className="button button-primary" href="/settings">Manage your profile</Link><p className="account-intro"><Link className="account-inline-link" href="/preview/dashboard">View the dashboard design preview</Link></p></section></div>}
+  const drafting=projectId!==undefined || createMode!==undefined;
+  return <AppShell active={settings ? "settings" : drafting ? "create" : "dashboard"} identity={user} processingLabel={settings || drafting ? undefined : processingLabel}>
+    {backgroundError && <Notice tone="warning" onRetry={()=>retrySession.current?.()} retrying={checkingSession}>We could not check your session. Your unsaved changes are still here. Check your connection and try again.</Notice>}
+    {settings && profile ? <ProfileSettings initial={profile} onSave={name=>setUser({...user,displayName:name})} /> : drafting ? <DraftWorkspace key={projectId??createMode??"new"} projectId={projectId} selectedMode={createMode}/> : <LiveDashboard displayName={user.displayName} onProcessingStatus={setProcessingLabel}/>}
   </AppShell>;
 }
 function ProfileSettings({initial,onSave}: {initial:Profile;onSave:(name:string)=>void}) {
@@ -43,6 +71,19 @@ function ProfileSettings({initial,onSave}: {initial:Profile;onSave:(name:string)
   const [pending,setPending] = useState(false); const [message,setMessage] = useState(""); const [error,setError] = useState(""); const [conflict,setConflict] = useState(false);
   const [touched,setTouched] = useState(false); const saving = useRef(false);
   const valid = DisplayNameSchema.safeParse(name).success;
+  const router=useRouter();
+  const [signingOut,setSigningOut]=useState(false);
+  const [signOutError,setSignOutError]=useState("");
+  async function signOut() {
+    if(saving.current)return;
+    saving.current=true;setSigningOut(true);setSignOutError("");
+    try {
+      await accountRequest("auth/sign-out",{method:"POST",body:{scope:"local"}});
+      if(typeof BroadcastChannel!=="undefined") {const channel=new BroadcastChannel("account-session");channel.postMessage("signed-out");channel.close();}
+      router.replace("/sign-in");router.refresh();
+    } catch(cause) {setSignOutError(cause instanceof Error ? cause.message : "Sign out couldn’t be completed.");}
+    finally {saving.current=false;setSigningOut(false);}
+  }
   async function save(event:FormEvent) {
     event.preventDefault(); setTouched(true); if (!valid || saving.current) return;
     saving.current=true; setPending(true); setError(""); setMessage("");
@@ -67,7 +108,7 @@ function ProfileSettings({initial,onSave}: {initial:Profile;onSave:(name:string)
       {message && <Notice tone="success">{message}</Notice>}{error && <Notice error>{error}</Notice>}{conflict && <Button variant="secondary" pending={pending} onClick={reloadSaved}>Reload saved profile (replaces your edits)</Button>}
     </form></section>
     <section className="settings-panel ui-panel"><div className="settings-panel-heading"><h2>Account security</h2><p>Credentials and access safeguards for your account.</p></div><div className="settings-security-row"><div className="security-method"><span className="settings-icon"><Icon name="key"/></span><p>Sign-in method: Email and password</p></div><Button variant="secondary" disabled aria-describedby="password-coming">Change password</Button></div><p id="password-coming" className="account-intro">Password changes will be connected in a later milestone.</p><p className="settings-help"><Icon name="info"/>Password-reset emails aren’t available in this version. Keep your password somewhere safe.</p></section>
-    <section className="settings-panel ui-panel"><div className="settings-panel-heading"><h2>Session</h2></div><Button variant="secondary" disabled aria-describedby="session-coming">Sign out</Button><p id="session-coming" className="account-intro">Sign out isn’t available in this local preview yet.</p></section>
+    <section className="settings-panel ui-panel"><div className="settings-panel-heading"><h2>Session</h2></div><Button variant="secondary" pending={signingOut} disabled={pending} pendingLabel="Signing out…" onClick={signOut}>Sign out</Button><p className="account-intro">Signing out doesn’t cancel generation already in progress.</p>{signOutError && <Notice error>{signOutError}</Notice>}</section>
     <section className="settings-panel ui-panel delete-account-panel"><div className="settings-panel-heading"><h2>Delete account</h2><p>Permanently delete your account, projects and stored media.</p></div><Button variant="danger" disabled aria-describedby="deletion-coming">Delete account</Button><p id="deletion-coming" className="account-intro">Account deletion isn’t available in this version yet.</p></section>
   </div>;
 }

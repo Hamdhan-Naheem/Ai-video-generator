@@ -1046,7 +1046,16 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "purge_revision_plans":
+            "create_project_draft":
+{ Args: { "new_input": Json,"new_mode": string,"new_preferences": Json,"new_title": string,"project": string,"request_hash": string,"request_key": string }; Returns: Json
+                           },
+"get_dashboard":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"get_project_draft":
+{ Args: { "project": string }; Returns: Json
+                           },
+"purge_revision_plans":
 { Args: { "target_revision": string }; Returns: number
                            },
 "save_project_draft":
@@ -1058,6 +1067,9 @@ isOneToOne: false
 { Args: { "expected_version": number,"new_name": string }; Returns: {
               "display_name": string,"settings_version": number
             }[]
+                           },
+"update_project_draft":
+{ Args: { "expected_version": number,"new_input": Json,"new_preferences": Json,"new_title": string,"project": string }; Returns: Json
                            }
           }
           Enums: {

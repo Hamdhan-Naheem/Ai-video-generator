@@ -478,3 +478,13 @@ Migration 008 preserves validated-content immutability while permitting scoped t
 ### Latest-result expiry and draft edits (4 November 2026)
 
 Migration 20261104000001_latest_result_expiry checks freshness when assigning a latest-ready pointer. Keeping the same pointer during metadata edits does not require unexpired media; ready status, nondeleted revision and matching project/owner still apply. Deferred assignment events validate the final row, so clearing/reassigning an expired pointer followed by another update cannot bypass the guard. The trigger uses a fixed-search-path security-definer read because expired revisions are correctly invisible to the authenticated caller at deferred commit time; browser execution is revoked. Read/access expiry policies and immutable seven-day retention are unchanged. Cleanup remains a separate milestone.
+
+
+### W-08 bounded dashboard summary
+
+The local schema now has eleven migrations including 20261104000002_dashboard_summary. Its stable, fixed-search-path security-definer get_dashboard() is read-only and authenticated-only. It scopes all private data by the active auth.uid(), never accepts an owner parameter, and exposes only six project summaries, owned counts/usage and a coarse worker/pause status. It grants no raw worker/accounting reads. Stored byte counters are serialized as decimal strings; missing user accounting is unknown. The displayed retained count queries nondeleted live ready revisions rather than trusting a stale latest-result pointer or cleanup timing. Stored reserved slots are shown separately; this projection does not implement admission/reservation writes. Protocol-1 enabled heartbeat freshness is 90 seconds with future timestamps rejected; full worker capability/lease enforcement remains W-15.
+
+
+### W-09 transactional editable draft snapshots
+
+The twelfth migration adds private.project_draft_json plus authenticated-only get_project_draft, create_project_draft and update_project_draft. Scoped wrappers derive the Auth UID, require the active profile and use the existing profile/project lock order and versioned save primitive. A saved receipt contains its own transaction snapshot/version. Create idempotency uses the existing private idempotency_requests table keyed by owner/operation/key and a canonical request hash; replay returns the original snapshot without rewriting later edits, while tombstones/removal prevent replay resurrection. The dashboard flag canEditDraft reflects active draft state rather than inferring editability from result status. Source binding lifecycle, generation admission and full library pagination remain separate features.

@@ -6,7 +6,8 @@ import "./form-controls.css";
 import "./education-form.css";
 import "./software-form.css";
 import "./auth.css";
-import "./auth.css";
+import "./dashboard-live.css";
+import "./drafts.css";
 
 export const metadata: Metadata = {
   title: { default: "AI Video Studio — Development preview", template: "%s | AI Video Studio" },

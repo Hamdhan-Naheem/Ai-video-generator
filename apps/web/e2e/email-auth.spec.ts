@@ -24,7 +24,7 @@ test.describe("W-05 local email authentication",()=>{
   test("approved forms validate names, password confirmation and match the shared canvas",async({page})=>{
     await page.goto("/sign-up");
     await expect(page.getByRole("heading",{name:"Create an account"})).toBeVisible();
-    await expect(page.getByRole("button",{name:"Continue with Google"})).toBeDisabled();
+    await expect(page.getByRole("button",{name:"Continue with Google"})).toHaveCount(0);
     await expect(page.getByRole("button",{name:"Create account",exact:true})).toBeDisabled();
     await expect(page.locator("body")).toHaveCSS("background-color","rgb(247, 246, 242)");
     await page.getByLabel("Full name",{exact:true}).fill("   ");
@@ -62,8 +62,8 @@ test.describe("W-05 local email authentication",()=>{
     expect(JSON.stringify(receipt)).not.toMatch(/access_token|refresh_token|service_role|"password"\s*:/);
     expect(response.request().postDataJSON()).not.toHaveProperty("confirmPassword");
     await expect(page).toHaveURL(/\/dashboard$/);
-    await expect(page.getByRole("heading",{name:"Welcome, Álex Morgan"})).toBeVisible();
-    await page.getByRole("link",{name:"Manage your profile"}).click();
+    await expect(page.getByText("Welcome, Álex Morgan",{exact:true})).toBeVisible();
+    await page.getByRole("link",{name:"Settings",exact:true}).click();
     await page.getByLabel("Full name",{exact:true}).fill("Alex Updated");
     await page.getByRole("button",{name:"Save changes"}).click();
     await expect(page.getByText("Your full name has been saved.")).toBeVisible();
@@ -81,7 +81,9 @@ test.describe("W-05 local email authentication",()=>{
       await other.getByRole("button",{name:"Sign in",exact:true}).click();
       await expect(other.getByText("Email or password is incorrect. Check your details and try again.")).toBeVisible();
       await other.getByLabel("Password",{exact:true}).fill(password);
+      const signedIn=other.waitForResponse(response=>response.url().endsWith("/api/v1/auth/sign-in"),{timeout:65_000});
       await other.getByRole("button",{name:"Sign in",exact:true}).click();
+      const signinReceipt=await signedIn;expect(signinReceipt.status(),await signinReceipt.text()).toBe(200);
       await expect(other).toHaveURL(/\/dashboard$/);
       await other.goto("/settings");
       await expect(other.getByLabel("Full name",{exact:true})).toHaveValue("Alex Updated");
@@ -119,6 +121,6 @@ test.describe("W-05 local email authentication",()=>{
     expect((await mutate(request,"auth/sign-up",{email:"nobody@example.invalid",password:"short",displayName:"Valid"})).status()).toBe(422);
     const session=await request.get("/api/v1/auth/session");
     expect(session.headers()["cache-control"]).toBe("private, no-store");
-    await page.goto("/settings");await expect(page).toHaveURL(/\/sign-in$/);
+    await page.goto("/settings");await expect(page).toHaveURL(/\/sign-in\?next=%2Fsettings$/);
   });
 });

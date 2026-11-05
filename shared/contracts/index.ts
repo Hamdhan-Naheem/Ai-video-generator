@@ -3,3 +3,6 @@ export * from "./common.ts";
 export * from "./inputs.ts";
 export * from "./auth.ts";
 export * from "./responses.ts";
+export * from "./dashboard.ts";
+export * from "./projects.ts";
+export * from "./capabilities.ts";

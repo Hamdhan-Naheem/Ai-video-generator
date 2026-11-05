@@ -1,0 +1,7 @@
+.draft-fields {display:contents;border:0;padding:0;margin:0;min-width:0;}
+.draft-status {display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:13px;margin-bottom:16px;flex-wrap:wrap;}
+.draft-status a {color:var(--primary);text-decoration:underline;text-underline-offset:3px;}
+.draft-message {padding:24px;display:grid;gap:20px;}
+.draft-workspace>.ui-notice,.draft-workspace>.button {margin-bottom:16px;}
+.live-project-card .draft-card-actions {padding:0 20px 20px;}
+@media(max-width:760px){.draft-status{font-size:12px;}.draft-message{padding:20px;}}

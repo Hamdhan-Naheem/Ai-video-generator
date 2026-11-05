@@ -99,7 +99,7 @@ The separate local Supabase stack and SQL ownership tests are implemented. See [
 
 Start Docker Desktop and run npm run db:start. Run npm run web:auth:local once to write ignored apps/web/.env.local from this project's local Supabase status. This helper never prints credentials, copies a service-role key, or reads the root AI-provider environment. The committed apps/web/.env.example lists the three server-side settings. APP_ORIGIN must exactly match the app's origin (including port); local default is http://127.0.0.1:3000. Restart Next.js after changing environment values.
 
-Run npm run web:dev and open /sign-up or /sign-in on port 3000. Full name, email and password create a real local Auth identity and its existing profile trigger. Passwords are preserved exactly; new passwords require 12–128 characters. No confirmation/reset email is sent. Email is self-declared, not proof of mailbox ownership. The /account-access page explains the recovery limitation. Google is visibly disabled until W-06.
+Run npm run web:dev and open /sign-up or /sign-in on port 3000. Full name, email and password create a real local Auth identity and its existing profile trigger. Passwords are preserved exactly; new passwords require 12–128 characters. No confirmation/reset email is sent. Email is self-declared, not proof of mailbox ownership. The /account-access page explains the recovery limitation. Google is deferred by user request and removed from the live authentication screens.
 
 After signing in, /dashboard is a minimal real-account welcome page; real project/usage/worker data belongs to W-08. /settings reads the signed-in identity's email and profile. Saving changes only display_name through the existing update_display_name RPC and expected settings version. Refreshing preserves the saved name. Stale-tab conflicts preserve entered text and offer an explicit reload of the latest saved profile. Email, roles and ownership cannot be changed by this endpoint. The /preview/* routes remain sample-based design fixtures, including the Create/My videos links. No database migration is needed for W-05.
 
@@ -116,4 +116,67 @@ For real Auth browser checks, start the local DB and configure .env.local, set W
 2. Create a local account. Check the real welcome page, then open /settings. Change Full name, save, refresh and confirm it persists; email stays read-only.
 3. In a separate browser profile/private window, use /sign-in with the same email/password. Check an incorrect password gives a generic error and the correct password loads the saved name.
 4. Open Settings in two tabs, save a name in one and attempt saving from the older tab. Confirm it offers the explicit saved-profile reload instead of overwriting silently.
-5. Confirm Google sign-in and the later security/destructive controls are visibly unavailable. Account-access help must explain that no reset email can be sent. These tests create local-only accounts; production deployment and complete session/sign-out behavior are separate milestones.
+5. Confirm Google sign-in is absent; the later password-change/destructive controls remain unavailable. Account-access help must explain that no reset email can be sent. These tests create local-only accounts; production deployment and complete session/sign-out behavior are separate milestones.
+
+
+### W-07 email-only sessions
+
+W-06 is deferred by user request. Live signup/signin use email/password only. Settings has working local Sign out; another browser remains signed in. POST /api/v1/auth/sign-out accepts {scope:"local"}, returns 204 and clears local session/CSRF cookies. POST /api/v1/auth/refresh accepts {}, returns {data:{authenticated:true}}, and verifies the active profile after SDK refresh. Both require Origin/CSRF and return safe failures. Existing SDK automatic refresh still applies to authenticated requests. Invalid sessions clear stale cookies; transient Auth failures show retry feedback.
+
+Live account pages hide content until their verified API load succeeds, recheck when a tab becomes visible/focused and every 60 seconds while visible, and handle API 401 without replaying mutations. /session-expired explains signing in again; signin accepts only /dashboard or /settings as return destinations. Preview routes stay public fixtures. No generation-cancellation logic is invoked by session expiry/signout. A revoked refresh session does not promise instant recall of already-issued bearer JWTs; their lifetime is provider-controlled.
+
+Manual QA: check Google is absent on both forms; visit /settings signed out and signin returns there; save a profile name then sign out; confirm refresh/back does not reveal authenticated content; sign in in two tabs and sign out in one; check a separate private-browser session stays signed in. Remove this browser’s cookies while editing Settings, then Save: expect Please sign in again, and after login the saved name must remain unchanged. Try an external next URL: it must return to Dashboard. Temporary network failures should show retry feedback, not a false successful signout. Browser regressions run with W05_AUTH_TESTS=1 and include session-auth.spec.ts; synthetic w07-*@example.invalid users are cleaned up.
+
+
+### W-08 dashboard and manual QA
+
+Apply npm run db:migrate, then npm run db:types:check for the new read-only dashboard RPC. /dashboard reuses the approved preview composition but reads actual account data through GET /api/v1/dashboard. No new AI keys, Google setup or worker configuration is required. The local generation system remains paused/unconfigured until its later milestones. /preview/dashboard still contains labeled sample projects. Creation/library links enter design previews; saving projects is the next W-09 task.
+
+Manual checks:
+
+1. Sign in and open /dashboard at desktop and mobile widths. Confirm the shared ivory background, compact shell, approved hero/mode cards and no sample projects in the live list. An account without saved projects gets an honest empty state.
+2. Read Saved videos, Reserved video slots and storage fields. Missing accounting shows Not configured, with no fake free-capacity claim. The processing computer can be not configured, offline or connected; paused processing is stated separately.
+3. Refresh the page and use Refresh. A temporary data failure shows a retry notice; Try again reloads without creating projects or jobs. Returning to a visible tab refreshes server state. Expired output stops counting without a cleanup worker.
+4. Sign in as another account in a separate browser. Project names/counts and usage must belong to that account only. An expired session should lead to Please sign in again without replaying an edit.
+5. Create video/template/library links remain design previews; generating, editing, playback and downloads are not connected by this milestone. Existing settings/profile/signout should continue to work.
+
+Automated real-Auth coverage: set W05_AUTH_TESTS=1 and run dashboard-data.spec.ts with the local stack; tests insert only owned UUID metadata fixtures and remove them afterward. Actual empty/populated data and two-account isolation use the real API/DB; only transport failure is simulated for the retry UI. Screenshots are ignored .cache/w08-dashboard-desktop.png and .cache/w08-dashboard-mobile.png. Database tests also cover bounded ordering, worker freshness/protocols, inactive/missing identities, source/worker redaction, decimal precision and live/deleted/expired output counts.
+
+
+### Signup security-cookie troubleshooting
+
+Use the exact APP_ORIGIN address (currently http://127.0.0.1:3000); localhost and 127.0.0.1 are different origins. A signup CSRF 403 occurs before Auth signup and does not prove the credentials were rejected. Valid pre-auth nonces are reused until their original 30-minute expiry; signed-out background account checks preserve them, while session changes/signout invalidate them. Missing-cookie errors identify a blocked/absent security cookie; try the configured address in a regular Chrome window with site cookies enabled if the embedded preview blocks cookies. Do not disable CSRF or loosen the Origin allowlist.
+
+
+Open http://127.0.0.1:3000/ for the live application. The root now redirects to /dashboard, then signin when needed. /settings is the working profile/signout page. /preview/dashboard and /preview/settings contain sample data and disabled account actions; use them only for design reference. Create video/My videos still use preview routes until their upcoming implementation. Port numbers select a running server; /preview is a URL path, not a special port. The current local app uses port 3000; update APP_ORIGIN to the exact origin if intentionally changing ports.
+
+
+### W-09 live draft setup and manual QA
+
+Apply npm run db:migrate (twelfth migration) and check npm run db:types:check. Open http://127.0.0.1:3000/projects/new while signed in. The real dashboard and sidebar Create video actions now enter this route. /preview/create remains a sample-only design reference. Existing preview text about disabled Save applies to preview routes; live Education/Software forms have enabled Save draft. Branding currently saves a title/settings shell; its full form is W-13. Uploads, voice samples and Generate are still unavailable. No new keys are required.
+
+Manual checks:
+
+1. Choose Education, leave required generation fields incomplete, and Save draft. Check the saved project URL, default title and version. Refresh and reopen it from Dashboard -> Continue draft; saved content must remain.
+2. Change Project title, topic, optional reference notes, duration and orientation; Save, refresh and check every saved field. Consent boxes should remain unchecked on reopening and Generate must remain disabled. Saving makes no AI calls or jobs.
+3. Open the same draft in two tabs. Save one, then save different details in the older tab. The stale edit must stay visible with a conflict; another stale Save is disabled. Explicit Reload saved draft replaces it with the saved version.
+4. Sign out/in and reopen the same URL. Remove this browser's cookies during an unsaved edit, then Save: signin is required and the unsubmitted edit must not be replayed. The original saved data remains. Browser refresh while dirty warns about unsaved changes; only explicit Save persists.
+5. Check Software with blank required details, then its combined 4,000-character description/features budget. Check Branding saves title and orientation while explaining the missing full form. Neither flow uploads files. Unknown modes show the selection choices safely.
+6. Use a second account: the other owner's URL must be unavailable and must not reveal title/input. Verify the same ivory canvas, compact shell and readable controls on desktop/mobile. Dashboard recent projects are limited to six; the full library remains a later task.
+
+Run project-drafts.spec.ts with W05_AUTH_TESTS=1 and the local stack for real Auth/SQL coverage. Only generated w09-UUID@example.invalid test accounts, their drafts and idempotency receipts are removed afterward. Tests cover concurrent duplicate create, separate-owner keys, two concurrent edits, source/role rejection and zero jobs/reservations; no provider requests or real user's rows are touched. Ignored screenshots: .cache/w09-education-desktop.png and .cache/w09-education-mobile.png.
+
+
+### W-10 capabilities and voice samples (5 November 2026)
+
+Live /projects/new?mode=education and reopened Education drafts load authenticated capabilities and voice DTOs. Loading/retry does not erase draft content or block saving partial drafts. The catalog separates selectable draft preferences from actual generation availability; all three generation modes remain disabled, and upload limits are informational until W-11. Save persists the selected voice, duration and orientation using W-09. No new credentials or database migration is needed.
+
+The player requests the fixed authenticated /api/v1/voices/Kore/preview only after a user clicks; it never synthesizes on demand. Optional reviewed audio is read from apps/web/voice-samples/Kore.wav (outside public/, ignored, maximum 2 MB). Missing audio gives previewUrl:null and an explanatory disabled control. Permission to reuse the matching private education-demo excerpt is pending; solar-demo is an ElevenLabs recording and must not be labeled Kore. No private demo file has been promoted. A fresh checkout intentionally has no sample until a reviewed asset is explicitly installed. Keep this limitation visible in the tracker; browser tests using a fake Audio implementation establish UI state handling only, not actual speech quality or decode.
+
+Manual QA:
+1. Sign in at the configured 127.0.0.1 origin, open Education, and check 60/75/90 seconds, landscape/portrait and Kore. Change choices, save and reopen; they persist.
+2. Simulate a failed capabilities request: loading becomes an error with Try again, existing topic/title remains, and Save draft still works. Retry restores options.
+3. With no installed authorized sample, Preview voice is disabled and explains why. After a sample is explicitly approved and installed, check audible speech, Stop, Replay, loading cancellation, offline Retry, hidden-tab stopping and navigation/session-loss cleanup. There must be no autoplay or new provider call. Real-audio QA is pending.
+4. Check the same ivory mobile/desktop palette and no horizontal overflow. Generate remains disabled, and preview fixture routes retain their old sample-only behavior.
+
+Automated education-capabilities.spec.ts labels mocked Audio explicitly; project-drafts.spec.ts additionally verifies real authenticated catalog access. Run with PLAYWRIGHT_PORT=3000, PLAYWRIGHT_REUSE_SERVER=1 and W05_AUTH_TESTS=1 against the local stack after building/starting the app. Only the existing synthetic W09 fixture users are removed.

@@ -14,13 +14,13 @@ const modes = [
   { key: "branding", title: "Product branding", description: "Introduce your product with images, clear benefits and narration.", hint: "Start with your product details and images.", action: "Create branding video", heading: "Create a product branding video" },
 ] as const;
 
-export function CreateVideo() {
+export function CreateVideo({live=false}: {live?:boolean}={}) {
   const params = useSearchParams();
   const selected = params.get("mode");
   const mode = modes.find(item => item.key === selected);
-  if (mode?.key === "education") return <EducationForm />;
-  if (mode?.key === "software") return <SoftwareForm />;
-  if (mode) return <div className="mode-destination">
+  if (!live && mode?.key === "education") return <EducationForm />;
+  if (!live && mode?.key === "software") return <SoftwareForm />;
+  if (!live && mode) return <div className="mode-destination">
     <Link className="back-link" href="/preview/create"><Icon name="arrow-left" width="17" height="17" />All video types</Link>
     <section className="mode-intro ui-panel"><div><span className="studio-label">{mode.title}</span><h1>{mode.heading}</h1><p>{mode.description}</p></div><Image src={`/illustrations/select-${mode.key}.svg`} width={200} height={120} alt="" /></section>
     <Notice>You selected {mode.title}. Its input form has been designed in Stitch and will be implemented in the next creation-form step. This preview does not collect inputs or generate a video.</Notice>
@@ -28,13 +28,13 @@ export function CreateVideo() {
   </div>;
   return <div className="create-selection">
     <div className="page-heading"><div><h1>Create video</h1><p>Choose the kind of video you want to create.</p></div></div>
-    {selected && <Notice error>That video type isn’t available. Choose one of the three types below.</Notice>}
+    {selected && !mode && <Notice error>That video type isn’t available. Choose one of the three types below.</Notice>}
     <div className="selection-grid">{modes.map(item => <article className="selection-card" key={item.key}>
       <div className="selection-top"><div className="selection-art"><Image src={`/illustrations/select-${item.key}.svg`} width={200} height={120} alt="" loading="eager" /></div><h2>{item.title}</h2></div>
       <p className="selection-description">{item.description}</p><span className="selection-hint">{item.hint}</span>
-      <Link className="button button-primary selection-action" href={`/preview/create?mode=${item.key}`}>{item.action}<Icon name="arrow-right" width="18" height="18" /></Link>
+      <Link className="button button-primary selection-action" href={`${live?"/projects/new":"/preview/create"}?mode=${item.key}`}>{item.action}<Icon name="arrow-right" width="18" height="18" /></Link>
     </article>)}</div>
     <div className="selection-guidance"><Icon name="info" width="18" height="18" /><p>You can review your details and video settings before generating.</p></div>
-    <PreviewNote>Education and Software open their form previews. The Branding form, uploads, draft saving and generation are upcoming features.</PreviewNote>
+    {live?<Notice>Choose a video type, add details and save your draft. Uploads and video generation are not connected yet.</Notice>:<PreviewNote>Education and Software open their form previews. The Branding form, uploads, draft saving and generation are upcoming features.</PreviewNote>}
   </div>;
 }

@@ -78,7 +78,7 @@ The incremental Next.js application lives in `apps/web`. Start the local scaffol
 
 ## Local application database
 
-W-04 adds a separate local Supabase/PostgreSQL Docker stack. Start Docker Desktop, then run `npm run db:start`. Open Studio at http://127.0.0.1:55423. See [local database setup](doc/LOCAL-DATABASE.md) for pgAdmin, migrations, tests and safe reset commands. The preview UI is not yet connected; real authentication begins with W-05. The standalone CLI pipeline still needs no database.
+W-04 adds a separate local Supabase/PostgreSQL Docker stack. Start Docker Desktop, then run `npm run db:start`. Open Studio at http://127.0.0.1:55423. See [local database setup](doc/LOCAL-DATABASE.md) for pgAdmin, migrations, tests and safe reset commands. Local email authentication/session handling and the live /dashboard are connected to this stack. The dashboard reads owned project summaries, usage and worker availability; draft creation/editing is live at /projects/new and /projects/:id. The full video library, uploads and generation remain separate features. See [web setup](doc/WEB-DEVELOPMENT.md) and the [project tracker](doc/PROJECT-TRACKER.md). The standalone CLI pipeline still needs no database.
 
 ## Repository and documentation map
 
