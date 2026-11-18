@@ -165,3 +165,11 @@ W-23 (7 November 2026): migration 20261107000005_video_library.sql applied witho
 
 
 W-24 Storage-retention slice (12 November 2026): 20261112000001_media_retention.sql applied without reset; 30 migrations / 33 app tables, 661 SQL assertions and existing concurrency/expiry regressions passed. Use media:cleanup for read-only preview and MEDIA-RETENTION.md for the private watcher. Stop global maintenance while running synthetic integration fixtures. No account/global allowance changed.
+
+## Hosted push: Missing recovery validator anchor
+
+If a first hosted `supabase db push` stops at `20261112000004_provider_daily_limits.sql` with `Missing recovery validator anchor`, Windows CRLF endings may have been preserved in the earlier PL/pgSQL function body while the guarded migration searches for LF. Do not mark the failed migration as applied or reset either database.
+
+In the intended hosted project's SQL Editor, run `deploy/database/normalize-recovery-line-endings.sql`, then rerun `npx supabase db push` from the repository root. The transaction changes only CRLF endings in `private.generation_recovery_reason(public.jobs)`, requires the expected normalized anchor, and preserves the function identity, logic, owner and grants. It is safe to repeat. If its unexpected-validator check fails, inspect the function instead of removing the guard. The failed migration is transactional; completed prior migrations remain recorded and the push resumes from the pending migration.
+
+Repository attributes now require LF for migration SQL on future checkouts. Already-applied migration files are unchanged. A rollback-only local regression reproduced the CRLF missing anchor, applied the repair twice, executed the exact pending daily-guard patch and verified function security/permissions. No hosted changes were made by the assistant; the user performs SQL Editor execution and deployment.

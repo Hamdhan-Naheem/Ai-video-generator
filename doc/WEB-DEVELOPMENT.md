@@ -310,3 +310,9 @@ My videos and pinned result pages share confirmed Delete video actions and owned
 ## Security safeguards — 12 November 2026
 
 Production HTML now receives a per-document nonce/CSP and renders dynamically so a static nonce is not cached. The policy allows only the configured Supabase origin for private media/connections and keeps required blob/local assets; eval/WebSocket allowances are development-only. Confirmed sign-in/sign-up/sign-out replace the document, using an allowlisted sign-in return, to clear prior client/router identity. Other tabs receive the existing confirmed-signout broadcast. Existing account/profile expiry and transient-background-error handling remain. Use Node 24. Remotion is aligned at 4.0.543; the lint-only minimatch override is 11.0.1, with zero known advisories in the fresh scan. [Controls/manual checks](SECURITY-CONTROLS.md).
+
+## Production web build versus browser-test tooling
+
+The production `apps/web/tsconfig.json` excludes `e2e` and `playwright.config.ts`. Browser fixtures require local-only tools such as Docker and root FFmpeg dependencies, which are not web runtime requirements and need not be installed by Vercel's web workspace build. Strict application/shared-contract checking remains enabled during `next build`.
+
+`npm run web:typecheck` checks both the application and the dedicated `apps/web/tsconfig.e2e.json`; `npm run typecheck:e2e --workspace=@ai-video-studio/web` checks browser-test tooling explicitly after a full local dependency install. Browser test execution remains a separate check. Do not disable build type checking or add worker/native packages to the frontend to satisfy a fixture import.
