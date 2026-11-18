@@ -8,7 +8,7 @@
 
 A local education-video prototype implemented in TypeScript/Node.js. It turns a topic and audience into a Gemini storyboard and narration, measured captions, Rhubarb teacher mouth cues, and a Remotion MP4. No Python, background music, Supabase, or web deployment is required for this prototype.
 
-A Next.js/Tailwind scaffold now lives in apps/web. Local email signup/signin and profile-name persistence are implemented. Google sign-in, cloud media integration and complete application generation remain later milestones. See the [project tracker](doc/PROJECT-TRACKER.md) for implementation status and remaining validation.
+The Next.js/Tailwind application lives in apps/web with local email sessions, owned drafts, private uploads and verified Education generation through an outgoing local worker. Read [Education setup and QA](doc/EDUCATION-GENERATION.md) before local activation. Google remains deferred; Software/Branding execution and full result/library flows remain later milestones. See the [project tracker](doc/PROJECT-TRACKER.md) for implementation status and remaining validation.
 
 ## Run in VS Code
 
@@ -73,7 +73,7 @@ Provider configuration checks remain available as `npm run setup:providers`. The
 
 ## Web application development
 
-The incremental Next.js application lives in `apps/web`. Start the local scaffold with `npm run web:dev` and open http://127.0.0.1:3000. This milestone is a labeled layout preview, not functional authentication or generation. See [web development](doc/WEB-DEVELOPMENT.md) for commands and [project tracker](doc/PROJECT-TRACKER.md) for feature status and the next task. Existing root pipeline commands remain available.
+The incremental Next.js application lives in `apps/web`. Start the local scaffold with `npm run web:dev` and open http://127.0.0.1:3000. Live application routes use real account/draft data; /preview routes remain disconnected design fixtures. Education execution requires the reviewed local setup described in doc/EDUCATION-GENERATION.md. See [web development](doc/WEB-DEVELOPMENT.md) for commands and [project tracker](doc/PROJECT-TRACKER.md) for feature status and the next task. Existing root pipeline commands remain available.
 
 
 ## Local application database
@@ -88,3 +88,9 @@ See [document map](doc/README.md) for current specifications and historical refe
 ## Local email authentication
 
 After npm run db:start, run npm run web:auth:local to configure ignored web-only local settings, then npm run web:dev. Open http://127.0.0.1:3000/sign-up or /sign-in; /settings saves the signed-in user's full name. Google, explicit sign-out/expiry handling and generation integration remain later milestones. See doc/WEB-DEVELOPMENT.md for exact setup, API boundaries and opt-in local Auth browser checks. Never commit .env.local.
+
+
+W-11 local private upload setup and QA are documented in doc/WEB-DEVELOPMENT.md. Use node scripts/configure-local-uploads.mjs only for the existing local stack, after forward migrations; uploaded media and credentials stay ignored. Images/recordings are received privately, with actual decoding/generation still pending worker integration.
+
+
+W-15 local outbound worker setup, credential handling, leases, verification and manual checks are in [local worker](doc/LOCAL-WORKER.md). Worker control and W-16 Education execution are implemented locally; see doc/EDUCATION-GENERATION.md for activation and verification. Keep generation/claim pauses on.

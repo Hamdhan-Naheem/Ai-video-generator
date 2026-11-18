@@ -1,3 +1,4 @@
+import {freeWorkerMemory} from './worker/resources.ts';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdir, readFile, writeFile, readdir, stat, rename} from 'node:fs/promises';
@@ -5,15 +6,16 @@ import {createWriteStream} from 'node:fs';
 import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import path from 'node:path';
+import {boundWhisperCaptions} from './timing.ts';
 import ffmpegImport from 'ffmpeg-static';
 import {installWhisperCpp, transcribe, toCaptions} from '@remotion/install-whisper-cpp';
 import {ensureBrowser} from '@remotion/renderer';
 import {Caption, MouthCue} from './contracts.js';
 import {exists, root, writeJson} from './storage.js';
 const execute=promisify(execFile);
-export const ffmpeg=ffmpegImport as unknown as string;
-const ffprobePath=async()=>((await import('ffprobe-static')).default as unknown as {path:string}).path;
-export const whisperPath=path.join(root,'.cache','whisper.cpp');
+export const ffmpeg=process.env.FFMPEG_EXECUTABLE??ffmpegImport as unknown as string;
+const ffprobePath=async()=>process.env.FFPROBE_EXECUTABLE??((await import('ffprobe-static')).default as unknown as {path:string}).path;
+export const whisperPath=process.env.WHISPER_CPP_PATH??path.join(root,'.cache','whisper.cpp');
 const whisperVersion='1.6.0';
 export async function browserPath(){
   const configured=process.env.REMOTION_BROWSER_EXECUTABLE;if(configured){if(!await exists(configured))throw new Error('Configured browser executable does not exist');return configured;}
@@ -39,7 +41,7 @@ export async function normalizeAudio(source:string,destination:string){
   if(nonZero<100)throw new Error('Narration appears silent');
   return info.duration;
 }
-export async function findRhubarb(dir=path.join(root,'.cache','rhubarb')):Promise<string|undefined>{
+export async function findRhubarb(dir=process.env.RHUBARB_PATH??path.join(root,'.cache','rhubarb')):Promise<string|undefined>{
   if(!await exists(dir))return;
   for(const item of await readdir(dir,{withFileTypes:true})){
     if(item.isSymbolicLink())continue;
@@ -84,7 +86,7 @@ export async function installTools(){
   console.log('Media tools installed.');
 }
 export async function doctor(){
-  console.log(`Node ${process.versions.node}; available RAM ${Math.round((await import('node:os')).freemem()/1024**3)} GiB`);
+  console.log(`Node ${process.versions.node}; available RAM ${Math.round(freeWorkerMemory()/1024**3)} GiB`);
   console.log(`Gemini key: ${process.env.GEMINI_API_KEY?'configured':'missing'}; ElevenLabs: ${process.env.ELEVENLABS_API_KEY?'configured':'optional, absent'}`);
   let ffprobe='';try{ffprobe=await ffprobePath();}catch{}
   console.log(`FFmpeg: ${ffmpeg&&await exists(ffmpeg)?'available':'missing'}; FFprobe: ${ffprobe&&await exists(ffprobe)?'available':'missing'}`);
@@ -94,10 +96,11 @@ export async function doctor(){
 }
 export async function captionAudio(file:string):Promise<Caption[]>{
   if(!await exists(path.join(whisperPath,'models','ggml-base.en.bin')))throw new Error('Whisper tools/model not installed. Run npm run pipeline:tools');
-  const result=await transcribe({inputPath:file,whisperPath,modelFolder:path.join(whisperPath,'models'),whisperCppVersion:whisperVersion,model:'base.en',tokenLevelTimestamps:true,splitOnWord:true,printOutput:false,language:'English'});
+  const threads=process.env.WHISPER_THREADS;if(threads!==undefined&&!/^[1-8]$/.test(threads))throw Error('WHISPER_THREADS must be 1–8');
+  const result=await transcribe({additionalArgs:threads?['--threads',threads]:undefined,inputPath:file,whisperPath,modelFolder:path.join(whisperPath,'models'),whisperCppVersion:whisperVersion,model:'base.en',tokenLevelTimestamps:true,splitOnWord:true,printOutput:false,language:'English'});
   const converted=toCaptions({whisperCppOutput:result});
   await writeJson(path.join(path.dirname(path.dirname(file)),'whisper-raw.json'),converted.captions);
-  return converted.captions.filter(c=>c.text.trim()).map(c=>({...c}));
+  return boundWhisperCaptions(converted.captions.filter(c=>c.text.trim()).map(c=>({...c})),(await probe(file)).duration);
 }
 export async function mouthCues(file:string,script:string,outDir:string):Promise<MouthCue[]>{
   const exe=await findRhubarb();if(!exe)throw new Error('Rhubarb missing. Run npm run pipeline:tools');

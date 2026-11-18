@@ -1,0 +1,16 @@
+import {fileURLToPath} from "node:url";
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import {execFileSync} from 'node:child_process';
+const root=fileURLToPath(new URL("../",import.meta.url));const require=createRequire(root+'/package.json');
+const speech=JSON.parse(readFileSync(root+'/local-runs/education-demo/speech.json','utf8'));
+if(speech.provider!=='gemini'||speech.voice!=='Kore')throw Error('Wrong source voice');
+const source=root+'/local-runs/education-demo/public/narration.wav';
+const destination=root+'/apps/web/voice-samples';mkdirSync(destination,{recursive:true});
+execFileSync(require('ffmpeg-static'),['-hide_banner','-loglevel','error','-y','-i',source,'-t','12','-af','afade=t=out:st=11.8:d=0.2','-ac','1','-ar','24000','-c:a','pcm_s16le',destination+'/Kore.wav'],{windowsHide:true});
+execFileSync(require('ffmpeg-static'),['-v','error','-i',destination+'/Kore.wav','-f','null','-'],{windowsHide:true});
+const probe=JSON.parse(execFileSync(require('ffprobe-static').path,['-v','error','-show_entries','format=duration:stream=codec_name,sample_rate,channels','-of','json',destination+'/Kore.wav'],{encoding:'utf8',windowsHide:true}));
+const bytes=readFileSync(destination+'/Kore.wav');if(bytes.length>2_000_000)throw Error('Sample too large');
+writeFileSync(destination+'/provenance.json',JSON.stringify({source:'local-runs/education-demo/public/narration.wav',provider:speech.provider,voice:speech.voice,sourceModel:speech.model,excerptStartSeconds:0,excerptSeconds:12,approval:'User approved completing W10 with the existing Education Kore sample in this conversation.',sha256:createHash('sha256').update(bytes).digest('hex')},null,2));
+console.log(JSON.stringify({bytes:bytes.length,...probe}));

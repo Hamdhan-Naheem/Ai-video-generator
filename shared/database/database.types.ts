@@ -200,14 +200,14 @@ isOneToOne: false
                   ]
                 },"cleanup_tasks": {
                   Row: {
-                    "asset_id": string | null,"attempt_count": number,"bucket": string,"completed_at": string | null,"created_at": string,"id": string,"lease_expires_at": string | null,"lease_token": number,"next_attempt_at": string,"object_key": string,"owner_id": string | null,"reason": string,"safe_error_code": string | null,"state": string,"updated_at": string,"worker_id": string | null
+                    "asset_id": string | null,"attempt_count": number,"bucket": string,"completed_at": string | null,"created_at": string,"id": string,"lease_expires_at": string | null,"lease_token": number,"next_attempt_at": string,"object_key": string,"owner_id": string | null,"reason": string,"runner_id": string | null,"safe_error_code": string | null,"state": string,"updated_at": string,"worker_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "asset_id"?: string | null,"attempt_count"?: number,"bucket": string,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"lease_expires_at"?: string | null,"lease_token"?: number,"next_attempt_at"?: string,"object_key": string,"owner_id"?: string | null,"reason": string,"safe_error_code"?: string | null,"state"?: string,"updated_at"?: string,"worker_id"?: string | null
+                    "asset_id"?: string | null,"attempt_count"?: number,"bucket": string,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"lease_expires_at"?: string | null,"lease_token"?: number,"next_attempt_at"?: string,"object_key": string,"owner_id"?: string | null,"reason": string,"runner_id"?: string | null,"safe_error_code"?: string | null,"state"?: string,"updated_at"?: string,"worker_id"?: string | null
                   }
                   Update: {
-                    "asset_id"?: string | null,"attempt_count"?: number,"bucket"?: string,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"lease_expires_at"?: string | null,"lease_token"?: number,"next_attempt_at"?: string,"object_key"?: string,"owner_id"?: string | null,"reason"?: string,"safe_error_code"?: string | null,"state"?: string,"updated_at"?: string,"worker_id"?: string | null
+                    "asset_id"?: string | null,"attempt_count"?: number,"bucket"?: string,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"lease_expires_at"?: string | null,"lease_token"?: number,"next_attempt_at"?: string,"object_key"?: string,"owner_id"?: string | null,"reason"?: string,"runner_id"?: string | null,"safe_error_code"?: string | null,"state"?: string,"updated_at"?: string,"worker_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -442,14 +442,14 @@ isOneToOne: false
                   ]
                 },"jobs": {
                   Row: {
-                    "active_ms": number,"attempt_count": number,"available_at": string,"budget_snapshot": NonNullable<Json>,"cancel_requested_at": string | null,"completion_key": string | null,"completion_manifest_hash": string | null,"created_at": string,"event_sequence": number,"export_id": string | null,"finished_at": string | null,"id": string,"kind": string,"last_failure_key": string | null,"last_heartbeat_at": string | null,"lease_expires_at": string | null,"lease_token": number,"owner_id": string,"progress": NonNullable<Json>,"project_id": string,"protocol_version": number,"provider_attempt_count": number,"repair_count": number,"retry_at": string | null,"revision_id": string,"safe_error_code": string | null,"safe_message": string | null,"stage": string,"started_at": string | null,"status": string,"updated_at": string,"worker_id": string | null
+                    "active_ms": number,"attempt_count": number,"available_at": string,"budget_snapshot": NonNullable<Json>,"cancel_requested_at": string | null,"completion_key": string | null,"completion_manifest_hash": string | null,"created_at": string,"event_sequence": number,"export_id": string | null,"finished_at": string | null,"id": string,"kind": string,"last_failure_key": string | null,"last_heartbeat_at": string | null,"lease_expires_at": string | null,"lease_token": number,"owner_id": string,"progress": NonNullable<Json>,"project_id": string,"protocol_version": number,"provider_attempt_count": number,"repair_count": number,"retry_at": string | null,"revision_id": string,"safe_error_code": string | null,"safe_message": string | null,"stage": string,"started_at": string | null,"status": string,"updated_at": string,"worker_id": string | null,"worker_instance_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "active_ms"?: number,"attempt_count"?: number,"available_at"?: string,"budget_snapshot"?: NonNullable<Json>,"cancel_requested_at"?: string | null,"completion_key"?: string | null,"completion_manifest_hash"?: string | null,"created_at"?: string,"event_sequence"?: number,"export_id"?: string | null,"finished_at"?: string | null,"id"?: string,"kind": string,"last_failure_key"?: string | null,"last_heartbeat_at"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number,"owner_id": string,"progress"?: NonNullable<Json>,"project_id": string,"protocol_version"?: number,"provider_attempt_count"?: number,"repair_count"?: number,"retry_at"?: string | null,"revision_id": string,"safe_error_code"?: string | null,"safe_message"?: string | null,"stage"?: string,"started_at"?: string | null,"status"?: string,"updated_at"?: string,"worker_id"?: string | null
+                    "active_ms"?: number,"attempt_count"?: number,"available_at"?: string,"budget_snapshot"?: NonNullable<Json>,"cancel_requested_at"?: string | null,"completion_key"?: string | null,"completion_manifest_hash"?: string | null,"created_at"?: string,"event_sequence"?: number,"export_id"?: string | null,"finished_at"?: string | null,"id"?: string,"kind": string,"last_failure_key"?: string | null,"last_heartbeat_at"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number,"owner_id": string,"progress"?: NonNullable<Json>,"project_id": string,"protocol_version"?: number,"provider_attempt_count"?: number,"repair_count"?: number,"retry_at"?: string | null,"revision_id": string,"safe_error_code"?: string | null,"safe_message"?: string | null,"stage"?: string,"started_at"?: string | null,"status"?: string,"updated_at"?: string,"worker_id"?: string | null,"worker_instance_id"?: string | null
                   }
                   Update: {
-                    "active_ms"?: number,"attempt_count"?: number,"available_at"?: string,"budget_snapshot"?: NonNullable<Json>,"cancel_requested_at"?: string | null,"completion_key"?: string | null,"completion_manifest_hash"?: string | null,"created_at"?: string,"event_sequence"?: number,"export_id"?: string | null,"finished_at"?: string | null,"id"?: string,"kind"?: string,"last_failure_key"?: string | null,"last_heartbeat_at"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number,"owner_id"?: string,"progress"?: NonNullable<Json>,"project_id"?: string,"protocol_version"?: number,"provider_attempt_count"?: number,"repair_count"?: number,"retry_at"?: string | null,"revision_id"?: string,"safe_error_code"?: string | null,"safe_message"?: string | null,"stage"?: string,"started_at"?: string | null,"status"?: string,"updated_at"?: string,"worker_id"?: string | null
+                    "active_ms"?: number,"attempt_count"?: number,"available_at"?: string,"budget_snapshot"?: NonNullable<Json>,"cancel_requested_at"?: string | null,"completion_key"?: string | null,"completion_manifest_hash"?: string | null,"created_at"?: string,"event_sequence"?: number,"export_id"?: string | null,"finished_at"?: string | null,"id"?: string,"kind"?: string,"last_failure_key"?: string | null,"last_heartbeat_at"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number,"owner_id"?: string,"progress"?: NonNullable<Json>,"project_id"?: string,"protocol_version"?: number,"provider_attempt_count"?: number,"repair_count"?: number,"retry_at"?: string | null,"revision_id"?: string,"safe_error_code"?: string | null,"safe_message"?: string | null,"stage"?: string,"started_at"?: string | null,"status"?: string,"updated_at"?: string,"worker_id"?: string | null,"worker_instance_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -964,14 +964,14 @@ isOneToOne: false
                   ]
                 },"worker_slots": {
                   Row: {
-                    "job_id": string | null,"lease_expires_at": string | null,"lease_token": number | null,"slot_name": string,"worker_id": string | null
+                    "job_id": string | null,"lease_expires_at": string | null,"lease_token": number | null,"slot_name": string,"worker_id": string | null,"worker_instance_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "job_id"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number | null,"slot_name": string,"worker_id"?: string | null
+                    "job_id"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number | null,"slot_name": string,"worker_id"?: string | null,"worker_instance_id"?: string | null
                   }
                   Update: {
-                    "job_id"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number | null,"slot_name"?: string,"worker_id"?: string | null
+                    "job_id"?: string | null,"lease_expires_at"?: string | null,"lease_token"?: number | null,"slot_name"?: string,"worker_id"?: string | null,"worker_instance_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -1046,22 +1046,94 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "create_project_draft":
+            "cancel_generation":
+{ Args: { "job": string }; Returns: Json
+                           },
+"change_source_upload":
+{ Args: { "action": string,"upload": string }; Returns: Json
+                           },
+"cleanup_source_upload":
+{ Args: { "finish"?: boolean,"owner": string,"upload": string }; Returns: Json
+                           },
+"consume_auth_attempt":
+{ Args: { "network_hash": string,"subject_hash": string }; Returns: Json
+                           },
+"create_project_draft":
 { Args: { "new_input": Json,"new_mode": string,"new_preferences": Json,"new_title": string,"project": string,"request_hash": string,"request_key": string }; Returns: Json
+                           },
+"delete_education_video":
+{ Args: { "expected_version": number,"project": string,"revision": string }; Returns: Json
+                           },
+"delete_saved_draft":
+{ Args: { "expected_version": number,"project": string }; Returns: Json
+                           },
+"describe_education_result":
+{ Args: { "actor": string,"project": string,"variant": string }; Returns: Json
+                           },
+"describe_education_revision_media":
+{ Args: { "actor": string,"kind": string,"project": string,"revision": string }; Returns: Json
+                           },
+"education_execution_available":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"enqueue_generation":
+{ Args: { "project": string,"request": Json,"request_key": string }; Returns: Json
+                           },
+"expire_source_upload":
+{ Args: { "upload": string }; Returns: boolean
                            },
 "get_dashboard":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"get_draft_uploads":
+{ Args: { "project": string }; Returns: Json
+                           },
+"get_education_result":
+{ Args: { "project": string,"revision": string }; Returns: Json
+                           },
+"get_education_run":
+{ Args: { "project": string }; Returns: Json
+                           },
+"get_generation_job":
+{ Args: { "job": string }; Returns: Json
+                           },
+"get_generation_recovery":
+{ Args: { "job": string }; Returns: Json
+                           },
 "get_project_draft":
 { Args: { "project": string }; Returns: Json
                            },
+"get_video_deletion":
+{ Args: { "project": string,"revision": string }; Returns: Json
+                           },
+"list_education_videos":
+{ Args: { "before_id"?: string,"before_time"?: string }; Returns: Json
+                           },
+"list_saved_drafts":
+{ Args: { "before_id"?: string,"before_time"?: string }; Returns: Json
+                           },
+"media_cleanup_task":
+{ Args: { "expected_token"?: number,"operation": string,"runner"?: string,"scope_owner"?: string,"task"?: string }; Returns: Json
+                           },
+"operator_console":
+{ Args: { "action": string,"payload"?: Json }; Returns: Json
+                           },
 "purge_revision_plans":
 { Args: { "target_revision": string }; Returns: number
+                           },
+"reserve_source_upload":
+{ Args: { "bytes": number,"expected_version": number,"filename": string,"mime": string,"project": string,"request_hash": string,"request_key": string,"role": string }; Returns: Json
+                           },
+"retry_generation":
+{ Args: { "job": string,"request_key": string }; Returns: Json
                            },
 "save_project_draft":
 { Args: { "expected_version": number,"new_input": Json,"new_mode": string,"new_preferences": Json,"new_title": string,"project": string }; Returns: {
               "draft_version": number,"id": string
             }[]
+                           },
+"sweep_expired_media":
+{ Args: { "apply_changes"?: boolean,"page_size"?: number,"scope_owner"?: string }; Returns: Json
                            },
 "update_display_name":
 { Args: { "expected_version": number,"new_name": string }; Returns: {
@@ -1070,6 +1142,12 @@ isOneToOne: false
                            },
 "update_project_draft":
 { Args: { "expected_version": number,"new_input": Json,"new_preferences": Json,"new_title": string,"project": string }; Returns: Json
+                           },
+"worker_control":
+{ Args: { "action": string,"credential_hash": string,"payload": Json,"protocol": number }; Returns: Json
+                           },
+"worker_execute":
+{ Args: { "credential_hash": string,"payload": Json,"protocol": number }; Returns: Json
                            }
           }
           Enums: {

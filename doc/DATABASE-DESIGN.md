@@ -2,18 +2,31 @@
 
 # AI Video Studio — database design
 
-**Version:** 1.1 · **Date:** 24 October 2026  
-**Status:** Detailed design for review; no database or migrations have been deployed.  
+**Version:** 1.3 · **Date:** 7 November 2026
+**Status:** Design baseline with locally implemented schema through W-24D; hosted setup/verification remain Planned; R2-specific migrations are deferred.
 **Authority:** [PRD](PRD.md) and user-approved [system architecture](SYSTEM-ARCHITECTURE.md).  
-**Companion:** [API design](API-DESIGN.md). Review these together, then design the UI in Google Stitch, reconcile, and implement.
+**Companion:** [API design](API-DESIGN.md) and [Education showcase release plan](EDUCATION-RELEASE.md). The tracker records actual implementation evidence.
 
 ## 1. Purpose and boundaries
 
-PostgreSQL stores users' project metadata, immutable generation requests, execution state, source references, media manifests and usage accounting. Supabase Storage stores the actual files. Supabase Auth owns password hashes, OAuth identities and login sessions. Our tables do not duplicate those secrets.
+PostgreSQL stores users' project metadata, immutable generation requests, execution state, source references, media manifests and usage accounting. Private Supabase Storage is selected for actual files in the first release, matching the current local integration. Hosted setup remains pending; R2 is deferred. Supabase Auth owns password hashes, OAuth identities and login sessions. Our tables do not duplicate those secrets.
 
 A project is the workspace; a revision is one immutable requested video; a job executes work; an asset is one stored object. A successful revision is one output card, regardless of whether it has both clean and burned-caption variants. Another orientation is a new revision and output slot. Retrying infrastructure failure resumes the same job/revision; changing content creates a new revision.
 
-The design supports education, software and branding, English 60/75/90-second targets, both 720p orientations, seven-day media retention, three retained outputs/user, one active job/user and one global processing worker. The short software demo is not a new duration option. No music, billing, R2, Python or public gallery tables are needed.
+The design supports education, software and branding, English 60/75/90-second targets, both 720p orientations, seven-day media retention, three retained outputs/user, one active job/user and one global processing worker. The short software demo is not a new duration option. No music, billing, Python or public gallery tables are needed. No second application database or R2 integration is required for the showcase.
+
+### Release/storage revision — 7 November 2026
+
+> **Storage decision — 7 November 2026:** The user selected private Supabase Storage for the first Education release, alongside Supabase Auth and PostgreSQL. This supersedes the 6 November R2 target. R-02 is Deferred for showcase, not Complete; no R2 integration is required for this release. Existing local Storage integration is retained, while hosted setup and release verification remain unfinished. The [project tracker](PROJECT-TRACKER.md) records the current implementation order.
+
+The first deployment still enables Education only; Software/Branding forms/drafts and their schemas remain, with generation and Google deferred.
+
+- Retain profiles, projects, immutable revisions/plans/scenes, jobs, usage/reservations, asset manifests and ownership relationships. Supabase Auth owns identities. The existing local schema and Storage metadata checks are the implementation baseline, not a schema to replace.
+- Keep bucket/key, asset identity, size, checksum and expiry in PostgreSQL; media bytes remain in private Storage. Never persist signed URLs as stable object identity. Hosted bucket/RLS/SQL setup must be verified from versioned migrations and current configuration.
+- Client completion claims are insufficient: preserve exact allocation metadata checks, trusted worker decode/hash evidence, current lease fencing and atomic publication. No new storage-provider columns or forward migrations are needed solely because the user retained Supabase.
+- Keep physical-deletion evidence and conservative partial-upload accounting. Expiry/logical hiding does not reclaim bytes by itself. The W-24 private Storage-retention slice is verified locally; hosted scheduling and local web-worker workspace lifecycle cleanup remain launch gates. W-24D remains the saved-draft source-removal slice.
+- W-24D removes only owned drafts with no active project job, serializes with generation admission and preserves frozen results/shared source references. Do not reset the database, drop old migrations or delete accepted outputs to change documentation.
+- R2 was a target on 6 November and deferred on 7 November before implementation. Any later provider migration requires separately reviewed manifests, verification, policies and cleanup/cutover work. Existing local counts/evidence remain unchanged by this decision.
 
 ### 1.1 How to read the schema notation
 
@@ -488,3 +501,87 @@ The local schema now has eleven migrations including 20261104000002_dashboard_su
 ### W-09 transactional editable draft snapshots
 
 The twelfth migration adds private.project_draft_json plus authenticated-only get_project_draft, create_project_draft and update_project_draft. Scoped wrappers derive the Auth UID, require the active profile and use the existing profile/project lock order and versioned save primitive. A saved receipt contains its own transaction snapshot/version. Create idempotency uses the existing private idempotency_requests table keyed by owner/operation/key and a canonical request hash; replay returns the original snapshot without rewriting later edits, while tombstones/removal prevent replay resurrection. The dashboard flag canEditDraft reflects active draft state rather than inferring editability from result status. Source binding lifecycle, generation admission and full library pagination remain separate features.
+
+
+### W-11 local implementation
+
+Four forward migrations dated 20261105 add private source guards, get_draft_uploads, reserve_source_upload, change_source_upload, and service-only cleanup_source_upload/expire_source_upload (16 migrations total). No reset or historical migration rewrite was performed. Existing assets/upload_allocations/usage tables are reused. Active Auth UID is derived inside browser RPCs; fixed search_path and minimal grants remain. Profile/project locks serialize owned edits and allocations; global/user usage rows lock in a consistent order. Same-key allocation replay returns the same upload identity and the current owned snapshot; changed hashes conflict. Mutable source selections increment the draft version, while receipt updates only transfer/accounting state.
+
+Allocation reserves 45,000,000 bytes per open transfer, capped by configured global/user accounts; count/combined selection limits use declared sizes. Receipt converts it to actual stored bytes once. Logical removal conservatively charges unreceived transfers until their 24-hour allocation expires plus the 24-hour orphan window; completed objects remain charged until confirmed removal. Ledger operation keys make receipt/removal/cleanup idempotent. Shared frozen references block destruction. Removed allocation tombstones and metadata remain through the scan window; UI removal never authorizes resurrection or overwrite.
+
+Local setup uses a 400,000,000-byte global disk allowance and a 120,000,000-byte ceiling for new upload accounts; it does not claim verified cloud capacity. Existing configured limits are preserved. Tests now explicitly seed their unknown-capacity fixtures inside rollback transactions rather than assuming the operator's real local global limit is zero.
+
+
+## W-14 local implementation — 6 November 2026
+
+Migration 20261106000001 adds the enqueue/read RPCs and private complete-input/serializer/usage-lock helpers; no new table is required. New quota-changing transactions lock global usage then existing user usage, shared admission settings, active profile, owned project and source assets in UUID order, followed by reservation/reference writes. Existing upload/cleanup functions are aligned to global/user-first locking. Source allocation can create its new user usage account only while the global/profile locks are held. No storage network or AI call runs inside a transaction.
+
+Admission uses the fixed configured 160 MiB reservation plus one output slot, the stricter user output ceiling (maximum three), and optional global output ceiling. It reconciles stale user retained counters against live owned ready revisions while retaining all used-byte charges. The immutable revision stores input/preferences/acknowledgments/acceptedAt/draftVersion; sources remain received until worker validation and are referenced/protected for seven days of queue waiting. Replay does not reserve again or extend retention. Future worker finalization/cancellation/reaping must use the same quota-first lock order and convert/release reservations exactly once; W-14 does not implement those lifecycle operations. Migration 20261106000002 aligns source UUID spelling with the strict shared schema before PostgreSQL casts, without changing prior migrations.
+
+
+W-15 implementation (6 November 2026): migration 20261106000004 adds process-instance fencing to jobs/worker_slots and service-role-only worker_control for authenticated claim/heartbeat/release. Existing 33 tables remain; worker run history, safe events and reservation ledger are reused. Current local schema has 20 applied versions. See LOCAL-WORKER.md and PROJECT-TRACKER.md for actual verification and the distinction between control/preparation and later pipeline execution.
+
+
+W-16 implementation uses the existing plan/scenes, attempts/repairs, assets/references/checkpoints, exports, job/slot/run/event, terminal receipt and usage ledger tables. Three forward migrations bring local versions to 23 without adding a table. Atomic completion and scoped media predicates are exercised by rollback-only integrity tests and real uploaded/rendered output checks. Account activation is explicit local operator tooling; user ownership and immutable validated content remain intact.
+
+
+### W-24D local schema implementation — 6 November 2026
+
+Forward migration 20261106000008_delete_saved_draft.sql adds public.delete_saved_draft(uuid,integer), executable by authenticated only, with fixed empty search_path and actor from auth.uid(). It takes the existing usage-scope lock, active-profile lock and project row lock in admission order. An active project job blocks removal; stale draft versions conflict. A removed owned draft replays without incrementing its version again. The transition is draft_state=removed and draft_input={}; project.deleted_at, immutable revisions, jobs and result pointers remain intact.
+
+Only upload allocations without revision/checkpoint references are removed through existing change_source_upload bookkeeping, scheduling cleanup and retaining charges until established physical-removal/grace checks allow release. No direct SQL object deletion, database reset or new table. Local totals: 24 applied migrations / 33 app tables; the 449-assertion SQL suite and two held-lock admission/delete races passed. Existing baseline fixtures now establish paused/offline expectations inside their rollback transactions rather than depending on runtime Education configuration.
+
+
+### W-17 progress projection and narration telemetry — 7 November 2026
+
+Migration 20261107000001_education_progress.sql updates get_education_run and worker_execute without new tables or resetting data (25 migrations / 33 app tables). The owned read returns a strict safe projection, server-side clock, nullable retry eligibility, start/count metadata and live executor state. It never mutates leases, jobs, checkpoints or accounting. Assigned running jobs require their own fresh heartbeat/current lease; compatible idle capacity cannot conceal their disconnection.
+
+The existing execution function is replaced in a forward migration, retaining lease/identity/provider-budget/publication checks. Narration telemetry requires a valid paired count (0–total, total 4–6), is voice-only and emits a scene-progress event only on changes. Returning to story clears earlier counts for automatic correction. Published Ready still depends on the existing verified artifact/export transaction; reported stage/counter progress is not publication evidence. Worker operations remain service-role-only and user progress remains active-owner-only. All 474 SQL assertions passed, including unchanged source/deletion/queue/publication guards and new ownership/liveness/count checks.
+
+
+### W-18 recovery implementation — 7 November 2026
+
+Forward migration 20261107000002_generation_recovery.sql adds owner-only get_generation_recovery/retry_generation and private eligibility checks, without tables/reset (26 migrations / 33 app tables). The serialized capacity hierarchy prevents concurrent admission/retry double charging. Retry reuses the released reservation with one output slot and remaining original job byte ceiling after all prior allocations; original expiry and consumed counters/checkpoints remain. Retained source/checkpoint metadata and Storage object presence/size are checked before recovery, with worker hash/decoding verification retained. No expired media is silently recreated. Latest-request checks use immutable revision ordering.
+
+A narrow SECURITY DEFINER repair lets deferred private.check_ready_revision read internal revision/export consistency after authenticated RPCs return; empty search_path and revoked direct execute/table grants remain. The worker_execute forward replacement retains existing fences/budgets/publication while adding a three-attempt persistent per-operation ceiling. Full migration SQL was validated in a rolled-back transaction. 520 transaction-isolated pgTAP assertions pass, including real authenticated-role deferred validation, checkpoint retention, state/owner/budget/capacity/replay checks.
+
+
+### W-19 cancellation implementation — 7 November 2026
+
+Forward migration 20261107000003_generation_cancellation.sql adds cancel_generation and replaces the existing terminal-lease helper/control function without new tables/reset (27 migrations / 33 app tables). Owner stop locks global/user capacity, processing slot, profile, project, revision and job before changing state. Live leases retain reservations and enter cancel_requested; worker release or expired-lease reconciliation fences authority and releases unused capacity once. Ready is never rewritten by cancellation. Existing execution publication checks, budgets/counters and asset charges remain. Provider attempts without confirmed outcomes remain unknown when stopped.
+
+Expiry reconciliation is available through the owned idempotent cancel RPC and authenticated idle worker heartbeats even with claims paused. Source/draft/previous results are preserved; physical partial-media cleanup remains separate release work. 549 pgTAP assertions pass, covering owner/state gates, both publication orderings, retained usage/slot boundaries, acknowledgment, lease expiry and duplicate release.
+
+
+### W-20 result metadata and private grants — 7 November 2026
+
+Forward migration 20261107000004_education_result_player.sql adds private.education_result_metadata, authenticated get_education_result and service-role-only describe_education_revision_media. Totals are 28 migration versions / 33 app tables, without reset. Private metadata checks active ownership, fixed revision/project linkage, original title, clean export, successful job, recorded verification, typed available artifacts and matching Storage object byte metadata. Public callers cannot choose an actor or obtain raw descriptors. Deleted/missing/expired media cannot authorize access; metadata never exposes source notes/object paths/credentials. No job/lease/accounting mutation occurs during result reads or media access.
+
+The access descriptor uses the exact requested revision and the minimum revision/export/asset expiry. API minting/recheck limits signed grants to 60 seconds; no DB storage blobs, table grants, new retention extension or backend migration. The SQL result suite uses publication fixtures plus ownership, expiry, missing-object, deactivation, immutable-title and changed-latest-pointer assertions. All 598 SQL assertions pass; fixture transactions roll back.
+
+
+### W-23 retained-video listing — 7 November 2026
+
+Migration 20261107000005_video_library.sql adds authenticated-only list_education_videos(before_time,before_id) and revisions_owner_completed_idx(owner_id,completed_at DESC,id DESC), partial to nondeleted ready/expired revisions. Totals: 29 migrations / 33 app tables. Active auth.uid ownership is checked before a MATERIALIZED bounded page joins nondeleted Education projects; only that page invokes private.education_result_metadata. Removed mutable drafts do not remove frozen results. Index existence and tied microsecond/UUID pagination are verified; no production throughput claim follows from an index alone.
+
+The read-only RPC reuses get_dashboard usage/time and W-20 result validation, with 21-row lookahead for 20-item HTTP pages. It creates no media access, job, accounting mutation or provider dispatch. 616 total SQL assertions plus real worker/scene/expiry/concurrency regressions pass. No changes to existing retained-media deadlines, budgets, bucket policies or grants to raw application tables.
+
+
+### W-24 private Storage retention — 12 November 2026
+
+Forward 20261112000001_media_retention.sql adds service-only sweep_expired_media/apply and media_cleanup_task claim/finish/fail/retry. Thirty migrations / 33 app tables; cleanup_tasks adds runner_id and a lease guard allowing either the existing worker or private maintenance runner. Ready-expiry/asset-expiry partial indexes support bounded batches. New reference adoption is blocked before external deletion; expiry pointers/slot deltas and confirmed artifact byte debits use quota locks and unique operation keys. Original source cleanup adopts the same global-first quota lock order while retaining its partial-transfer window. Ready validation still requires live available artifacts; expired safe provider metadata survives physical removal. 661 SQL assertions plus existing concurrency regressions passed. See MEDIA-RETENTION.md for failure/recovery and scope.
+
+### W-24 completed-result deletion slice — 12 November 2026
+
+20261112000002_delete_video.sql adds owner-only delete_education_video and get_video_deletion RPCs. Existing deleted_at/export states, unique usage ledger operations and cleanup_tasks retain the tombstone and physical-deletion work; no new table or direct user table grant. The global/user/project/revision lock order prevents concurrent admission/deletion races. Assets owned by the deleted producer can clean up before seven-day expiry only after existing late-upload/recovery/active-job/shared-reference safeguards pass. Deferred export checks use the internal function owner, with direct execution revoked. Drafts and immutable inputs/retention dates are preserved.
+
+
+## Security safeguards — 12 November 2026
+
+Additive migrations 20261112000003–20261112000007 implement private.auth_attempt_windows, private.provider_daily_usage, service-only consume_auth_attempt and metadata/admission/dispatch triggers. Windows use hashed identifiers and global-first transactional locking; provider counters survive logical media deletion and include current-day pre-migration dispatches. New/changed draft JSON is capped at 64 KiB while unchanged legacy input can still be edited through its actual save RPC. All insert-capable draft paths share 20-active/50-total bounds; 50 stored revisions and 12 new jobs per UTC day prevent start/cancel metadata growth. Source allocation history is bounded at 100 records per account. Existing ownership/RLS, immutable revisions, conservative upload-byte reservations and cleanup fences remain. No existing record or media was purged by these migrations. See [complete control definitions](SECURITY-CONTROLS.md).
+
+## W30 protected operational state — 13 November 2026
+
+Additive 20261113000001–000003 migrations add private RLS-enabled operator_windows and operator_receipts, stable job/audit paging indexes, a safe job projection and authenticated operator_console(action,payload). The public early role guard delegates to private.operator_console_internal; direct execution is revoked. Authorization is repeated under global-first locks to survive concurrent disable/demotion. Persisted limits are 60 inspections/10 valid mutation attempts per operator per minute; exact-payload request UUID receipts are capped at 5,000/operator and retained 30 days. Pruning runs on operational activity; no scheduler was added. Only the new controls/reconcile audit records follow this 30-day activity-driven pruning; other existing audit actions are preserved.
+
+Controls use optimistic settings versions, immutable limits and no-op metadata preservation. Lease repair requires claims paused plus matching expired job/slot/worker/instance and the expected decimal fence; it uses the existing terminal/queue helper, preserving consumed budgets/checkpoints and fencing stale callbacks. Uncertain provider dispatch becomes outcome_unknown and stops for review, without refund. It does not invent storage deletion or force Ready. SQL/real-concurrency/HTTP acceptance and remaining hosted boundaries are in [operator guide](OPERATOR-CONTROLS.md).

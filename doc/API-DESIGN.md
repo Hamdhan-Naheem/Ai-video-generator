@@ -2,10 +2,23 @@
 
 # AI Video Studio — API design
 
-**Version:** 1.1 · **Date:** 24 October 2026  
-**Status:** Detailed contract for review; endpoints are not implemented or deployed.  
+**Version:** 1.3 · **Date:** 7 November 2026
+**Status:** Contract baseline with local implementation slices through W-24D; not deployed. Supabase Storage is retained; hosted verification is pending and R2 adaptations are deferred.
 **Authority:** [PRD](PRD.md), approved [system architecture](SYSTEM-ARCHITECTURE.md).  
 **Companion:** [Database design](DATABASE-DESIGN.md), including exact ownership, transitions, transactions and indexes.
+
+> **Storage decision — 7 November 2026:** The user selected private Supabase Storage for the first Education release, alongside Supabase Auth and PostgreSQL. This supersedes the 6 November R2 target. R-02 is Deferred for showcase, not Complete; no R2 integration is required for this release. Existing local Storage integration is retained, while hosted setup and release verification remain unfinished. The [project tracker](PROJECT-TRACKER.md) records the current implementation order.
+
+### Supabase Storage first-release contract amendment
+
+- Keep the existing user/worker endpoint boundaries, strict schemas, Supabase sessions, exact Origin/CSRF rules, ownership, disabled-mode admission, quotas, immutable snapshots and fenced worker operations. No new R2 route or credentials are needed for this release.
+- Retain the locally implemented Supabase private upload/TUS/receipt protocols. Allocate exact paths after reservation, transfer bytes directly to Storage, and verify actual allocation metadata before accepting receipt. Preserve native media verification before publishing results. No media-byte proxy through Vercel API requests.
+- Supabase JWT/RLS policies and scoped grants authorize exact files; privileged credentials stay server-side. Reauthorize active ownership, tombstones and expiry before issuing or renewing private reads, capped at 60 seconds and remaining result lifetime. Do not cache or persist signed URLs as permanent identities.
+- DELETE /projects/:id/draft remains the implemented W-24D contract: strict expectedDraftVersion, owner/state checks, 409 stale/active-job conflicts, idempotent 202 pending-cleanup acknowledgment, safe retry and preserved immutable results/shared sources. Physical cleanup is distinct from removal from the list; current bounded source cleanup/retry bookkeeping stays in place.
+- General expired-result cleanup, cancellation/recovery and hosted access/transfer verification remain release tasks; a storage-provider decision does not complete them. Check per-file upload ceilings and monthly cached/uncached egress in hosted acceptance while preserving application budgets.
+- Education is the only enabled generation mode; other forms can prepare drafts but generation stays disabled in UI and API. Coming soon messaging is implemented locally; no next-release date is promised.
+
+The 6 November R2 proposal is superseded. Existing local API evidence is retained in the implementation slices; no runtime endpoint, generated schema or database migration changed in this decision revision. See [release plan](EDUCATION-RELEASE.md) for the current sequence.
 
 ## 1. Purpose and API boundaries
 
@@ -83,7 +96,7 @@ Initial tunable limits from architecture: 10 generation/revision requests/user/h
 
 Use Supabase Auth via its supported SSR integration. Server validates token claims/signature (`getClaims`) and checks current active profile; obtain fresh identity information for security-sensitive operations; do not require local email confirmation. Do not trust the user object from an unvalidated cookie/session. Supabase manages password hashes, OAuth identities and token refresh; application tables never store them. [Supabase SSR guidance](https://supabase.com/docs/guides/auth/server-side/creating-a-client).
 
-Auth adapters below are our HTTP interface over the SDK, not replacements for Supabase's Auth protocol. Cookie options follow SDK/browser requirements with Secure in production and appropriate SameSite settings; do not falsely assume all SSR session cookies can be HttpOnly when the browser SDK needs them for direct Storage upload. Prevent XSS with escaped text, CSP and no model-generated HTML. Response token material is never logged. Browser Storage requests use the user token from the SDK; do not copy it into project metadata.
+Auth adapters below are our HTTP interface over the SDK, not replacements for Supabase's Auth protocol. Cookie options follow SDK/browser requirements with Secure in production and appropriate SameSite settings; do not falsely assume all SSR session cookies can be HttpOnly when the browser SDK needs them for direct Storage upload. Prevent XSS with escaped text, CSP and no model-generated HTML. Response token material is never logged. Selected Supabase Storage requests use the supported SDK/session and exact allocation policies or scoped transfer grants as implemented. Do not copy tokens into project metadata. R2 is deferred and receives no Supabase tokens.
 
 On session refresh failure clear stale cookies and return AUTH_REQUIRED. Refresh/signout does not stop an already queued generation. Disabled/deleting profiles are denied even if the Auth JWT has not expired. Account roles come from protected DB records, not client-editable user metadata. Operator actions are separately authorized; operator role does not imply arbitrary tester media downloads.
 
@@ -279,7 +292,7 @@ Returns 201 `{data:{uploadId,assetId,bucket,objectKey,protocol:"standard"|"tus",
   "preferences": {
     "targetSeconds": 60,
     "orientation": "landscape",
-    "voiceProfileId": "gemini-kore"
+    "voiceProfileId": "Kore"
   },
   "acknowledgments": {
     "sourceRights": true,
@@ -649,3 +662,131 @@ The full paginated /projects and /videos library, upload lifecycle, complete bra
 GET /capabilities and /voices now require a verified active account, return private/no-store data envelopes and reject query parameters. Capabilities modes are objects {id,draftAvailable,generationAvailable}, not a claim of live generation: all draftAvailable=true, generationAvailable=false. Durations=[60,75,90], orientations=[landscape,portrait], uploadLimits has enabled=false and the shared V1 byte/count bounds; educationCapabilities describes current drafts/generation/installed sample state and limitsVersion=v1. Voice available means selectable for draft preferences, not verified current provider capacity or usage rights. Kore is the sole selectable voice; nextCursor=null. No accent guarantee or provider credential/voice identifier is exposed. Shared DTOs are in shared/contracts/capabilities.ts.
 
 The earlier public-preview proposal is narrowed for this implementation: previewUrl is either null or the fixed same-origin /api/v1/voices/Kore/preview. That GET requires active-account verification before returning reviewed static audio/wav, private/no-store, nosniff and same-origin resource policy. Missing/invalid/over-2MB sample returns 404. It accepts no media ID, path, source URL or query and never reads tester media or synthesizes speech. Reviewed installation outside public/ is explicit; no automatic promotion of private results. Currently no authorized sample has been installed, so real playback remains pending. Future public landing samples still require separate authorization.
+
+
+W-10 sample update: the owner-approved 12-second Education Gemini/Kore excerpt is now installed locally. /voices returns previewUrl=/api/v1/voices/Kore/preview and educationCapabilities.voicePreview=true when that reviewed file exists. Active-account authorization/private caching rules are unchanged. Desktop/mobile native audio playback passed. No generation endpoint is enabled by sample availability.
+
+
+### W-11 implemented upload boundary
+
+The source allocation request above is implemented with strict shared UploadRequestSchema and required idempotency key. POST /projects/:id/uploads returns 201 {data:{uploadId,snapshot:{project,items}}}; GET on that path returns {data:{project,items}}. Items carry uploadId, assetId, filename, mimeType, decimal byteSize, role, protocol, allocation state/expiry and the exact bucket/objectKey needed for owner-session uploads. The snapshot is an atomic versioned project DTO. A changed payload cannot reuse an allocation key. GET /uploads/:id, POST /uploads/:id/complete {} and DELETE /uploads/:id {} return the owner's current upload snapshot; removal returns 202 because cleanup can retry. Unknown queries and unexpected mutation fields are rejected. GET /upload-config exposes only public Supabase URL/anon configuration after active-account verification; it never returns a session token or service key.
+
+Direct uploads use the browser's own verified Storage session: standard POST for images and TUS for recordings, upsert=false. The Storage policy checks active exact allocation/path plus available metadata, with a full 45 MB bucket-ceiling reservation during transfer because Storage pre-authorizes before metadata exists. Receipt reads Storage metadata through scoped SQL, charges the declared exact size once and releases the excess reservation. It never trusts a browser completion payload and never claims decoding. Source selection changes remain controlled by upload operations; ordinary PATCH must preserve the current source list. A database guard also protects direct draft RPCs from foreign assets, invalid roles, duplicate sources and count/combined-byte overflow.
+
+Server-only cleanup uses the existing service credential after verified owner-scoped logical removal; its bookkeeping RPC is granted only to service_role, checks the exact upload/owner and surviving references, and releases charge once after deletion. Incomplete transfers retain their ceiling charge through the authorization/orphan window. Missing service config or storage failures leave cleanup pending. Foreign/disabled/missing resources are unavailable; confirmed source-in-use, stale version, expiry and capacity failures preserve draft data. Private/no-store, Origin/CSRF, 64 KiB JSON bounds and safe error envelopes apply.
+
+The local periodic cleanup command is operator-driven until scheduler integration. It re-scans removed paths through authorization expiry plus 24 hours, and expires abandoned 24-hour allocations. General received-media retention, account deletion and published signed access are separate milestones.
+
+
+## W-14 implemented queue boundary — 6 November 2026
+
+Implemented locally: POST /projects/:id/generations (mandatory Idempotency-Key; exact GenerationRequest) returns 202 QueuedResult and Location /api/v1/jobs/:uuid; GET /jobs/:uuid returns the owned safe JobDto. Same-key receipt recovery runs before draft/config/source freshness checks. Same key with changed payload: 409 IDEMPOTENCY_CONFLICT; stale version: 409 DRAFT_VERSION_CONFLICT with currentDraftVersion; another active owned job: 409 ACTIVE_JOB_EXISTS with jobId. Pause: 503 GENERATION_PAUSED; byte/configuration failure: 409 STORAGE_CAPACITY; output cap: 409 OUTPUT_LIMIT; incomplete receipt: 409 UPLOAD_INCOMPLETE; expired inputs/hidden retired receipt: 410 INPUTS_EXPIRED; unknown/foreign/deleted project or job: 404. Content validation returns 422 with safe messages. Query parameters are rejected; Origin/session-bound CSRF protects POST; response status/receipt bodies are strict browser-safe schemas and private/no-store.
+
+The SQL RPC derives input from the locked draft and rechecks completeness even for direct authenticated RPC callers. It freezes consent plus acceptedAt, selected preferences and exact source references, applies cumulative byte/output admission, and creates one revision/job/reservation/ledger/event/receipt atomically. Offline/claim-paused workers do not reject accepted work; they yield waiting_worker. Safe GET currently reports canCancel=false/canRetry=false because those mutation endpoints remain planned; generic error text replaces any raw stored message.
+
+W-14 implements the backend boundary only. Existing generation pauses and UI generationAvailable=false remain in place. There is no live provider processing, progress polling UI, cancellation, retry worker, or result publication yet. New admissions require configured actual global/user capacity; no default grant is invented or increased. The architecture sections above remain the future full API contract.
+
+
+## Dedicated draft list — implemented 6 November 2026
+
+GET /drafts requires an active authenticated account. Response: {data:{items:[{id,title,mode,draftVersion,updatedAt}],nextCursor:string|null}}. Each response contains at most 20 summaries. Optional cursor is canonical base64url of the strictly validated {updatedAt,id} boundary; it preserves the exact UTC timestamp and UUID for stable keyset pagination. It contains no source content, is not an access grant, and every request derives ownership again from the verified session. Unknown/duplicate parameters are INVALID_QUERY; malformed cursors are INVALID_CURSOR. POST/other mutations are unsupported. Responses are private/no-store, and private inputs, media keys and owner metadata are omitted. /drafts is an exact allowed authentication return path.
+
+
+## W-15 implemented control boundary - 6 November 2026
+
+The current strict protocol uses POST /api/worker/v1/claim with {instanceId,capabilities}; heartbeat with {instanceId,health,assignment?:{jobId,leaseToken}}; release with {instanceId,jobId,leaseToken,reason:adapter_pending|stopping}. Each process UUID is bound to its lease. Health currently permits only decimal freeDiskBytes/freeMemoryBytes and a bounded Node version; no progress or private filesystem paths. Headers require the opaque wkr_ token and X-Worker-Protocol: 1; any Origin is rejected and cookies/user JWTs grant no authority. Control-body ceiling is 16 KiB. Responses are strict shared worker schemas, private/no-store; idle claim is 204 Retry-After: 15, auth 401, stale lease 409, invalid fields 422, oversized 413, protocol/service unavailable 503. Errors never expose SDK/SQL bodies.
+
+Claim returns serverTime, a 90-second lease, 20-second heartbeat interval, exact frozen input, remaining budget and checkpoint metadata. Same instance recovers its original claim/fence; a second process cannot. Expired leases close prior job_runs, retain bounded elapsed budgets and increment the fence before reassignment. Deactivated/deleted owners, cancellation, missing inputs or exhausted budgets stop renewal; terminal control releases only unused reservation, preserving physical-byte charges. All capacity transitions share global-first usage locks.
+
+Only these three control actions are implemented in W-15. Artifact access/registration, provider attempts, stage progress, cancellation UI and Ready publication above remain future contracts. The adapter prepares/reuses validated immutable local input and yields safely; it does not execute AI. See LOCAL-WORKER.md for setup, tests and boundaries.
+
+
+## W-16 implemented Education boundary - 6 November 2026
+
+POST /api/worker/v1/execute accepts the strict WorkerExecutionRequest (256 KiB maximum): instanceId, jobId, leaseToken, bounded health and one allowlisted operation. Scoped state/plan, dispatch/result/repair, allocate/confirm/read, checkpoint, stage-start, complete and fail all authorize the current server fence and account/project state. Binary uploads/downloads use exact private Storage permits, not a Next.js media proxy. Server validates report bytes/hash/schema; worker performs full decoding/timing checks. Confirmed metadata alone never publishes Ready. Completed-operation replay preserves one output charge; no raw SQL/provider failures are returned.
+
+GET /api/v1/projects/:id/generation returns a safe owned EducationRun projection without input/paths/credentials; GET /api/v1/projects/:id/result/video|srt|vtt freshly authorizes active ownership, live verified result and retention before a private 307 to an at-most-60-second Storage permit. Missing/foreign/expired media is unavailable. Worker credentials do not authorize user routes.
+
+Capabilities advertise Education generation only when reviewed activation, live executing-worker health, configured account/global capacity and enabled mode agree. Control-only heartbeat does not imply an executor. Optional health.executionReady is additive within protocol 1. A forward admission guard preserves existing receipt recovery while enforcing configured enabledGenerationModes for new jobs. Software/Branding readiness stays false.
+
+The original 24-attempt lease gate, two repairs and 30-minute execution budget are retained; execution reserves no more than 23 actual dispatches. Unknown attempts remain charged and cannot be blindly replayed; eligible fallback uses a separately budgeted consistent scene set. See EDUCATION-GENERATION.md for verified scope and remaining W-17 through W-28 workflows.
+
+
+### W-24D local implementation — 6 November 2026
+
+DELETE /api/v1/projects/:id/draft accepts strict DeleteDraftRequest {expectedDraftVersion} with the existing verified session, exact Origin, CSRF and JSON size boundary. Success is HTTP 202 {data:{deleted:true,cleanupState:"pending"}}; the receipt means the mutable draft was removed and cleanup scheduled, not all bytes physically purged. Query parameters are rejected. Foreign/missing drafts are indistinguishable 404s; a stale version returns 409 DRAFT_VERSION_CONFLICT; active queued/waiting/running/cancelling work on this project returns 409 ACTIVE_JOB_EXISTS with finish/cancel guidance. Transient failures remain retryable and the client keeps the card until confirmation.
+
+The authenticated delete_saved_draft(project,expected_version) RPC owns the transaction; repeat owned requests after removal return the same safe acknowledgment even with the original positive version. No arbitrary owner or force flag is accepted. Frozen results/history and revision/checkpoint sources remain. The route attempts bounded cleanup after the response; durable source cleanup tasks and existing uploads:cleanup retry failures and preserve partial-upload grace accounting. Current transfers/deletion remain Supabase Storage; no R2 API has been implemented by W-24D. Generated component schemas include the strict deletion request and acknowledgment.
+
+
+### W-17 progress read/telemetry implementation — 7 November 2026
+
+GET /api/v1/projects/:id/generation remains an owner-authorized private/no-store read and returns null before generation. EducationRun now includes strict status/stage, jobId/revisionId, activeMs, expiresAt, startedAt, serverTime, retryAt, workerStatus (online/offline/not_configured), claimsPaused and progress {completedScenes,totalScenes}. Count ranges are bounded to Education plans (4–6 total when known); retryAt is nullable and supplied only for waiting_quota. No input, storage path, worker identity, credential, lease token or raw error is exposed. A foreign/missing/non-Education project is 404; service/projection failures are retryable 503, not a false missing project.
+
+Running/cancel-requested availability is derived from the assigned worker and current job lease/heartbeat; other queue states use compatible enabled executor liveness/readiness. Reads do not mutate job state. Existing fenced worker progress operations accept an optional paired completedScenes/totalScenes only for voice preparation, validate bounds and preserve compatibility with stage-only reports. Repeated identical counts do not add duplicate progress events; corrections back to story clear old counts. This telemetry does not change external attempt/repair budgets.
+
+Foreground polling uses five seconds for online running work, fifteen for waiting/unavailable work; hidden tabs pause, focus/online resumes and terminal recurring polling stops. Manual Check status/Try again repeats a read only. Connection failures retain last known status/editor; abort/teardown guards prevent stale updates. A known retry time is provider eligibility, never ETA. The existing Open video/SRT/VTT links remain; full player, recovery commands and cancellation belong to W-20, W-18 and W-19. No provider scheduler or new generation request is triggered by viewing progress.
+
+
+### W-18 recovery implementation — 7 November 2026
+
+GET /api/v1/jobs/:id/recovery returns strict {jobId,revisionId,reason}, where reason is retry/edit_input/inputs_expired/budget_exhausted/operator_required/state_conflict/unavailable. No raw exception/provider text/input/storage path is returned. GET is read-only. Unknown/foreign/deleted/inactive resources are hidden by the established active-account and owner checks.
+
+POST /api/v1/jobs/:id/retry requires {} exactly, an Idempotency-Key, active email session, exact Origin and session-bound CSRF. Returns 202 QueuedResult and Location for the same job/revision. Same-key replay only recovers its receipt/current status and cannot requeue a later failure. Different keys cannot double-reserve an active job. Newer revisions, nonfailed states, nonrecoverable/uncertain failures and missing/expired media reject retry. 409 STATE_CONFLICT/BUDGET_EXHAUSTED/ACTIVE_JOB_EXISTS/STORAGE_CAPACITY/OUTPUT_LIMIT, 410 INPUTS_EXPIRED, 503 GENERATION_PAUSED or retryable SERVICE_UNAVAILABLE retain safe messages; foreign resources are 404. No query parameters or changed content/budget fields.
+
+Retries reacquire capacity without resetting consumed provider/repair/time/worker/byte budgets or extending expiry. Existing valid checkpoints resume under a fresh lease; pending/unknown provider outcomes require operator review. Per logical operation the durable dispatch ceiling is three attempts. Unknown historical PIPELINE_FAILED records do not authorize blind provider retry. Failure classification only labels known infrastructure/processing problems recoverable; content/config/refusal/verification failures stay stopped. Needs input returns to the form and explicit Generate creates a new immutable request. Provider waiting/scheduler and cancellation are not implemented by this endpoint.
+
+The browser retains the key after ambiguous responses, offers Check retry request and holds new Generate through background checks until confirmation. Successful receipt confirmation permits a later deliberate retry only if a later failure is eligible. No automatic retry POST or paid/exactly-once-provider guarantee is introduced.
+
+
+### W-19 cancellation implementation — 7 November 2026
+
+POST /api/v1/jobs/:id/cancel requires an active owner session, exact Origin, session-bound CSRF and {} exactly; no idempotency key is necessary because the target job/state is the operation identity. Returns 202 {jobId,status:cancel_requested} for a live assignment or 200 {jobId,status:cancelled} after unassigned stop, acknowledgment or lease expiry. Replays do not add events/releases. Foreign/missing/deleted resources are 404; completed/stopped noncancelled states are 409 STATE_CONFLICT; transient service errors are safe retryable 503. Unknown fields/queries are rejected.
+
+Cancellation commits before any later publication grant: worker_execute rejects a cancelled/stopping fence. Completion winning the serialized transaction first stays successful and cancel returns conflict. Already issued private upload permits may still land; allocated bytes and provider usage are not refunded. In-flight unconfirmed attempts become outcome_unknown upon terminal cancellation. Unused reservation/output capacity releases once only after acknowledgment or expired authority.
+
+The existing worker release acts as cancellation acknowledgment after its child stops. Stopping views repeat the same cancellation POST every fifteen seconds while visible/online to reconcile expiry; user Check cancellation repeats that same operation after ambiguous replies. Status GETs remain read-only. Idle worker heartbeat also reconciles an expired cancellation. With all workers offline and no open view, durable fencing persists and bookkeeping reconciles on next activity; no continuous scheduler is introduced. Cancelled offers Review input and requires an explicit new Generate; no Undo/Resume/Retry of the cancelled job.
+
+
+### W-20 revision-pinned private results — 7 November 2026
+
+GET /api/v1/projects/:id/results/:revisionId returns strict EducationResult: revisionId, frozen title, version, ready/expired/unavailable status, orientation, targetSeconds, nullable measured durationMs/completedAt/expiresAt, serverTime and recorded narration {provider,voice}. Active ownership and a nondeleted Education project are required. Ready requires retained clean-export/typed-artifact/Storage metadata; expired metadata remains readable without issuing file access. No inputs, keys, credentials or media URL are in metadata. Foreign/missing/deactivated resources are hidden; infrastructure/schema faults return safe retryable 503.
+
+POST /api/v1/projects/:id/results/:revisionId/access {kind:video|srt|vtt|thumbnail,download:boolean} requires exact Origin, session CSRF and active ownership; queries/unknown fields and thumbnail downloads are rejected. Response is {revisionId,kind,download,url,serverTime,expiresAt}; no idempotency key/provider request is involved. Grants authorize that exact revision rather than mutable latest_ready_revision_id. The server rechecks after signing, matches the configured Storage origin, and bounds TTL to 60 seconds and the minimum revision/export/requested-asset expiry. Download filenames are education-<revisionId>.mp4|srt|vtt through Storage Content-Disposition. Report/checkpoint access is not exposed.
+
+404 hides foreign/missing resources; 410 RESULT_UNAVAILABLE covers expired/incomplete/removed result access; 422 rejects unsupported actions and 503 preserves retryable infrastructure failure. Responses are private/no-store. Existing legacy GET result redirects remain compatible, while the player uses pinned grants. Native video/track/download transfer is direct to private Storage, never a Vercel media proxy. Caption controls, position-preserving bounded reauthorization and expiry/session cleanup do not create generations, renders or new quota.
+
+
+### W-23 implemented Education library — 7 November 2026
+
+GET /api/v1/videos accepts only an optional single canonical base64url cursor containing {completedAt,id}; timestamps retain PostgreSQL microseconds. Returns SavedVideoPage {items,nextCursor,usage,asOf}, at most 20 items and a 21-row private lookahead. Each item extends the W-20 EducationResult with {projectId,canEditDraft}, nonnull completedAt/expiresAt, frozen title, original version/orientation/duration and recorded narration. No source input, owner override, media URL, asset ID or object path is returned. Unknown/duplicate/empty/malformed query parameters return 400, unsupported methods 405, inactive accounts 403 and transient faults safe retryable 503. Same-origin session policy and private/no-store headers apply. Filters/custom limits in the broader future contract are not enabled for this release.
+
+Lists owned nondeleted completed Education revisions independently of mutable latest_ready_revision_id and removed draft state. Expired results retain safe metadata; unavailable verification/Storage objects cannot mint new links. Usage is the existing dashboard projection as of the returned timestamp; listing does not reconcile/charge/release quota. Thumbnail access remains the W-20 exact-revision POST with Origin/CSRF and at most 60-second grants; no extra grant endpoint or media proxy. The live result page /projects/:id/results/:revisionId uses that player and can reopen results even after the editable draft was removed. /videos and exact root-relative pinned result pages are valid email-session return destinations; no mutation/query or foreign scheme is replayed.
+
+
+### W-24 privileged maintenance — 12 November 2026
+
+No browser/Next.js cleanup route was added. Supabase RPC sweep_expired_media(apply_changes=false,scope_owner=null,page_size=25) and media_cleanup_task(operation,runner,task,expected_token,scope_owner) are revoked from PUBLIC/anon/authenticated and granted only to service_role. The private Node tool defaults to preview; apply/serial watch and revalidated blocked-task retry are operator actions. Claims carry an exact artifact identity, decimal fence and at most 60-second lease. Storage API deletion must be followed by database absence/accounting verification; stale acknowledgments fail closed. Ordinary user JWT denial was verified over real local Auth/REST. Existing private player/library contracts are unchanged.
+
+### Education topic-visual data — 12 November 2026
+
+The existing authenticated worker plan operation accepts optional `SceneSchema.animation`: bounded `bubble-sort` or `llm-flow` data with allowlisted phases and consistent examples. New specialized planner requests require it; older plans without it remain valid. This adds no public form endpoint, executable code or external-media URL. The shared OpenAPI catalog is refreshed. See [topic visuals](TOPIC-VISUALS.md); ownership, budgets and lease checks are unchanged.
+
+### Completed Education video deletion — 12 November 2026
+
+DELETE /api/v1/projects/:project/results/:revision accepts only expectedVersion and uses the user JWT, same-origin CSRF and owner/version checks. Returns deleted/revisionId/cleanupState (202 pending, 200 complete). GET on the same path plus /deletion reads an owned safe receipt. Confirmed removal blocks new grants and hides that result; drafts/other revisions stay intact. Logical slots are reconciled once; physical bytes stay charged until the service-only Storage watcher confirms removal. See [video deletion and account controls](VIDEO-DELETION-ACCOUNT.md).
+
+
+## Security safeguards — 12 November 2026
+
+Sign-in/sign-up share durable email/network/global 60-second windows. A denied application attempt returns RATE_LIMITED/429 and Retry-After; unavailable protection returns SERVICE_UNAVAILABLE/503 before credentials are submitted to Auth. Vercel forwarding is trusted only at the configured platform boundary. Project/generation-history capacity uses the existing validated STATE_CONFLICT/409 envelope; daily job/provider admission uses RATE_LIMITED/429 with the 00:00 UTC reset explanation. Recovery may report daily_limit and offers a bounded read to recheck; cached media/storage recovery stays eligible subject to existing safety guards. Worker P1604 maps to the allowlisted PROVIDER_DAILY_LIMIT transport conflict, never lease loss or provider-fallback permission. No new browser service/provider credentials or permissive CORS policy were introduced. [Implementation and remaining direct-Auth checks](SECURITY-CONTROLS.md).
+
+## W30 essential operational contract — 13 November 2026
+
+Essential controls are verified locally through active operator sessions plus a repeated DB role/status gate: GET /api/v1/operator/health, /workers, /jobs (status/before), /audit (before); PATCH /controls with {requestId,reason,expectedVersion,generationPaused?,claimsPaused?}; POST /jobs/:id/reconcile with {requestId,reason,expectedLeaseToken}. Bodies are strict; mutations keep same-origin/CSRF protection, exact per-actor receipts and safe audit. No credential/model/limit update is exposed. State/version conflicts use STATE_CONFLICT; role failures OPERATOR_REQUIRED; persisted limits return RATE_LIMITED/Retry-After. Public RPC operator_console delegates to a private denied-to-users implementation only after early protected-role authorization, then rechecks under locks. Read projections omit raw inputs/media/credential hashes. The wider operator endpoint table above remains design backlog where not listed here. No operator UI or worker-token creation/rotation was added. [Guide/evidence](OPERATOR-CONTROLS.md).
+
+## Media handoff and upload error corrections — 13 November 2026
+
+Legacy GET /api/v1/projects/:id/result/{video|srt|vtt} revalidates the active owner and live result after Storage signing, compares the same bucket/object and rechecks expiry before returning 307. A deletion/account denial returns 404; changed-object or unavailable checks fail closed without returning the signed URL. Links remain pinned to the configured Storage origin and bounded to 60 seconds, consistent with the exact-revision POST handoff.
+
+Worker upload confirmation now uses SQL P1605 and the allowlisted ARTIFACT_UPLOAD_INCOMPLETE/409 transport response. The worker records STORAGE_UNAVAILABLE for that failure, preserving cached-only retry at a full daily AI allowance. P1604 remains reserved for daily provider admission and maps to PROVIDER_DAILY_LIMIT/409, recorded as PROVIDER_UNAVAILABLE. A recovery that actually dispatches a new provider request must still pass the unchanged daily guard.

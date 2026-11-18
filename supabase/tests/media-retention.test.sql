@@ -1,0 +1,88 @@
+begin;set local search_path=public,extensions,pg_temp;create extension if not exists pgtap with schema extensions;select no_plan();
+select ok(not has_function_privilege('authenticated','public.sweep_expired_media(boolean,uuid,integer)','execute'),'Users cannot run global retention');
+select ok(not has_function_privilege('anon','public.media_cleanup_task(text,uuid,uuid,bigint,uuid)','execute'),'Anonymous cleanup denied');
+select ok(not has_function_privilege('authenticated','private.media_cleanup_eligible(uuid,timestamptz)','execute'),'Eligibility paths stay private');
+create temporary table baseline as select used_bytes,retained_outputs from public.usage_accounts where scope='global';
+insert into auth.users(id,email) values('a2400000-0000-4000-8000-000000000001','retention-sql-a@example.invalid'),('a2400000-0000-4000-8000-000000000002','retention-sql-b@example.invalid');
+insert into public.usage_accounts(scope,owner_id,byte_limit,used_bytes,retained_outputs) values('user','a2400000-0000-4000-8000-000000000001',1000000,40,1),('user','a2400000-0000-4000-8000-000000000002',1000000,10,1);
+update public.usage_accounts set used_bytes=used_bytes+50,retained_outputs=retained_outputs+2 where scope='global';
+insert into public.projects(id,owner_id,title,mode) values('a2400000-0000-4000-8000-000000000011','a2400000-0000-4000-8000-000000000001','Retention SQL fixture','education'),('a2400000-0000-4000-8000-000000000012','a2400000-0000-4000-8000-000000000002','Other owner','education');
+insert into public.revisions(id,owner_id,project_id,revision_number,input_hash,request_kind,status,target_seconds,orientation,voice_profile_id,schema_version,prompt_version,composition_version,completed_at,expires_at)
+ select ('a2400000-0000-4000-8000-'||lpad((20+n)::text,12,'0'))::uuid,'a2400000-0000-4000-8000-000000000001','a2400000-0000-4000-8000-000000000011',n,repeat('a',64),'initial',case when n=1 then 'ready' else 'expired' end,60,'landscape','Kore',1,'v1','v1',now()-interval '8 days',now()-interval '1 day' from generate_series(1,3)n;
+insert into public.revisions(id,owner_id,project_id,revision_number,input_hash,request_kind,status,target_seconds,orientation,voice_profile_id,schema_version,prompt_version,composition_version,completed_at,expires_at)
+ values('a2400000-0000-4000-8000-000000000024','a2400000-0000-4000-8000-000000000002','a2400000-0000-4000-8000-000000000012',1,repeat('b',64),'initial','expired',60,'landscape','Kore',1,'v1','v1',now()-interval '8 days',now()-interval '1 day');
+update public.projects set latest_ready_revision_id='a2400000-0000-4000-8000-000000000021' where id='a2400000-0000-4000-8000-000000000011';
+insert into public.workers(id,label,enabled,protocol_version) values('a2400000-0000-4000-8000-000000000099','Retention SQL worker',false,1);
+insert into public.jobs(id,project_id,owner_id,revision_id,kind,status,finished_at)
+ select ('a2400000-0000-4000-8000-'||lpad((30+n)::text,12,'0'))::uuid,'a2400000-0000-4000-8000-000000000011','a2400000-0000-4000-8000-000000000001',('a2400000-0000-4000-8000-'||lpad((20+n)::text,12,'0'))::uuid,'generation','succeeded',case when n=3 then now() else now()-interval '8 days' end from generate_series(1,3)n;
+insert into public.jobs(id,project_id,owner_id,revision_id,kind,status,finished_at) values('a2400000-0000-4000-8000-000000000034','a2400000-0000-4000-8000-000000000012','a2400000-0000-4000-8000-000000000002','a2400000-0000-4000-8000-000000000024','generation','succeeded',now()-interval '8 days');
+insert into public.job_runs(job_id,attempt_number,worker_id,lease_token,started_at,ended_at,outcome) select id,1,'a2400000-0000-4000-8000-000000000099',1,now()-interval '9 days',finished_at,'succeeded' from public.jobs where id in('a2400000-0000-4000-8000-000000000031','a2400000-0000-4000-8000-000000000032','a2400000-0000-4000-8000-000000000033','a2400000-0000-4000-8000-000000000034');
+insert into public.assets(id,project_id,owner_id,creator_job_id,producing_lease_token,client_artifact_key,kind,bucket,object_key,state,declared_bytes,byte_size,checksum,declared_mime,detected_mime,received_at,validated_at,expires_at,created_at)
+ select ('a2400000-0000-4000-8000-'||lpad((40+n)::text,12,'0'))::uuid,'a2400000-0000-4000-8000-000000000011','a2400000-0000-4000-8000-000000000001',('a2400000-0000-4000-8000-'||lpad((30+least(n,3))::text,12,'0'))::uuid,1,'fixture-'||n,case when n=1 then 'video' else 'audio' end,'artifacts','a2400000-0000-4000-8000-000000000001/a2400000-0000-4000-8000-000000000011/a2400000-0000-4000-8000-'||lpad((40+n)::text,12,'0')||'/fixture.mp4','available',10,10,repeat('c',64),'video/mp4','video/mp4',now()-interval '8 days',now()-interval '8 days',case when n=2 then now()+interval '1 day' else now()-interval '1 day' end,now()-interval '8 days' from generate_series(1,3)n;
+insert into public.revision_assets(revision_id,asset_id,project_id,owner_id,purpose,retain_until) values('a2400000-0000-4000-8000-000000000022','a2400000-0000-4000-8000-000000000042','a2400000-0000-4000-8000-000000000011','a2400000-0000-4000-8000-000000000001','intermediate',now()+interval '1 day');
+update public.assets set expires_at=now()-interval '1 day' where id='a2400000-0000-4000-8000-000000000042';
+insert into public.assets(id,project_id,owner_id,kind,bucket,object_key,expires_at) values('a2400000-0000-4000-8000-000000000044','a2400000-0000-4000-8000-000000000011','a2400000-0000-4000-8000-000000000001','source_image','sources','a2400000-0000-4000-8000-000000000001/a2400000-0000-4000-8000-000000000011/a2400000-0000-4000-8000-000000000044/fixture.png',now()-interval '1 day');
+insert into public.assets(id,project_id,owner_id,creator_job_id,producing_lease_token,client_artifact_key,kind,bucket,object_key,declared_bytes,expires_at,created_at) values('a2400000-0000-4000-8000-000000000045','a2400000-0000-4000-8000-000000000012','a2400000-0000-4000-8000-000000000002','a2400000-0000-4000-8000-000000000034',1,'fixture-b','video','artifacts','a2400000-0000-4000-8000-000000000002/a2400000-0000-4000-8000-000000000012/a2400000-0000-4000-8000-000000000045/fixture.mp4',10,now()-interval '1 day',now()-interval '8 days');
+insert into public.usage_ledger(operation_key,owner_id,asset_id,used_bytes_delta,reserved_bytes_delta,retained_outputs_delta,reserved_outputs_delta,reason) select 'artifact:'||id,owner_id,id,10,0,0,0,'synthetic retention charge' from public.assets where id in('a2400000-0000-4000-8000-000000000041','a2400000-0000-4000-8000-000000000042','a2400000-0000-4000-8000-000000000043','a2400000-0000-4000-8000-000000000045');
+insert into storage.objects(bucket_id,name,metadata) select bucket,object_key,'{"size":10}' from public.assets where id='a2400000-0000-4000-8000-000000000041';
+select is(public.sweep_expired_media(false,'a2400000-0000-4000-8000-000000000001',25)->>'expired','1','Preview sees expired result');
+select is((select status from public.revisions where id='a2400000-0000-4000-8000-000000000021'),'ready','Preview makes no mutation');
+select ok(not private.media_cleanup_eligible('a2400000-0000-4000-8000-000000000042',clock_timestamp()),'Live retention reference protects shared audio');
+select ok(not private.media_cleanup_eligible('a2400000-0000-4000-8000-000000000043',clock_timestamp()),'Late-upload window protects recent producer');
+select ok(not private.media_cleanup_eligible('a2400000-0000-4000-8000-000000000044',clock_timestamp()),'Original sources are not artifact cleanup candidates');
+update public.jobs set status='waiting_worker',finished_at=null where id='a2400000-0000-4000-8000-000000000033';
+select ok(not private.media_cleanup_eligible('a2400000-0000-4000-8000-000000000041',clock_timestamp()),'Active project job blocks deletion');
+update public.jobs set status='succeeded',finished_at=now() where id='a2400000-0000-4000-8000-000000000033';
+update public.jobs set status='failed',finished_at=now()-interval '36 hours' where id='a2400000-0000-4000-8000-000000000031';
+select ok(not private.media_cleanup_eligible('a2400000-0000-4000-8000-000000000041',clock_timestamp()),'Bounded 48-hour recovery window remains protected');
+update public.jobs set status='succeeded',finished_at=now()-interval '8 days' where id='a2400000-0000-4000-8000-000000000031';
+select is(public.sweep_expired_media(true,'a2400000-0000-4000-8000-000000000001',25)->>'scheduled','1','Only safe scoped artifact scheduled');
+select is((select status from public.revisions where id='a2400000-0000-4000-8000-000000000021'),'expired','Retention marks result expired');
+select ok((select latest_ready_revision_id is null from public.projects where id='a2400000-0000-4000-8000-000000000011'),'Latest pointer cleared');
+select is((select used_bytes from public.usage_accounts where owner_id='a2400000-0000-4000-8000-000000000001'),40::bigint,'No bytes released at logical expiry');
+select is((select retained_outputs from public.usage_accounts where owner_id='a2400000-0000-4000-8000-000000000001'),0,'Expired slot reconciled');
+select is(public.sweep_expired_media(true,'a2400000-0000-4000-8000-000000000001',25)->>'scheduled','0','Sweep retry does not duplicate tasks');
+create temporary table lease(value jsonb);insert into lease values(public.media_cleanup_task('claim','a2400000-0000-4000-8000-000000000071',scope_owner=>'a2400000-0000-4000-8000-000000000001'));
+select is((select value->>'leaseToken' from lease),'1','First cleanup claim gets fence one');
+select is((select state from public.assets where id='a2400000-0000-4000-8000-000000000041'),'deleting','Claim blocks new adoption');
+select throws_ok($$select public.media_cleanup_task('finish','a2400000-0000-4000-8000-000000000071',(select(value->>'taskId')::uuid from lease),1,'a2400000-0000-4000-8000-000000000001')$$,'P2402',null::text,'Storage presence prevents early release');
+select throws_ok($$select public.media_cleanup_task('finish','a2400000-0000-4000-8000-000000000072',(select(value->>'taskId')::uuid from lease),1,'a2400000-0000-4000-8000-000000000001')$$,'P2401',null::text,'Wrong runner cannot acknowledge');
+select lives_ok($$select public.media_cleanup_task('fail','a2400000-0000-4000-8000-000000000071',(select(value->>'taskId')::uuid from lease),1,'a2400000-0000-4000-8000-000000000001')$$,'Failure records retry');
+select ok((select state='retry' and next_attempt_at>now() from public.cleanup_tasks where id=(select(value->>'taskId')::uuid from lease)),'Retry backoff is durable');
+update public.cleanup_tasks set next_attempt_at=now() where id=(select(value->>'taskId')::uuid from lease);
+update lease set value=public.media_cleanup_task('claim','a2400000-0000-4000-8000-000000000072',scope_owner=>'a2400000-0000-4000-8000-000000000001');
+select is((select value->>'leaseToken' from lease),'2','Retry receives higher fence');
+update public.cleanup_tasks set lease_expires_at=clock_timestamp()-interval '1 second' where id=(select(value->>'taskId')::uuid from lease);
+select throws_ok($$select public.media_cleanup_task('finish','a2400000-0000-4000-8000-000000000072',(select(value->>'taskId')::uuid from lease),2,'a2400000-0000-4000-8000-000000000001')$$,'P2401',null::text,'Expired runner cannot finish');
+update lease set value=public.media_cleanup_task('claim','a2400000-0000-4000-8000-000000000073',scope_owner=>'a2400000-0000-4000-8000-000000000001');
+select is((select value->>'leaseToken' from lease),'3','Abandoned claim is reclaimed');
+-- SQL absence is simulated by renaming transaction-local metadata. Actual
+-- Storage API deletion is verified by the separate retention integration test.
+update storage.objects set name='sql-absence/'||name where name=(select object_key from public.assets where id='a2400000-0000-4000-8000-000000000041');
+select is(public.media_cleanup_task('finish','a2400000-0000-4000-8000-000000000073',(select(value->>'taskId')::uuid from lease),3,'a2400000-0000-4000-8000-000000000001')->>'done','true','Confirmed absence finalizes');
+select is((select used_bytes from public.usage_accounts where owner_id='a2400000-0000-4000-8000-000000000001'),30::bigint,'Exact original byte charge released');
+select is((select used_bytes from public.usage_accounts where owner_id='a2400000-0000-4000-8000-000000000002'),10::bigint,'Other account bytes untouched');
+select lives_ok($$select public.media_cleanup_task('finish','a2400000-0000-4000-8000-000000000073',(select(value->>'taskId')::uuid from lease),3,'a2400000-0000-4000-8000-000000000001')$$,'Lost acknowledgment replay succeeds');
+select is((select count(*)::integer from public.usage_ledger where operation_key='media:delete:a2400000-0000-4000-8000-000000000041'),1,'One durable byte release');
+select is((select count(*)::integer from public.usage_ledger where operation_key='retention:slots:a2400000-0000-4000-8000-000000000021'),1,'One slot reconciliation');
+select is((select state from public.assets where id='a2400000-0000-4000-8000-000000000042'),'available','Shared media remains usable');
+select throws_ok($$select public.sweep_expired_media(true,null,101)$$,'22023',null::text,'Unbounded sweep denied');
+select is((select used_bytes from public.usage_accounts where scope='global'),(select used_bytes+40 from baseline),'Global release matches scoped account release');
+
+select throws_ok($$select public.media_cleanup_task('finish','a2400000-0000-4000-8000-000000000073',(select(value->>'taskId')::uuid from lease),3,'a2400000-0000-4000-8000-000000000002')$$,'42501',null::text,'Task scope cannot cross owner boundary');
+delete from public.revision_assets where asset_id='a2400000-0000-4000-8000-000000000042';
+select is(public.sweep_expired_media(true,'a2400000-0000-4000-8000-000000000001',25)->>'scheduled','1','Released reference becomes eligible');
+update public.cleanup_tasks set attempt_count=5 where asset_id='a2400000-0000-4000-8000-000000000042';
+select is(public.media_cleanup_task('claim','a2400000-0000-4000-8000-000000000074',scope_owner=>'a2400000-0000-4000-8000-000000000001')->>'idle','true','Exhausted budget cannot dispatch deletion');
+select is((select state from public.cleanup_tasks where asset_id='a2400000-0000-4000-8000-000000000042'),'blocked','Retry exhaustion persists for operator review');
+select is(public.media_cleanup_task('retry',task=>(select id from public.cleanup_tasks where asset_id='a2400000-0000-4000-8000-000000000042'),scope_owner=>'a2400000-0000-4000-8000-000000000001')->>'retry','true','Protected retry revalidates repaired candidate');
+select is((select attempt_count from public.cleanup_tasks where asset_id='a2400000-0000-4000-8000-000000000042'),0,'Explicit operator retry restores bounded attempts');
+insert into public.assets(id,project_id,owner_id,creator_job_id,producing_lease_token,client_artifact_key,kind,bucket,object_key,declared_bytes,expires_at,created_at) values('a2400000-0000-4000-8000-000000000046','a2400000-0000-4000-8000-000000000011','a2400000-0000-4000-8000-000000000001','a2400000-0000-4000-8000-000000000032',1,'missing-charge','audio','artifacts','a2400000-0000-4000-8000-000000000001/a2400000-0000-4000-8000-000000000011/a2400000-0000-4000-8000-000000000046/fixture.wav',10,now()-interval '1 day',now()-interval '8 days');
+select lives_ok($$select public.sweep_expired_media(true,'a2400000-0000-4000-8000-000000000001',25)$$,'Unknown accounting is queued for safe review');
+update public.cleanup_tasks set next_attempt_at=now()+interval '1 day' where asset_id='a2400000-0000-4000-8000-000000000042';
+select is(public.media_cleanup_task('claim','a2400000-0000-4000-8000-000000000074',scope_owner=>'a2400000-0000-4000-8000-000000000001')->>'idle','true','Unknown byte charge cannot dispatch deletion');
+select is((select safe_error_code from public.cleanup_tasks where asset_id='a2400000-0000-4000-8000-000000000046'),'ACCOUNTING_RECONCILIATION','Missing charge requires reconciliation');
+select is((select state from public.assets where id='a2400000-0000-4000-8000-000000000046'),'allocated','Blocked accounting leaves file untouched');
+select is((select used_bytes from public.usage_accounts where owner_id='a2400000-0000-4000-8000-000000000001'),30::bigint,'Blocked work never frees unconfirmed capacity');
+set constraints all immediate;
+select * from finish();rollback;

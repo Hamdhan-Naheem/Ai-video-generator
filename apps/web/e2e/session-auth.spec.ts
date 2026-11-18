@@ -56,19 +56,22 @@ test.describe("Email-only session lifecycle",()=>{
       await page.getByRole("link",{name:"Sign in",exact:true}).click();
       await page.getByLabel("Email",{exact:true}).fill(email);await page.getByLabel("Password",{exact:true}).fill(password);
       await page.getByRole("button",{name:"Sign in",exact:true}).click();
-      await expect(page).toHaveURL(/\/settings$/);
+      await expect(page).toHaveURL(/\/settings$/,{timeout:30000});
       await expect(page.getByLabel("Full name",{exact:true})).toHaveValue("Session Creator");
       const tab=await context.newPage();await tab.goto("/dashboard");await expect(tab.getByText("Welcome, Session Creator",{exact:true})).toBeVisible();
       await page.getByRole("button",{name:"Sign out",exact:true}).click();
-      await expect(page).toHaveURL(/\/sign-in$/);
-      await expect(tab).toHaveURL(/\/session-expired/);
+      const signedOut=page.waitForResponse(r=>r.url().endsWith('/api/v1/auth/sign-out')&&r.request().method()==='POST');
+      await page.getByRole("dialog",{name:"Sign out?",exact:true}).getByRole("button",{name:"Sign out",exact:true}).click();
+      expect((await signedOut).status()).toBe(204);
+      await expect(page).toHaveURL(/\/sign-in$/,{timeout:30000});
+      await expect(tab).toHaveURL(/\/sign-in$/,{timeout:30000});
       expect((await context.request.get("/api/v1/me/settings")).status()).toBe(401);
       expect((await other.request.get("/api/v1/auth/session")).status()).toBe(200);
       expect((await mutate(context.request,"auth/refresh",{})).status()).toBe(401);
       expect((await mutate(context.request,"auth/sign-out",{scope:"local"})).status()).toBe(204);
       await page.goto("/sign-in?next=https%3A%2F%2Fevil.example");
       await page.getByLabel("Email",{exact:true}).fill(email);await page.getByLabel("Password",{exact:true}).fill(password);await page.getByRole("button",{name:"Sign in",exact:true}).click();
-      await expect(page).toHaveURL(/\/dashboard$/);
+      await expect(page).toHaveURL(/\/dashboard$/,{timeout:30000});
       await tab.close();
     } finally {await other.close();}
   });

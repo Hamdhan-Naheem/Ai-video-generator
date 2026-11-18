@@ -1,0 +1,27 @@
+begin;
+set local search_path=public,extensions,pg_temp;
+select no_plan();
+select ok(not has_function_privilege('anon','public.list_saved_drafts(timestamptz,uuid)','execute'),'Anonymous listing denied');
+insert into auth.users(id,email) values('d1500000-0000-4000-8000-000000000001','draft-list-a@example.invalid'),('d1500000-0000-4000-8000-000000000002','draft-list-b@example.invalid');
+-- Legacy over-capacity pagination fixture; DDL and rows both roll back.
+alter table public.projects disable trigger projects_metadata_limit;
+insert into public.projects(owner_id,title,mode,draft_input,updated_at) select 'd1500000-0000-4000-8000-000000000001','List draft '||n,'education','{"referenceNotes":"PRIVATE_NOTE"}','2026-11-01T00:00:00.123456Z' from generate_series(1,23) n;
+insert into public.projects(owner_id,title,mode,deleted_at) values('d1500000-0000-4000-8000-000000000001','Deleted draft','education',now());
+insert into public.projects(owner_id,title,mode,draft_state) values('d1500000-0000-4000-8000-000000000001','Removed draft','education','removed');
+insert into public.projects(owner_id,title,mode) values('d1500000-0000-4000-8000-000000000002','Other owner','software');
+set constraints all immediate;
+alter table public.projects enable trigger projects_metadata_limit;
+set constraints all deferred;
+select set_config('request.jwt.claims','{"sub":"d1500000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+create temporary table listing(value jsonb);insert into listing values(public.list_saved_drafts());
+select is((select jsonb_array_length(value) from listing),21,'SQL returns at most one bounded page plus lookahead');
+select ok((select bool_and((item-array['id','title','mode','draftVersion','updatedAt'])='{}'::jsonb) from listing,jsonb_array_elements(value) item),'Only safe summary columns');
+select ok((select value::text not like '%PRIVATE_NOTE%' and value::text not like '%Other owner%' and value::text not like '%Deleted draft%' and value::text not like '%Removed draft%' from listing),'No private content, other owners, deleted or removed drafts');
+select is((select jsonb_array_length(public.list_saved_drafts((value->19->>'updatedAt')::timestamptz,(value->19->>'id')::uuid)) from listing),3,'Keyset cursor preserves all tied timestamp rows');
+select throws_ok($$select public.list_saved_drafts(now(),null)$$,'22023',null::text,'Partial cursor rejected');
+select set_config('request.jwt.claims','{"sub":"d1500000-0000-4000-8000-000000000002","role":"authenticated"}',true);
+select is(jsonb_array_length(public.list_saved_drafts()),1,'Other owner sees only own draft');
+update public.profiles set status='disabled' where id='d1500000-0000-4000-8000-000000000002';
+select throws_ok($$select public.list_saved_drafts()$$,'42501',null::text,'Disabled owner listing denied');
+select * from finish();
+rollback;

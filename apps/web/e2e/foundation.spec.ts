@@ -44,12 +44,12 @@ test("keyboard skip link reaches the content", async ({ page }) => {
   await expect(page.getByRole("main")).toBeFocused();
 });
 
-test("unavailable paths recover to preview", async ({ page }) => {
+test("unavailable paths recover to the public home", async ({ page }) => {
   const response = await page.goto("/preview/not-a-section");
   expect(response?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: "This page isn’t available" })).toBeVisible();
-  await page.getByRole("link", { name: "Back to preview", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Bring your next idea to life.", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Back to home", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Turn your ideas into narrated videos", exact: true })).toBeVisible();
 });
 
 
@@ -74,7 +74,7 @@ test("Dashboard follows the design and labels fixture data", async ({ page, isMo
   await expect(page).toHaveURL(/mode=education$/);
 });
 
-test("homepage enters the live app and design previews remain explicit",async({request})=>{
- const live=await request.get("/",{maxRedirects:0});expect(live.status()).toBe(307);expect(live.headers().location).toBe("/dashboard");
+test("homepage is public and design previews remain explicit",async({request})=>{
+ const live=await request.get("/",{maxRedirects:0});expect(live.status()).toBe(200);expect(await live.text()).toContain("Turn your ideas into narrated videos");
  const preview=await request.get("/preview",{maxRedirects:0});expect(preview.status()).toBe(307);expect(preview.headers().location).toBe("/preview/dashboard");
 });

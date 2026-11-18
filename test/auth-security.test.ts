@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {allowAuthAttempt,csrfCookieName,issueCsrf,sessionFingerprint,validCsrf,CSRF_LIFETIME} from '../apps/web/src/lib/auth-security.ts';
+import {csrfCookieName,issueCsrf,sessionFingerprint,validCsrf,CSRF_LIFETIME} from '../apps/web/src/lib/auth-security.ts';
 
 test('CSRF token requires matching cookie/header, current session binding and finite lifetime',()=>{
   const now=1800000000000;
@@ -20,10 +20,4 @@ test('session binding ignores unrelated cookies, includes chunks and is order-in
   const a={name:'sb-local-auth-token.0',value:'a'},b={name:'sb-local-auth-token.1',value:'b'};
   assert.equal(sessionFingerprint([a,b]),sessionFingerprint([b,{name:'other',value:'unused'},a]));
   assert.notEqual(sessionFingerprint([a,b]),sessionFingerprint([a]));
-});
-test('auth attempt limit applies across casing and expires without unbounded entries',()=>{
-  const now=1800000000000;
-  for(let i=0;i<8;i++) assert.equal(allowAuthAttempt('rate-test@example.invalid',now),true);
-  assert.equal(allowAuthAttempt('RATE-TEST@EXAMPLE.INVALID',now),false);
-  assert.equal(allowAuthAttempt('rate-test@example.invalid',now+60000),true);
 });

@@ -1,0 +1,17 @@
+"use client";
+import {useEffect,useRef,useState} from 'react';
+import {DeleteVideoResultSchema,type DeleteVideoResult} from '@contracts';
+import {accountRequest,AccountError} from '@/lib/auth-browser';
+import {Button,Modal,Notice} from '@/components/ui';
+type Video={projectId:string;revisionId:string;version:number;title:string};
+export function DeleteVideo({video,onDeleted}:{video:Video;onDeleted:(receipt:DeleteVideoResult)=>void}){
+ const [open,setOpen]=useState(false),[pending,setPending]=useState(false),[error,setError]=useState('');const busy=useRef(false),alive=useRef(true);
+ useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
+ async function submit(){if(busy.current)return;busy.current=true;setPending(true);setError('');try{const receipt=DeleteVideoResultSchema.parse(await accountRequest(`projects/${video.projectId}/results/${video.revisionId}`,{method:'DELETE',body:{expectedVersion:video.version}}));if(receipt.revisionId!==video.revisionId)throw Error('Result identity mismatch');if(alive.current){setOpen(false);onDeleted(receipt);}}catch(cause){if(alive.current)setError(cause instanceof AccountError?cause.message:'We could not confirm deletion. Retry to safely check this same video.');}finally{busy.current=false;if(alive.current)setPending(false);}}
+ return <><Button variant="quiet" className="draft-delete-action" onClick={()=>{setError('');setOpen(true);}}>Delete video<span className="sr-only">: {video.title}, version {video.version}</span></Button><Modal open={open} title="Delete this video?" dismissible={!pending} onClose={()=>{if(!busy.current)setOpen(false);}}><p>Delete “{video.title}”, version {video.version}? This cannot be undone.</p><p>Your saved draft and other videos will be kept. New playback and download access will stop. Downloaded copies remain on your device.</p><p>The saved-video slot is released when deletion is accepted. Storage is reclaimed after safe file cleanup; this can take time.</p>{error&&<Notice error>{error}</Notice>}<div className="dialog-actions"><Button variant="secondary" data-initial-focus disabled={pending} onClick={()=>setOpen(false)}>Cancel</Button><Button variant="danger" pending={pending} pendingLabel="Deleting…" onClick={()=>void submit()}>Delete video</Button></div></Modal></>;
+}
+export function VideoDeletionNotice({projectId,receipt:initial}:{projectId:string;receipt:DeleteVideoResult}){
+ const [receipt,setReceipt]=useState(initial),[error,setError]=useState(''),[checking,setChecking]=useState(false);const busy=useRef(false);
+ async function check(){if(busy.current)return;busy.current=true;setChecking(true);setError('');try{const value=DeleteVideoResultSchema.parse(await accountRequest(`projects/${projectId}/results/${receipt.revisionId}/deletion`));if(value.revisionId!==receipt.revisionId)throw Error('Mismatch');setReceipt(value);}catch{setError('Cleanup status could not be checked. Your deletion remains saved.');}finally{busy.current=false;setChecking(false);}}
+ return <div className="video-deletion-notice"><Notice tone="success">Video deleted. Your saved draft is preserved. {receipt.cleanupState==='complete'?'Its generated files have been removed.':'File cleanup is pending. Storage usage updates after confirmed removal; recent uploads and shared files may need to be retained temporarily.'}</Notice>{receipt.cleanupState==='pending'&&<Button variant="secondary" pending={checking} pendingLabel="Checking…" onClick={()=>void check()}>Check cleanup status</Button>}{error&&<Notice error>{error}</Notice>}</div>;
+}

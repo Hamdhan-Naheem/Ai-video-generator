@@ -4,7 +4,7 @@ import { GoogleSignInRequestSchema } from '../shared/contracts/auth.ts';
 
 // Compare real PostgreSQL CHECK predicate behavior with the browser/server request contract.
 const paths: Array<string | null> = [
-  '/dashboard', '/videos', '/settings', '/projects/new',
+  '/dashboard', '/drafts', '/drafts?cursor=private', '/videos', '/settings', '/projects/new',
   ...Array.from({ length: 8 }, (_, index) => `/projects/10000000-0000-${index + 1}000-8000-000000000001`),
   '/projects/ABCDEF01-ABCD-4000-ABCD-ABCDEF123456',
   '/projects/00000000-0000-0000-0000-000000000000',

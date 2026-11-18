@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import {safeAccountReturn} from "@/lib/auth-return";
 import { useRef, useState, type FormEvent } from "react";
 import { EmailSchema, DisplayNameSchema, NewPasswordSchema, CurrentPasswordSchema, LIMITS } from "@contracts";
 import { Brand } from "@/components/brand";
@@ -10,10 +10,9 @@ import { Button, Notice } from "@/components/ui";
 import { accountRequest } from "@/lib/auth-browser";
 
 export function AuthFrame({children}: {children:React.ReactNode}) {
-  return <main className="auth-page"><section className="auth-card"><Brand href="/sign-in" />{children}</section></main>;
+  return <main className="auth-page"><section className="auth-card"><Brand href="/" />{children}<nav className="auth-public-links" aria-label="Public information"><Link href="/help">Help</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><Link href="/contact">Contact</Link></nav></section></main>;
 }
 export function AuthForm({signup=false,nextPath="/dashboard"}: {signup?:boolean;nextPath?:string}) {
-  const router = useRouter();
   const [name,setName] = useState(""); const [email,setEmail] = useState("");
   const [password,setPassword] = useState(""); const [confirm,setConfirm] = useState("");
   const [touched,setTouched] = useState<Record<string,boolean>>({});
@@ -31,7 +30,7 @@ export function AuthForm({signup=false,nextPath="/dashboard"}: {signup?:boolean;
     try {
       const body = signup ? {email,password,displayName:name} : {email,password};
       await accountRequest(signup ? "auth/sign-up" : "auth/sign-in",{method:"POST",body});
-      setPassword(""); setConfirm(""); router.replace(signup ? "/dashboard" : nextPath); router.refresh();
+      setPassword(""); setConfirm(""); window.location.replace(signup ? "/dashboard" : safeAccountReturn(nextPath));
     } catch (cause) { setError(cause instanceof Error ? cause.message : "We couldn’t connect. Please try again."); }
     finally { submitting.current=false; setPending(false); }
   }

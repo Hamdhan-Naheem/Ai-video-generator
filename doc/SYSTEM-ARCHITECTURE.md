@@ -2,10 +2,14 @@
 
 # AI Video Studio — system design architecture
 
-**Version:** 1.1 · **Date:** 24 October 2026  
+**Version:** 1.3 · **Date:** 7 November 2026
 **Status:** Approved by the user; architecture baseline, not a claim of deployed functionality.  
 **Product authority:** [Approved PRD](PRD.md). This document supersedes the full-application proposals in [initial architecture](INITIAL-ARCHITECTURE.md), preserving that document as prototype history.  
 **Audience:** A software engineer implementing and maintaining this application.
+
+> **Storage decision — 7 November 2026:** The user selected private Supabase Storage for the first Education release, alongside Supabase Auth and PostgreSQL. This supersedes the 6 November R2 target. R-02 is Deferred for showcase, not Complete; no R2 integration is required for this release. Existing local Storage integration is retained, while hosted setup and release verification remain unfinished. The [project tracker](PROJECT-TRACKER.md) records the current implementation order.
+
+See [Education showcase release plan](EDUCATION-RELEASE.md). W-16 and W-24D are locally verified, not deployed. The wider three-mode/Google/revision backlog remains deferred from this showcase.
 
 ## 1. Read this first
 
@@ -17,13 +21,13 @@ This is one product with two executable applications: a Next.js web application 
 
 | Area | Design baseline |
 |---|---|
-| Users | Public email/password registration and Google sign-in; each user owns private projects |
-| Modes | Education, software showcase, product branding |
+| Users | Email/password registration; private owned projects. Google sign-in deferred for this release |
+| Modes | Education enabled for first release; Software showcase and Product branding generation deferred with Coming soon UI |
 | App languages | TypeScript, Next.js/React, Node.js; Tailwind CSS for web styling |
 | Native helpers | Whisper.cpp, Rhubarb, FFmpeg/FFprobe and Chromium invoked from Node.js; no Python |
 | AI | Gemini planning and primary speech; eligible ElevenLabs speech fallback |
 | Hosting | Vercel web/API; creator's Windows computer runs heavy work |
-| Persistence | Supabase Auth, PostgreSQL and private Supabase Storage; no R2 |
+| Persistence | Hosted Supabase Auth/PostgreSQL/private Storage target; local integration verified, hosted verification pending. R2 deferred |
 | Output | English; 60/75/90-second target; 720p landscape or portrait; 30 fps |
 | Captions | Clean preview plus VTT; clean MP4/SRT download; burned captions rendered on request |
 | Automation | One Generate action, four automatic stages; no required script/storyboard approval |
@@ -60,9 +64,9 @@ flowchart TB
     WEB[Next.js pages and Node.js route handlers]
   end
   subgraph S[Supabase]
-    AUTH[Email-password and Google Auth]
+    AUTH[Email-password Auth]
     DB[(PostgreSQL metadata and durable queue)]
-    OBJ[Private object storage]
+    OBJ[Private Supabase Storage]
   end
   subgraph PC[Creator computer]
     W[Node.js worker and heartbeat loop]
@@ -99,6 +103,18 @@ The arrows from the worker are outbound HTTPS. No inbound port, public tunnel, o
 | AI provider | Receives minimal content needed for the assigned stage | No DB access, host files, tools or executable permissions |
 
 Small JSON travels through the API. Media transfers directly to Storage because Vercel Functions impose payload and runtime limits. This is a design choice to keep expensive work off web requests, not a dependency on one particular function-duration allowance. [Vercel limits](https://vercel.com/docs/functions/limitations).
+
+### 2.2 Supabase Storage first-release boundary — 7 November 2026
+
+Use hosted Supabase Auth, PostgreSQL and private Storage for the first release, retaining the existing local SDK, manifest, receipt, ownership-policy and cleanup integration. PostgreSQL is the relational system of record and durable queue; Storage holds video, narration, captions and sources. No Neon, Amazon RDS or R2 migration is required. Vercel serves lightweight requests while the separate worker performs generation. Production must use hosted persistence rather than a database reachable only on the creator's localhost.
+
+Private buckets and exact-object grants remain mandatory. Browser/worker transfers go directly to Storage after authorization; media bytes do not pass through Vercel JSON handlers. Preserve the maximum 60-second read-grant lifetime, ownership/RLS, active-profile checks, tombstones, original expiry, reservations, worker fences and verified Ready publication. Do not expose service credentials to browsers or the worker.
+
+The current SQL/SDK boundary uses Supabase Storage metadata and policies; retain it. Hosted migration/policy/bucket setup and both-orientation access/cleanup checks remain release gates. Verify successful exports and every uploaded artifact against the hosted plan's per-file limit, not only the aggregate job reservation. Check stored bytes and monthly cached/uncached transfer separately. Preserve account/global/provider budgets; do not automatically raise them to the provider allowance.
+
+Seven-day expiry stops new result access, while general expired-result physical cleanup remains unfinished release work. Do not release accounting merely because a link or result expired. Test interrupted transfers, orphan cleanup, shared files and idempotent deletion. Local W-24D source cleanup does not complete general W-24 retention.
+
+Decision history: on 6 November R2 was selected as a target but never integrated. On 7 November the user chose Supabase Storage for the showcase. R-02 is Deferred for showcase; revisiting R2 later requires explicit scope, compatibility and cutover verification. No runtime/cloud resources or data changed with this documentation revision.
 
 ## 3. Application structure
 
@@ -421,7 +437,7 @@ Keys are server allocated; never accept arbitrary caller paths or upsert publish
 
 Allocate bytes before upload. The browser uploads directly using its authenticated Supabase session and an INSERT policy requiring an active, unexpired exact-path allocation owned by `auth.uid()`. No browser UPDATE/DELETE policy, and no arbitrary own-prefix uploads. For recordings use resumable TUS with the same authorization; expire abandoned allocations and cleanup upload remnants. [Supabase resumable uploads](https://supabase.com/docs/guides/storage/uploads/resumable-uploads).
 
-Bucket limits enforce broad maximum size/type. API compares storage size with the per-asset reservation; worker inspects signatures, decodes and recomputes hashes. Exact content/type and image dimensions are not trusted from request headers. A malicious client might upload within the bucket maximum but beyond its image allocation; reject it, remove it promptly and reconcile actual usage. Reserve headroom for this case. Storage policies are enforced independently of UI checks. [Supabase Storage access control](https://supabase.com/docs/guides/storage/security/access-control).
+Selected Supabase Storage: bucket limits enforce broad maximum size/type; allocation-specific rules and server-side receipt checks remain mandatory. API compares storage size with the per-asset reservation; worker inspects signatures, decodes and recomputes hashes. Exact content/type and image dimensions are not trusted from request headers. A malicious client might upload within the bucket maximum but beyond its image allocation; reject it, remove it promptly and reconcile actual usage. Reserve headroom for this case. Storage policies are enforced independently of UI checks. [Supabase Storage access control](https://supabase.com/docs/guides/storage/security/access-control).
 
 Initial PRD limits: eight JPEG/PNG/WebP images ≤5 MB each; one MP4/H.264 recording ≤45 MB and ≤120 seconds; total uploads ≤60 MB; brief ≤4,000 characters and notes ≤10,000. Proposed decode guards: ≤32 million pixels/image, longest edge ≤20,000 pixels (supports the tested tall screenshot), recording ≤3840×2160 and ≤60 fps. Bound frame extraction, decoder memory and subprocess time. No SVG/HTML/PDF execution, URL fetching, website crawling or archives.
 
@@ -672,16 +688,16 @@ Separate unit tests, mocked providers, synthetic local renders, cloud integratio
 | ID | Decision / check | Status |
 |---|---|---|
 | ADR-01 | Modular web + local worker; Postgres queue, no Redis | Selected architecture |
-| ADR-02 | Supabase Auth/Postgres/private Storage; Vercel; no R2 | Approved PRD |
+| ADR-02 | Supabase Auth/Postgres/private Storage; Vercel web and separate worker | Revised by user 7 November 2026; retain existing local integration, verify hosted setup; R2 deferred |
 | ADR-03 | TypeScript/Node application, permitted non-Python native helpers | Approved PRD and verified prototype |
 | ADR-04 | Scene-level narration in app; retain demo full-track artifacts | Follows PRD; implementation/continuity tests pending |
 | ADR-05 | Max 60-second issued read links after deletion; block new access immediately | Explicit user decision, 24 October 2026 |
 | ADR-06 | Email/password + Google; no invitations, SMTP, verification or reset emails | Revised explicit user decision, 24 October 2026 |
-| ADR-07 | Branding demo deferred to save API usage; all three V1 modes remain | User decision; future validation outstanding |
+| ADR-07 | First deployment enables Education only; Software/Branding generation deferred, existing forms preserved with Coming soon entry points | Revised user decision 6 November 2026; full product backlog preserved |
 | ADR-08 | Automatic generic region selection and supported education capability registry | Required implementation; sample maps are not general support |
 | CHECK-01 | Actual Supabase/Vercel allowance, region and account eligibility | Verify before provisioning/deployment; no paid activation |
 | CHECK-02 | Native resources, per-scene quality, upload/decode limits and reservation sizes | Benchmark implementation with cached/synthetic artifacts first |
-| CHECK-03 | Google OAuth callbacks, public audience, identity-collision and fresh reauthentication behavior | Verify before public registration; no purchased domain or SMTP prerequisite |
+| CHECK-03 | Google OAuth callbacks, public audience and identity-collision behavior | Deferred with Google sign-in; verify before enabling it, not a gate for email-only release |
 | CHECK-04 | Voice previews, regional pronunciation, provider usage rights | Revalidate before exposing voice catalog/fallback |
 | CHECK-05 | Worker token lifecycle, RLS, atomic functions and browser URL renewal | Integration tests before deployment |
 
@@ -708,3 +724,25 @@ Use shared signed-in AppShell (Sidebar, TopBar, MobileBottomNav), AuthLayout, ad
 Full name already maps to displayName/profiles.display_name. Profile-only save, draft-only deletion, safe library summaries and raw feature/brand fields are now explicit. intendedUse is an existing required backend choice missing in mockups and must be surfaced before Generate. Product description stays optional per PRD. Account-deletion receipt copy must represent the asynchronous 202, not completed purge. Public samples must be authorized, actual media; illustrated placeholders are not evidence of rendered video.
 
 Do not implement repeated independent screen shells. Keep CLI wrappers and proven pipeline artifacts intact when introducing apps/web incrementally. Documentation reconciliation completes the design handoff, not application integration, public-release readiness or full acceptance. Provider, OAuth/identity isolation, fresh Google proof, ownership/RLS, cleanup races, accessibility and six mode/orientation acceptance remain implementation gates.
+
+
+### W-24 local retention implementation — 12 November 2026
+
+The Node private maintenance watcher now performs bounded metadata sweeps and direct Supabase Storage deletion using existing private service configuration. The renderer worker retains its scoped worker token; maintenance is a separate trusted process and does not expose service credentials to the browser or expand worker capabilities. PostgreSQL owns expiry, accounting, reference safety and fenced retry state. External Storage I/O runs outside database locks; confirmed absence commits one byte release. Run this outgoing private process alongside the local worker for periodic cleanup; access expires independently of process availability. Hosted scheduling and local web-worker workspace pruning remain launch checks, not completed infrastructure. See MEDIA-RETENTION.md.
+
+### Local implementation note — 12 November 2026
+
+Registered web-job working folders have an independent local lifecycle alongside private Storage retention. A private outgoing metadata reader verifies job identity, terminal/recovery/result periods and server time; a bounded janitor shares per-job filesystem locks with writers and refuses unknown/unsafe/recent data. Web render bundles containing copied narration stay inside the job tree and are disposed after rendering. ID-only records support later remnant checks. See [Local workspace cleanup](LOCAL-WORKSPACE-CLEANUP.md). This is locally verified implementation, not hosted acceptance; legacy/unowned artifacts remain a release review gate. No database/API schema change was required.
+
+
+## Security safeguards — 12 November 2026
+
+Application sign-in/sign-up now use a service-only PostgreSQL limiter shared across instances, with keyed email/network identifiers and trusted Vercel address attribution. Private counters gate actual provider dispatch across jobs; cache-only recovery remains possible without new AI usage. Database triggers bound draft, generation and allocation metadata, including direct authenticated RPC paths. Nonce-based CSP makes HTML documents dynamic, limits script/media origins and prevents framing. Confirmed auth transitions replace the document to clear prior-account router state. The Supabase/Vercel/separate-worker deployment target is unchanged. [Controls and boundaries](SECURITY-CONTROLS.md) document values, evidence and native Auth/hosted checks still required under W-31; remaining operator tooling belongs to W-30.
+
+## Worker hosting preparation — 13 November 2026
+
+The user wants a recruiter showcase that does not depend on their personal PC. Linux x86_64 Docker packaging and an offline resource benchmark are now authorized prerequisites before remaining W-30. This extends the execution packaging, not the database/API/storage contract. Windows is the existing local implementation; hosted execution remains unprovisioned/unverified. A separate remote worker is still required alongside Vercel and Supabase. Cloud provider/trial, spending and end-of-trial shutdown require a subsequent explicit decision; no automatic paid activation or always-free guarantee. See [Linux worker](LINUX-WORKER.md) for actual acceptance status and secret/mount/process boundaries. Historical local-worker descriptions above describe the original deployment baseline.
+
+## W30 operational implementation — 13 November 2026
+
+Essential operations are now verified locally as protected session-authenticated API endpoints and a private Node CLI; the advanced operator screen remains deferred. Neither ordinary users nor worker credentials gain administrative access. Early role checks avoid shared generation-lock contention, with repeated active-role checks under locks. Health reports stored application counters, safe queue/cleanup/worker state and accounting agreement; real provider balances remain unknown. Versioned pause does not cancel active assignments; fenced expired-lease reconciliation preserves budgets and prevents blind repetition of uncertain provider work. See [operator guide](OPERATOR-CONTROLS.md). No hosting/provider decision, cloud activation or deployment was performed. The user will execute W31 deployment steps under guidance.

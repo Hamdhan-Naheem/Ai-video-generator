@@ -127,3 +127,41 @@ W-08 adds 30 rollback-only pgTAP checks (164 SQL assertions total) for the dashb
 
 
 W-09 adds 29 rollback-only SQL assertions (193 total) covering scoped read/create/update snapshots, per-owner request keys, original receipt replay, optimistic conflicts, deleted/removed/disabled handling and no generation-side effects. Creation and update reuse the existing profile-before-project lock order and save_project_draft primitive; public table grants are unchanged. Idempotency receipts stay private. The UI/API performs additional mode-specific shared-schema validation. Apply pending migrations with db:migrate without resetting local data.
+
+
+W-11 adds four forward migrations (16 total) and SQL upload/ownership/quota/cleanup tests. Apply node scripts/database.mjs migrate and regenerate/check database types. Local upload setup is node scripts/configure-local-uploads.mjs; physical/abandoned-source cleanup is node scripts/cleanup-source-uploads.mjs. These commands validate the existing local stack and do not reset tables or configure remote services. The cleanup command must be run periodically until scheduling is integrated. API receipt state is received, not media-decoded validation.
+
+W-11 verification completed with 227 pgTAP assertions and the existing actual concurrency/expiry checks. There are 16 applied forward migration versions. Local operator configuration is isolated inside SQL test transactions, so running tests preserves the configured local allowance.
+
+
+W-14 (6 November 2026): 18 applied forward migrations, 33 app tables and 293 pgTAP assertions, with four real admission races in npm run db:test. No reset is required. New functions: public.enqueue_generation(project,request_key,request) and public.get_generation_job(job). Inspect jobs, revisions, revision_assets, usage_reservations, usage_ledger, idempotency_requests and job_events under postgres/public. Do not expose raw snapshots/paths/credentials through a browser view. Existing generation_paused/claims_paused and the 400 MB local global budget remain unchanged; no new service or provider key is needed.
+
+
+Dedicated draft listing (6 November 2026): migration 20261106000003_saved_drafts.sql adds an authenticated owner-filtered list RPC and /drafts return-path parity. The schema now has 19 applied forward migrations, still 33 app tables, and the SQL suite passes 301 assertions. Drafts remain rows in public.projects; no second draft table or copy is created.
+
+
+W-15 adds forward migration 20261106000004_worker_leases.sql (20 applied versions; 33 app tables). public.worker_control is executable only by service_role; private helpers keep fixed search_path and no browser grants. jobs/worker_slots gain worker_instance_id. Worker identities/hashed credentials, singleton slot, fenced runs, measured budgets and safe events reuse existing tables. Setup and expiry/revocation behavior are in [LOCAL-WORKER.md](LOCAL-WORKER.md). No database reset or quota increase.
+
+
+W-16 (6 November 2026): three forward migrations add worker_execute, owned Education run/media authorization, readiness and mode admission without a reset (23 applied versions; still 33 app tables). SQL/HTTP publication verifies the scoped artifact set, deferred Ready/export/latest-result integrity and exact terminal replay. Used upload ceilings remain charged through failures until physical deletion is confirmed. Public media descriptors remain service-role-only. See EDUCATION-GENERATION.md; no existing account/global allowance or pause is changed by migrations.
+
+
+W-24D (6 November 2026): migration 20261106000008_delete_saved_draft.sql adds version-checked owned draft removal without deleting generated history. Local totals: 24 applied versions / 33 app tables; 449 SQL assertions pass. Run node scripts/check-draft-deletion.mjs for the two real admission/delete lock orderings when local Education admission has capacity; it uses only temporary accounts, makes synthetic jobs unclaimable before commit and restores their accounting during cleanup. No provider call or reset is needed. Existing SQL baseline suites isolate pause/mode/offline assumptions in rollback transactions and preserve your enabled runtime settings.
+
+
+W-17 (7 November 2026): migration 20261107000001_education_progress.sql updates the owner-safe Education progress read and fenced narration count reporting. Local totals: 25 versions / 33 app tables; 474 pgTAP assertions pass. No reset, new storage backend or quota change. Run the transaction-isolated SQL suite through the configured local Docker network. Existing profile/usage/worker setup is retained.
+
+
+W-18 (7 November 2026): forward migration 20261107000002_generation_recovery.sql is applied locally without reset. Totals: 26 migration versions, 33 app tables, 520 passing pgTAP assertions. Owner-only retry RPCs retain reservations/counters/checkpoints; no table browsing privilege, real quota increase or hosted setup is added.
+
+
+W-19 (7 November 2026): migration 20261107000003_generation_cancellation.sql applied without reset. Local totals: 27 versions / 33 app tables; 549 pgTAP assertions pass. Run SQL acceptance separately from browser fixtures because both exercise the single global processing slot. Real 200 MB account / 400 MB global budgets and existing worker configuration remain unchanged.
+
+
+W-20 (7 November 2026): migration 20261107000004_education_result_player.sql applied without reset. Local totals: 28 versions / 33 app tables, 598 passing SQL assertions. New functions provide owner-scoped revision metadata and private media descriptors only; no generation settings or real 200 MB account / 400 MB global allowances changed. Temporary playback fixture objects are removed with the Storage API and fixture records with the narrowly authorized purge path.
+
+
+W-23 (7 November 2026): migration 20261107000005_video_library.sql applied without reset; 29 versions / 33 app tables, 616 passing SQL assertions plus concurrency/worker/scene/expiry regressions and 40 OAuth return-path parity checks. The full test wrapper needs a paused idle local stack; tests temporarily paused admission/claims and restored their original values. The user/account allowances remain unchanged.
+
+
+W-24 Storage-retention slice (12 November 2026): 20261112000001_media_retention.sql applied without reset; 30 migrations / 33 app tables, 661 SQL assertions and existing concurrency/expiry regressions passed. Use media:cleanup for read-only preview and MEDIA-RETENTION.md for the private watcher. Stop global maintenance while running synthetic integration fixtures. No account/global allowance changed.

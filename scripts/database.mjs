@@ -124,6 +124,10 @@ if(command==='start') {
   process.stderr.write(result.stderr??'');
   if(result.status!==0) process.exit(result.status??1);
   await concurrency();
+  const queue=spawnSync(process.execPath,['scripts/check-generation-concurrency.mjs'],{cwd:root,env:environment,encoding:'utf8',windowsHide:true});
+  process.stdout.write(queue.stdout??'');process.stderr.write(queue.stderr??'');if(queue.status!==0)process.exit(queue.status??1);
+  const worker=spawnSync(process.execPath,['scripts/check-worker-control.mjs'],{cwd:root,env:environment,encoding:'utf8',windowsHide:true});
+  process.stdout.write(worker.stdout??'');process.stderr.write(worker.stderr??'');if(worker.status!==0)process.exit(worker.status??1);
   const contracts=spawnSync(process.execPath,['--import','tsx','scripts/check-database-contracts.ts'],{cwd:root,env:environment,encoding:'utf8',windowsHide:true});
   process.stdout.write(contracts.stdout??''); process.stderr.write(contracts.stderr??'');
   if(contracts.status!==0) process.exit(contracts.status??1);

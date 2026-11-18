@@ -44,18 +44,31 @@
     "db:types:check": "node scripts/database.mjs types-check",
     "db:verify-migrations": "node scripts/database.mjs verify-migrations",
     "db:migrate": "node scripts/database.mjs migrate",
-    "web:auth:local": "node scripts/configure-web-auth.mjs"
+    "web:auth:local": "node scripts/configure-web-auth.mjs",
+    "web:uploads:local": "node scripts/configure-local-uploads.mjs",
+    "uploads:cleanup": "node scripts/cleanup-source-uploads.mjs",
+    "worker:provision:local": "node scripts/provision-worker-local.mjs",
+    "worker:revoke:local": "node scripts/provision-worker-local.mjs --revoke",
+    "worker:start": "tsx src/worker/cli.ts",
+    "worker:run": "tsx src/worker/cli.ts --execute",
+    "education:configure": "node scripts/configure-education-local.mjs",
+    "education:verify": "node --import tsx scripts/check-education-flow.mjs",
+    "media:cleanup": "node --import tsx scripts/cleanup-media.ts",
+    "media:watch": "node --import tsx scripts/cleanup-media.ts --apply --watch",
+    "workspace:cleanup": "node --import tsx scripts/cleanup-workspaces.ts",
+    "workspace:watch": "node --import tsx scripts/cleanup-workspaces.ts --apply --watch",
+    "operator": "node --import tsx scripts/operator-console.ts"
   },
   "dependencies": {
-    "@remotion/bundler": "4.0.538",
-    "@remotion/captions": "4.0.538",
-    "@remotion/install-whisper-cpp": "4.0.538",
-    "@remotion/renderer": "4.0.538",
+    "@remotion/bundler": "4.0.543",
+    "@remotion/captions": "4.0.543",
+    "@remotion/install-whisper-cpp": "4.0.543",
+    "@remotion/renderer": "4.0.543",
     "ffmpeg-static": "5.3.0",
     "ffprobe-static": "3.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "remotion": "4.0.538",
+    "remotion": "4.0.543",
     "zod": "4.6.7"
   },
   "devDependencies": {
@@ -68,5 +81,10 @@
   },
   "workspaces": [
     "apps/*"
-  ]
+  ],
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.1"
+    }
+  }
 }

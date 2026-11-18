@@ -1,6 +1,6 @@
 "use client";
 
-import { LIMITS, TopicSchema, IntendedUseSchema } from "@contracts";
+import { LIMITS, TopicSchema, IntendedUseSchema, GenerationInputSchema, PreferencesSchema } from "@contracts";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
@@ -8,7 +8,7 @@ import { CheckboxField, ChoiceField, SelectField, TextAreaField, TextField } fro
 import { Icon } from "@/components/icons";
 import {EducationSettings} from "@/components/education-settings";
 import { VideoSettings } from "@/components/video-settings";
-import { Button, PreviewNote } from "@/components/ui";
+import { Button, Notice, PreviewNote } from "@/components/ui";
 import type { DraftFormBinding } from "@/components/draft-form";
 
 export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
@@ -24,6 +24,8 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
   const [rights, setRights] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [generationEnabled,setGenerationEnabled]=useState(false);
+  const [generationError,setGenerationError]=useState("");
   const touch = (field: string) => setTouched(current => ({ ...current, [field]: true }));
   const topicError = touched.topic && !TopicSchema.safeParse(topic).success ? "Enter a topic you want to explain." : undefined;
   const useError = touched.intendedUse && !IntendedUseSchema.safeParse(intendedUse).success ? "Choose how you intend to use this video." : undefined;
@@ -33,6 +35,9 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
   function preventSubmission(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setTouched({ topic: true, intendedUse: true, rights: true, processing: true });
+    const input={...saved,mode:"education",title:draft?.title.trim()||"Untitled education video",topic,audience,intendedUse,learningObjective:objective,referenceNotes:notes,sources:[]};const preferences={targetSeconds:Number(duration),orientation,voiceProfileId:voice};
+    const valid=GenerationInputSchema.safeParse(input).success&&PreferencesSchema.safeParse(preferences).success;setGenerationError(valid?"":"Check the required fields and text limits before generating.");
+    if(generationEnabled&&rights&&processing&&valid)draft?.onGenerate?.(input,preferences,{sourceRights:true,externalAiProcessing:true,policyVersion:"v1"});
   }
 
   return <div className="education-page">
@@ -43,6 +48,7 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
     </section>
     <p className="education-preview-label">{draft ? "Save incomplete details as a draft. Changes are saved only when you choose Save draft." : "Form preview · Inputs stay on this page only. Leaving or refreshing clears them."}</p>
 
+    {generationError&&<Notice error>{generationError}</Notice>}
     <form className="education-workspace" onSubmit={preventSubmission} onChange={draft?.onDirty} noValidate aria-label="Education video details">
       <fieldset className="draft-fields" disabled={draft?.pending}>
       <div className="education-source ui-panel">
@@ -72,18 +78,18 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
       </div>
 
       <aside className="education-settings-column" aria-label="Video settings and automatic features">
-        {draft ? <EducationSettings duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation} voice={voice} onVoiceChange={setVoice}/> : <VideoSettings prefix="education" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation}/> }
+        {draft ? <EducationSettings onGenerationAvailable={setGenerationEnabled} duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation} voice={voice} onVoiceChange={setVoice}/> : <VideoSettings prefix="education" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation}/> }
         <section className="education-automatic ui-panel" aria-labelledby="automatic-title"><h2 id="automatic-title"><Icon name="layers" width="18" height="18" />Automatic generation</h2><p>Includes AI narration, automatic captions, illustrated scenes and a cartoon teacher synced with your topic.</p><ul>{["2D cartoon teacher", "Synchronized captions", "Illustrated scenes"].map(feature => <li key={feature}><Icon name="check" width="13" height="13" />{feature}</li>)}</ul></section>
       </aside>
 
         <section className="education-section education-acknowledgments" aria-label="Permissions and processing">
           <CheckboxField id="education-rights" name="rightsAcknowledged" label="I have permission to use any reference material I provide." required checked={rights} onChange={event => setRights(event.target.checked)} onBlur={() => touch("rights")} error={rightsError} />
           <CheckboxField id="education-processing" name="processingAcknowledged" label="I understand my inputs are processed by external AI services." required checked={processing} onChange={event => setProcessing(event.target.checked)} onBlur={() => touch("processing")} error={processingError} />
-          <p className="education-retention"><Icon name="clock" width="16" height="16" />Generated media is kept for 7 days.</p>
+          <p className="education-retention"><Icon name="clock" width="16" height="16" />Generated media is available for 7 days after completion. Download your video before it expires. Downloaded copies stay on your device.</p>
         </section>
         <div className="education-actions">
-          <div className="education-action-buttons"><Button variant="secondary" pending={draft?.pending} pendingLabel="Saving draft…" disabled={!draft || draft.conflict} onClick={()=>draft?.onSave({...saved,mode:"education",topic,audience,intendedUse:intendedUse||undefined,learningObjective:objective,referenceNotes:notes,sources:[]},{...draft.preferences,targetSeconds:Number(duration),orientation,voiceProfileId:voice})} aria-describedby="education-action-hint">Save draft</Button><Button type="submit" disabled aria-describedby="education-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div>
-          <p id="education-action-hint" className="field-hint">{draft ? "Saving does not start AI processing. Generation is not connected yet." : "Draft saving and generation are not connected in this preview, even when all required fields are filled."}</p>
+          <div className="education-action-buttons"><Button variant="secondary" pending={draft?.pending} pendingLabel="Saving draft…" disabled={!draft || draft.conflict} onClick={()=>draft?.onSave({...saved,mode:"education",topic,audience,intendedUse:intendedUse||undefined,learningObjective:objective,referenceNotes:notes,sources:[]},{...draft.preferences,targetSeconds:Number(duration),orientation,voiceProfileId:voice})} aria-describedby="education-action-hint">Save draft</Button><Button type="submit" disabled={!draft?.onGenerate||!generationEnabled||draft.pending||draft.conflict} aria-describedby="education-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div>
+          <p id="education-action-hint" className="field-hint">{draft ? "Saving does not start AI processing. Generate requires available processing capacity and both acknowledgments." : "Draft saving and generation are not connected in this preview, even when all required fields are filled."}</p>
         </div>
       </fieldset>
     </form>

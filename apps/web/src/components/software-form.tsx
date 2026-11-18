@@ -2,12 +2,14 @@
 
 import { LIMITS, NameSchema, RequiredBriefSchema, IntendedUseSchema, SoftwareTextSchema, countCharacters } from "@contracts";
 import Image from "next/image";
+import {SourceUploads} from "@/components/source-uploads";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { CheckboxField, SelectField, TextAreaField, TextField } from "@/components/form-fields";
+import {CatalogSettings} from "@/components/catalog-settings";
 import { VideoSettings } from "@/components/video-settings";
 import { Icon } from "@/components/icons";
-import { Button, PreviewNote } from "@/components/ui";
+import { Button, Notice, PreviewNote } from "@/components/ui";
 import type { DraftFormBinding } from "@/components/draft-form";
 
 export function SoftwareForm({draft}: {draft?:DraftFormBinding}={}) {
@@ -18,6 +20,7 @@ export function SoftwareForm({draft}: {draft?:DraftFormBinding}={}) {
   const [intendedUse, setIntendedUse] = useState<string>(saved?.intendedUse??"");
   const [duration, setDuration] = useState(String(draft?.preferences.targetSeconds??60));
   const [orientation, setOrientation] = useState<string>(draft?.preferences.orientation??"landscape");
+  const [voice,setVoice] = useState(draft?.preferences.voiceProfileId??"Kore");
   const [rights, setRights] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -32,7 +35,8 @@ export function SoftwareForm({draft}: {draft?:DraftFormBinding}={}) {
   return <div className="software-page education-page">
     <Link className="back-link" href={draft ? "/projects/new" : "/preview/create"}><Icon name="arrow-left" width="17" height="17" />All video types</Link>
     <section className="software-intro" aria-labelledby="software-title"><div><span className="education-mode"><Icon name="layout" width="14" height="14" />Software showcase</span><h1 id="software-title">Create a software showcase</h1><p>Add your software details and visuals. We’ll turn them into a narrated walkthrough.</p></div><Image src="/illustrations/select-software.svg" width={200} height={120} alt="" /></section>
-    <p className="education-preview-label">{draft ? "Save incomplete details as a draft. Changes are saved only when you choose Save draft." : "Form preview · Inputs stay on this page only. Leaving or refreshing clears them."}</p>
+    <p className="education-preview-label">{draft ? "Text and settings are saved only when you choose Save draft. File attachments are saved as you upload." : "Form preview · Inputs stay on this page only. Leaving or refreshing clears them."}</p>
+    {draft&&<Notice><strong>Coming soon:</strong> Software showcase generation will be available in a future release. You can prepare and save a draft now.</Notice>}
     <form className="education-workspace software-workspace" onSubmit={preventSubmission} onChange={draft?.onDirty} noValidate aria-label="Software showcase details">
       <fieldset className="draft-fields" disabled={draft?.pending}>
       <div className="education-source ui-panel software-source">
@@ -49,22 +53,22 @@ export function SoftwareForm({draft}: {draft?:DraftFormBinding}={}) {
           <p className="software-media-description">At least one screenshot or supported recording is required. Three or four screenshots are recommended.</p>
           <p className="software-privacy"><Icon name="lock" width="16" height="16" /><span>Remove passwords, private information and personal data before uploading. In the connected application, files will be uploaded privately; external AI analysis starts only after you acknowledge processing and choose Generate.</span></p>
           <ul className="software-file-limits" aria-label="File requirements"><li>JPEG, PNG or WebP: up to 8 screenshots, 5 MB each.</li><li>MP4 (H.264, optional AAC): one recording, up to 45 MB and 120 seconds.</li><li>60 MB combined upload limit. Recording audio will be muted.</li></ul>
-          <div className="software-upload-zone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); setDropMessage("No file was opened or uploaded. File selection and uploading are not connected in this preview."); }}>
+          {draft ? <SourceUploads draft={draft} recordings/> : <><div className="software-upload-zone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); setDropMessage("No file was opened or uploaded. File selection and uploading are not connected in this preview."); }}>
             <span className="software-upload-icon"><Icon name="plus-circle" width="26" height="26" /></span><h3>Add screenshots or screen recordings</h3><p id="software-upload-unavailable">File selection, drag and drop, and uploading are not connected in this preview.</p><Button variant="secondary" disabled aria-describedby="software-upload-unavailable">Choose files</Button>
           </div>
-          <p className="software-upload-status" role="status">{dropMessage || "No files added. No files are read or sent from this preview."}</p>
+          <p className="software-upload-status" role="status">{dropMessage || "No files added. No files are read or sent from this preview."}</p></>}
         </section>
       </div>
       <aside className="education-settings-column" aria-label="Video settings and automatic features">
-        <VideoSettings prefix="software" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation} />
+        {draft ? <CatalogSettings prefix="software" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation} voice={voice} onVoiceChange={setVoice}/> : <VideoSettings prefix="software" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation}/> }
         <section className="education-automatic ui-panel" aria-labelledby="software-automatic-title"><h2 id="software-automatic-title"><Icon name="layers" width="18" height="18" />Automatic generation</h2><p>Includes AI narration, automatic captions and scenes based on your supplied software visuals.</p><p>Recordings can demonstrate actions. Still screenshots won’t be presented as live interactions.</p></section>
       </aside>
       <section className="education-section education-acknowledgments" aria-label="Permissions and processing">
         <CheckboxField id="software-rights" name="rightsAcknowledged" label="I have permission to use any reference material I provide." required checked={rights} onChange={event => setRights(event.target.checked)} onBlur={() => touch("rights")} error={touched.rights && !rights ? "Confirm you have permission to use your reference material." : undefined} />
         <CheckboxField id="software-processing" name="processingAcknowledged" label="I understand my inputs are processed by external AI services." required checked={processing} onChange={event => setProcessing(event.target.checked)} onBlur={() => touch("processing")} error={touched.processing && !processing ? "Acknowledge external AI processing before generating." : undefined} />
-        <p className="education-retention"><Icon name="clock" width="16" height="16" />Generated media is kept for 7 days.</p>
+        <p className="education-retention"><Icon name="clock" width="16" height="16" />Generated media is available for 7 days after completion. Download your video before it expires. Downloaded copies stay on your device.</p>
       </section>
-      <div className="education-actions"><div className="education-action-buttons"><Button variant="secondary" pending={draft?.pending} pendingLabel="Saving draft…" disabled={!draft || draft.conflict} onClick={()=>draft?.onSave({...saved,mode:"software",softwareName:name,brief:description,featureHighlights:features,intendedUse:intendedUse||undefined,sources:saved?.sources??[]},{...draft.preferences,targetSeconds:Number(duration),orientation})} aria-describedby="software-action-hint">Save draft</Button><Button type="submit" disabled aria-describedby="software-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div><p className="field-hint" id="software-action-hint">{draft ? "Save your text and settings now. Uploads, voice playback and generation are not connected yet." : "Uploads, draft saving and generation are not connected in this preview, even when text fields are valid."}</p></div>
+      <div className="education-actions"><div className="education-action-buttons"><Button id="draft-save-button" variant="secondary" pending={draft?.pending} pendingLabel="Saving draft…" disabled={!draft || draft.conflict || draft.uploadBusy} onClick={()=>draft?.onSave({...saved,mode:"software",softwareName:name,brief:description,featureHighlights:features,intendedUse:intendedUse||undefined,sources:saved?.sources??[]},{...draft.preferences,targetSeconds:Number(duration),orientation,voiceProfileId:voice})} aria-describedby="software-action-hint">Save draft</Button><Button type="submit" disabled aria-describedby="software-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div><p className="field-hint" id="software-action-hint">{draft ? "Coming soon: Software showcase generation will be available in a future release. You can save this draft now." : "Uploads, draft saving and generation are not connected in this preview, even when text fields are valid."}</p></div>
       </fieldset>
     </form>
     {!draft && <PreviewNote>Software form UI only. No account, stored files, saved draft or generation service is connected.</PreviewNote>}

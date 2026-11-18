@@ -1,0 +1,10 @@
+import Link from "next/link";
+import { InformationPage } from "@/components/public-shell";
+export const metadata = { title: "Using the preview" };
+export default function Terms() { return <InformationPage title="Using the learning preview" intro="Practical terms for this creator-operated Education showcase. Updated 12 November 2026.">
+  <section><h2>Current scope</h2><p>The release provides Education video generation subject to processing availability and account limits. Software and Product branding generation are planned for a future release. This preview is provided as a learning project without an uptime or generation-time guarantee. Do not depend on it for urgent or critical work.</p></section>
+  <section><h2>Your inputs and account</h2><p>Use material you own or are authorized to process. Do not upload secrets, sensitive personal information or content that infringes someone else’s rights. Keep your password and private media links secure. Do not bypass access controls, quotas or safety checks, or interfere with other users’ jobs.</p></section>
+  <section><h2>AI outputs need review</h2><p>Check facts, captions, pronunciation and visuals before using a result. AI-generated output can be incorrect or incomplete. This application does not guarantee uniqueness, commercial-use rights or suitability for a particular purpose. Applicable AI-provider and source-material terms still apply, including attribution obligations where required.</p></section>
+  <section><h2>Availability and storage</h2><p>The creator’s processing computer must be online. Capacity, provider limits and failures can delay or prevent generation. Keep your own copies of important inputs and download successful generated media within seven days. Closing the browser or signing out does not cancel an existing job; use the job’s cancellation action when offered.</p></section>
+  <section><h2>Questions</h2><p>Read the privacy notice before submitting project data. Contact the creator if you have a concern about these terms or a result.</p><Link href="/privacy">Privacy notice</Link><p><Link href="/contact">Contact the creator →</Link></p></section>
+  </InformationPage>; }

@@ -90,3 +90,10 @@ Speech requests allow up to four minutes; planning requests allow up to two minu
 ## Short screenshot software example
 
 See [software showcase guide](SOFTWARE-SHOWCASE.md) for the Make My Marriage sample, commands, approved image analysis, source mapping and limits. The supplied screenshot is used for one requested 30–40-second landscape showcase; this is separate from the original 60–90-second education contract. `npm run pipeline:showcase` resumes the sample's saved stages; `npm run pipeline:showcase:render` and `npm run pipeline:showcase:verify` use only local saved artifacts.
+### Topic visual previews — 12 November 2026
+
+New supported sorting/LLM inference stories can contain validated topic-specific animations. Other named sorting algorithms and unsupported topics keep generic diagrams. Existing cached stories/exports are preserved. Run `node --import tsx scripts/render-topic-fixtures.ts --clips` for synthetic silent landscape/portrait checks without providers. See [supported visuals and limitations](TOPIC-VISUALS.md).
+
+## Linux worker image — 13 November 2026
+
+See [Linux worker](LINUX-WORKER.md) for the pinned Docker build and offline native/render acceptance. The Windows `pipeline:tools` command remains unchanged. Configured executable paths are operator-only environment settings; never take them from user form input or LLM output. Existing Windows defaults are retained.

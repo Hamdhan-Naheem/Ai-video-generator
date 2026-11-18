@@ -17,7 +17,9 @@ export function canonicalDraft(mode:ProjectDto["mode"],title:string|undefined,in
  return {mode,title:savedTitle,draftInput:DraftInputSchema.parse({...input,mode,title:savedTitle,sources:input?.sources??[]}),preferences:PreferencesSchema.parse({...INITIAL_VIDEO_PREFERENCES,...preferences})};
 }
 export function safeProjectReturn(value:unknown):string {
- if(value==="/settings" || value==="/dashboard" || value==="/projects/new")return value;
+ if(value==="/videos" || value==="/drafts" || value==="/settings" || value==="/dashboard" || value==="/projects/new")return value;
+ if(typeof value==="string" && /^\/projects\/[a-f0-9-]{36}\/progress$/.test(value) && IdSchema.safeParse(value.split("/")[2]).success)return value;
+ if(typeof value==="string") {const parts=value.split('/');if(parts.length===5&&parts[0]===''&&parts[1]==='projects'&&parts[3]==='results'&&IdSchema.safeParse(parts[2]).success&&IdSchema.safeParse(parts[4]).success)return value;}
  if(typeof value==="string" && value.startsWith("/projects/") && IdSchema.safeParse(value.slice(10)).success)return value;
  return "/dashboard";
 }

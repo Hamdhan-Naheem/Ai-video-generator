@@ -12,7 +12,7 @@ test("selection opens each mode destination and returns to all types", async ({ 
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
     if (mode === "education") await expect(page.getByRole("textbox", { name: "What would you like to explain?" })).toBeVisible();
     else if (mode === "software") await expect(page.getByRole("textbox", { name: "Software name", exact: true })).toBeVisible();
-    else await expect(page.getByText("Its input form has been designed", { exact: false })).toBeVisible();
+    else await expect(page.getByRole("textbox", {name:"Product name",exact:true})).toBeVisible();
     await page.getByRole("link", { name: "All video types", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Create video", exact: true })).toBeVisible();
   }

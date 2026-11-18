@@ -1,0 +1,11 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {EducationMediaGrantSchema,EducationMediaRequestSchema,EducationResultSchema} from '../shared/contracts/index.ts';
+test('private result grants reject overlong lifetimes, credentials, redirects and wrong media requests',()=>{
+ const grant={revisionId:'c2000000-0000-4000-8000-000000000001',kind:'video',download:false,url:'http://127.0.0.1:55421/storage/v1/object/sign/artifacts/fixture?token=fixture',serverTime:'2026-11-07T00:00:00Z',expiresAt:'2026-11-07T00:01:00Z'};
+ assert(EducationMediaGrantSchema.safeParse(grant).success);assert(!EducationMediaGrantSchema.safeParse({...grant,expiresAt:'2026-11-07T00:01:01Z'}).success);assert(!EducationMediaGrantSchema.safeParse({...grant,expiresAt:grant.serverTime}).success);
+ for(const url of ['javascript:alert(1)','http://evil.invalid/storage/v1/object/sign/a','https://user:secret@example.invalid/storage/v1/object/sign/a','https://example.invalid/redirect'])assert(!EducationMediaGrantSchema.safeParse({...grant,url}).success);
+ assert(EducationMediaRequestSchema.safeParse({kind:'video',download:true}).success);for(const value of [{kind:'report',download:true},{kind:'video',download:true,ownerId:'other'},{kind:'thumbnail',download:true}])assert(!EducationMediaRequestSchema.safeParse(value).success);
+});
+test('result metadata exposes recorded narration without media paths',()=>{
+ const result={revisionId:'c2000000-0000-4000-8000-000000000001',title:'Synthetic fixture',version:1,status:'ready',orientation:'portrait',targetSeconds:60,durationMs:60000,completedAt:'2026-11-07T00:00:00Z',expiresAt:'2026-11-14T00:00:00Z',serverTime:'2026-11-07T00:00:01Z',narration:{provider:'elevenlabs',voice:'fixture-voice'}};
+ assert(EducationResultSchema.safeParse(result).success);assert(EducationResultSchema.safeParse({...result,title:'🙂'.repeat(120)}).success);assert(!EducationResultSchema.safeParse({...result,expiresAt:null}).success);assert(!EducationResultSchema.safeParse({...result,durationMs:null}).success);assert(!EducationResultSchema.safeParse({...result,bucket:'private',objectKey:'secret'}).success);assert(!EducationResultSchema.safeParse({...result,status:'rendering'}).success);
+});

@@ -1,7 +1,8 @@
-import {test,expect,type APIRequestContext,type BrowserContext} from "@playwright/test";
+import {test,expect as baseExpect,type APIRequestContext,type BrowserContext} from "@playwright/test";
 import {execFileSync} from "node:child_process";
 import {randomUUID} from "node:crypto";
 import {ProjectDtoSchema} from "../../../shared/contracts/index";
+const expect=baseExpect.configure({timeout:65000});
 const origin=`http://127.0.0.1:${process.env.PLAYWRIGHT_PORT??"3100"}`;
 const emails:string[]=[];const password="Draft-workflow-private-2026!";
 function sql(input:string){return execFileSync("docker",["exec","-i","supabase_db_ai-video-studio-local","psql","-X","-U","postgres","-d","postgres","-v","ON_ERROR_STOP=1","-Atq"],{input,encoding:"utf8",windowsHide:true,stdio:["pipe","pipe","pipe"]});}
@@ -20,6 +21,24 @@ test.describe("W09 real owned project drafts",()=>{
   if(!emails.length)return;for(const email of emails)if(!/^w09-[a-f0-9-]+@example\.invalid$/.test(email))throw Error("Unsafe fixture");
   const list=emails.map(email=>`'${email}'`).join(",");
   sql(`begin;delete from public.idempotency_requests where owner_id in(select id from auth.users where email in(${list}));delete from public.projects where owner_id in(select id from auth.users where email in(${list}));delete from public.usage_accounts where owner_id in(select id from auth.users where email in(${list}));delete from public.profiles where id in(select id from auth.users where email in(${list}));delete from auth.users where email in(${list});commit;`);
+ });
+ for(const sampleMode of ["education","software","branding"] as const) test(`${sampleMode} approved Kore sample plays real audio through authenticated endpoint`,async({page,context})=>{
+  test.skip(process.env.W10_REAL_SAMPLE!=="1","Requires the explicitly installed approved sample.");
+  await signup(context);
+  const voices=(await(await context.request.get("/api/v1/voices")).json()).data;expect(voices.items[0].previewUrl).toBe("/api/v1/voices/Kore/preview");
+  const response=await context.request.get(voices.items[0].previewUrl);expect(response.status()).toBe(200);expect(response.headers()["content-type"]).toBe("audio/wav");expect(response.headers()["cache-control"]).toBe("private, no-store");const bytes=await response.body();expect(bytes.subarray(0,4).toString()).toBe("RIFF");expect(bytes.length).toBeLessThan(2_000_000);
+  const anonymous=await page.request.get("/api/v1/voices/Kore/preview?path=private");expect(anonymous.status()).toBe(400);
+  await page.addInitScript(()=>{const Original=window.Audio;const media:HTMLAudioElement[]=[];Object.defineProperty(window,"sampleMedia",{value:media});Object.defineProperty(window,"Audio",{value:function(src?:string){const audio=new Original(src);media.push(audio);return audio;}});});
+  await page.goto(`/projects/new?mode=${sampleMode}`);const preview=page.getByRole("button",{name:"Preview voice",exact:true});await expect(preview).toBeEnabled();
+  expect(await page.evaluate(()=>(window as unknown as {sampleMedia:HTMLAudioElement[]}).sampleMedia.length)).toBe(0);
+  await preview.click();await expect(page.getByRole("button",{name:"Stop sample",exact:true})).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>(window as unknown as {sampleMedia:HTMLAudioElement[]}).sampleMedia.at(-1)!.currentTime)).toBeGreaterThan(1);
+  expect(await page.evaluate(()=>(window as unknown as {sampleMedia:HTMLAudioElement[]}).sampleMedia.at(-1)!.duration)).toBeCloseTo(12,1);
+  await page.getByRole("button",{name:"Stop sample",exact:true}).click();await expect(preview).toBeEnabled();
+  expect(await page.evaluate(()=>(window as unknown as {sampleMedia:HTMLAudioElement[]}).sampleMedia.at(-1)!.paused)).toBe(true);
+  await preview.click();await expect(page.getByRole("button",{name:"Stop sample",exact:true})).toBeVisible();await expect(preview).toBeEnabled({timeout:25000});
+  await preview.click();await expect(page.getByRole("button",{name:"Stop sample",exact:true})).toBeVisible();await page.getByRole("link",{name:"All video types",exact:true}).click();
+  await expect(page).toHaveURL(/\/projects\/new$/);await expect.poll(()=>page.evaluate(()=>(window as unknown as {sampleMedia:HTMLAudioElement[]}).sampleMedia.every(audio=>audio.paused))).toBe(true);
  });
  test("education incomplete save, reopen, preferences, conflicts and safe return after expiry",async({page,context})=>{
   const user=await signup(context);let creates=0;
@@ -45,7 +64,7 @@ test.describe("W09 real owned project drafts",()=>{
    await second.getByRole("textbox",{name:"Project title"}).fill("First editor wins");await second.getByRole("button",{name:"Save draft",exact:true}).click();await expect(second.getByText("Draft saved.",{exact:true})).toBeVisible();
    await page.getByRole("textbox",{name:"Project title"}).fill("Keep this stale edit");await page.getByRole("button",{name:"Save draft",exact:true}).click();
    await expect(page.getByText(/This draft changed in another tab/)).toBeVisible();await expect(page.getByRole("textbox",{name:"Project title"})).toHaveValue("Keep this stale edit");await expect(page.getByRole("button",{name:"Save draft",exact:true})).toBeDisabled();
-   await page.getByRole("button",{name:"Reload saved draft (replaces your edits)"}).click();await expect(page.getByRole("textbox",{name:"Project title"})).toHaveValue("First editor wins");
+   await page.getByRole("button",{name:"Reload saved draft (replaces your edits)"}).click();await page.getByRole("dialog").getByRole("button",{name:"Replace with saved draft"}).click();await expect(page.getByRole("textbox",{name:"Project title"})).toHaveValue("First editor wins");
   } finally {await second.close();}
   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`../../.cache/w09-education-${test.info().project.name}.png`,fullPage:true});
   await page.getByRole("link",{name:"Back to dashboard",exact:true}).click();await expect(page.getByRole("heading",{name:"First editor wins"})).toBeVisible();await page.getByRole("link",{name:"Continue draft",exact:true}).click();
@@ -83,12 +102,21 @@ test.describe("W09 real owned project drafts",()=>{
  test("software text/settings and branding metadata drafts persist without enabling generation",async({page,context})=>{
   await signup(context);await page.goto("/projects/new?mode=software");
   await page.getByRole("textbox",{name:"Project title"}).fill("Software draft");await page.getByRole("textbox",{name:"Features to highlight"}).fill("A clear booking workflow");
+  await page.getByRole("radio",{name:/75 sec/}).check();await page.getByRole("radio",{name:/Portrait/}).check();await expect(page.getByRole("combobox",{name:"Narration voice"})).toHaveValue("Kore");
   await page.getByRole("button",{name:"Save draft",exact:true}).click();await expect(page).toHaveURL(/\/projects\/[0-9a-f-]{36}$/);await page.reload();
-  await expect(page.getByRole("textbox",{name:"Features to highlight"})).toHaveValue("A clear booking workflow");await expect(page.getByRole("button",{name:"Generate video"})).toBeDisabled();
+  await expect(page.getByRole("textbox",{name:"Features to highlight"})).toHaveValue("A clear booking workflow");await expect(page.getByRole("radio",{name:/75 sec/})).toBeChecked();await expect(page.getByRole("radio",{name:/Portrait/})).toBeChecked();await expect(page.getByRole("combobox",{name:"Narration voice"})).toHaveValue("Kore");await expect(page.getByRole("button",{name:"Generate video"})).toBeDisabled();
+  await expect(page.getByRole("button",{name:"Generate video"})).toBeDisabled();await expect(page.locator('input[type="file"]')).toHaveCount(1);await expect(page.getByText("Save this draft first, then add your private files here.",{exact:true})).toHaveCount(0);
+  await page.getByRole("navigation",{name:test.info().project.name==="mobile"?"Mobile navigation":"Main navigation",exact:true}).getByRole("link",{name:"My videos",exact:true}).click();await expect(page).toHaveURL(/\/videos$/);await expect(page.getByRole("heading",{name:"My videos",exact:true})).toBeVisible();await expect(page.getByText("Alex Morgan",{exact:true})).toHaveCount(0);await expect(page.getByRole("heading",{name:"Software draft",exact:true})).toBeVisible();await page.getByRole("link",{name:/Continue draft.*Software draft/}).click();await expect(page).toHaveURL(/\/projects\/[a-f0-9-]{36}$/);await expect(page.getByRole("textbox",{name:"Features to highlight",exact:true})).toHaveValue("A clear booking workflow");
+  await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo(0,0);});await page.screenshot({path:`../../.cache/w12-software-${test.info().project.name}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole("textbox",{name:"What does your software do?"}).fill("x".repeat(2500));await page.getByRole("textbox",{name:"Features to highlight"}).fill("x".repeat(1501));await page.getByRole("button",{name:"Save draft",exact:true}).click();await expect(page.getByText(/Check the draft’s field lengths/)).toBeVisible();
   await page.getByRole("textbox",{name:"Features to highlight"}).fill("Booking tools");await page.getByRole("button",{name:"Save draft",exact:true}).click();await expect(page.getByText("Draft saved.",{exact:true})).toBeVisible();
-  await page.getByRole("link",{name:"All video types"}).click();await page.getByRole("link",{name:"Create branding video"}).click();await expect(page.getByText(/full product-branding form is coming later/)).toBeVisible();
-  await page.getByRole("textbox",{name:"Project title"}).fill("Branding draft");await page.getByRole("radio",{name:/Portrait/}).check();await page.getByRole("button",{name:"Save draft",exact:true}).click();await expect(page).toHaveURL(/\/projects\/[0-9a-f-]{36}$/);await page.reload();await expect(page.getByRole("textbox",{name:"Project title"})).toHaveValue("Branding draft");await expect(page.getByRole("radio",{name:/Portrait/})).toBeChecked();await expect(page.getByRole("button",{name:"Generate video"})).toBeDisabled();
+  await page.getByRole("link",{name:"All video types"}).click();await page.getByRole("link",{name:"Prepare product branding draft"}).click();await expect(page.getByRole("textbox",{name:"Product name",exact:true})).toBeVisible();
+  await page.getByRole("textbox",{name:"Project title"}).fill("Branding draft");await page.getByRole("textbox",{name:"Product name",exact:true}).fill("Everyday backpack");await page.getByRole("textbox",{name:"Benefits to highlight",exact:true}).fill("Organize daily essentials\nDedicated laptop compartment");await page.getByRole("textbox",{name:"Brand details",exact:true}).fill("Forest and ivory; practical tone");await page.getByRole("combobox",{name:"Intended use"}).selectOption("promotional");await page.getByRole("radio",{name:/Portrait/}).check();await page.getByRole("button",{name:"Save draft",exact:true}).click();await expect(page).toHaveURL(/\/projects\/[0-9a-f-]{36}$/);await page.reload();await expect(page.getByRole("textbox",{name:"Project title"})).toHaveValue("Branding draft");await expect(page.getByRole("textbox",{name:"Product name",exact:true})).toHaveValue("Everyday backpack");await expect(page.getByRole("textbox",{name:"Benefits to highlight",exact:true})).toHaveValue("Organize daily essentials\nDedicated laptop compartment");await expect(page.getByRole("textbox",{name:"Brand details",exact:true})).toHaveValue("Forest and ivory; practical tone");await expect(page.getByRole("textbox",{name:"What is your product?",exact:true})).toHaveValue("");await expect(page.getByRole("combobox",{name:"Intended use"})).toHaveValue("promotional");await expect(page.getByRole("radio",{name:/Portrait/})).toBeChecked();await expect(page.getByRole("button",{name:"Generate video"})).toBeDisabled();
+  const id=page.url().split("/").at(-1)!;const before=ProjectDtoSchema.parse((await(await context.request.get(`/api/v1/projects/${id}`)).json()).data);
+  expect(before.draftInput.mode).toBe("branding");if(before.draftInput.mode!=="branding")throw Error("Unexpected mode");expect(before.draftInput.benefits).toEqual(["Organize daily essentials","Dedicated laptop compartment"]);
+  const extra={...before.draftInput,brandColors:["#235B4E"],callToAction:"Explore the backpack",intendedAudience:"Daily commuters"};expect((await mutate(context.request,`projects/${id}`,{expectedDraftVersion:before.draftVersion,draftInput:extra},"PATCH")).status()).toBe(200);
+  await page.reload();await page.getByRole("textbox",{name:"Product name",exact:true}).fill("Revised backpack");await page.getByRole("button",{name:"Save draft",exact:true}).click();await expect(page.getByText("Draft saved.",{exact:true})).toBeVisible();
+  const after=ProjectDtoSchema.parse((await(await context.request.get(`/api/v1/projects/${id}`)).json()).data);expect(after.draftInput).toMatchObject({productName:"Revised backpack",brandColors:["#235B4E"],callToAction:"Explore the backpack",intendedAudience:"Daily commuters"});
   await expect(page.locator("body")).toHaveCSS("background-color","rgb(247, 246, 242)");expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  });
 });

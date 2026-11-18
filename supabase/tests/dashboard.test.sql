@@ -1,5 +1,10 @@
 -- Rollback-only metadata fixtures: no media bytes, provider calls or changed real accounts.
 begin;
+-- These baseline assertions are transaction-local, even after Education is enabled.
+update public.app_settings set generation_paused=true,claims_paused=true where id='global';
+-- Isolate unknown-allowance fixtures from operator-configured local limits.
+update public.usage_accounts set byte_limit=0 where scope='global';
+update public.app_settings set limits=jsonb_set(limits,'{globalByteLimitConfigured}','false') where id='global';
 create extension if not exists pgtap with schema extensions;
 set local search_path=public,extensions,pg_temp;
 select no_plan();

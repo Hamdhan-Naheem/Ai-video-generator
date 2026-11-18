@@ -1,3 +1,4 @@
+import {RecoverablePipelineError} from './pipeline-errors.ts';
 import {Caption, Storyboard, VideoScene, words} from './contracts.js';
 
 export function validateCaptions(captions:Caption[],duration:number):Caption[]{
@@ -51,3 +52,25 @@ export function timeline(plan:Storyboard,captions:Caption[],audioDuration:number
 }
 function timestamp(ms:number,separator:string){const n=Math.max(0,Math.round(ms));return `${String(Math.floor(n/3600000)).padStart(2,'0')}:${String(Math.floor(n/60000)%60).padStart(2,'0')}:${String(Math.floor(n/1000)%60).padStart(2,'0')}${separator}${String(n%1000).padStart(3,'0')}`;}
 export function exportCaptions(captions:Caption[],vtt=false){return (vtt?'WEBVTT\n\n':'')+captions.map((c,i)=>`${vtt?'':`${i+1}\n`}${timestamp(c.startMs,vtt?'.':',')} --> ${timestamp(c.endMs,vtt?'.':',')}\n${c.text.trim()}\n`).join('\n');}
+
+/** Whisper windows can slightly exceed measured audio; bound only small trailing timestamp overshoot. */
+export function boundWhisperCaptions(captions:Caption[],duration:number):Caption[]{
+ const end=duration*1000;if(!Number.isFinite(end)||end<=0)throw new RecoverablePipelineError('CAPTION_TIMING_INVALID');
+ const bounded=captions.map(c=>{if(c.endMs>end){if(c.endMs-end>500||c.startMs>=end)throw new RecoverablePipelineError('CAPTION_TIMING_INVALID',['outside_audio']);return {...c,endMs:end};}return c;});
+ // Whisper may give a word no duration at the exact edge of its neighbour.
+ // Keep every word by grouping that boundary token inside an existing measured
+ // interval. Never invent a per-word clock or repair a negative/overlapping span.
+ const grouped:Caption[]=[];
+ const join=(parts:Caption[])=>parts.map((c,i)=>i&&!/^\s/.test(c.text)?' '+c.text:c.text).join('');
+ for(let i=0;i<bounded.length;i++){
+  const c=bounded[i];
+  if(c.startMs!==c.endMs){grouped.push({...c});continue;}
+  if(!Number.isFinite(c.startMs)||c.startMs<0||c.startMs>end)throw new RecoverablePipelineError('CAPTION_TIMING_INVALID',['invalid_intervals']);
+  let j=i+1;while(j<bounded.length&&bounded[j].startMs===c.startMs&&bounded[j].endMs===c.endMs)j++;
+  const next=bounded[j],previous=grouped.at(-1),tokens=bounded.slice(i,j);
+  if(next&&next.startMs===c.startMs&&next.endMs>next.startMs){grouped.push({...next,text:join([...tokens,next])});i=j;}
+  else if(previous&&previous.endMs===c.startMs&&previous.endMs>previous.startMs){previous.text=join([previous,...tokens]);i=j-1;}
+  else throw new RecoverablePipelineError('CAPTION_TIMING_INVALID',['zero_duration_without_boundary']);
+ }
+ try{return validateCaptions(grouped,duration);}catch{throw new RecoverablePipelineError('CAPTION_TIMING_INVALID',['invalid_intervals']);}
+}

@@ -16,7 +16,7 @@ export const AuthSessionDtoSchema = z.strictObject({ user: UserDtoSchema });
 export const AuthResultDtoSchema = z.strictObject({ user: UserDtoSchema, nextPath: z.literal("/dashboard") });
 export const DisplayNamePatchSchema = z.strictObject({ expectedVersion: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER), displayName: DisplayNameSchema });
 export const SignOutRequestSchema = z.strictObject({ scope: z.literal("local") });
-const allowedReturnPath = z.string().max(256).refine(value => ["/dashboard","/videos","/settings","/projects/new"].includes(value) || (value.startsWith("/projects/") && IdSchema.safeParse(value.slice("/projects/".length)).success));
+const allowedReturnPath = z.string().max(256).refine(value => ["/dashboard","/drafts","/videos","/settings","/projects/new"].includes(value) || (value.startsWith("/projects/") && IdSchema.safeParse(value.slice("/projects/".length)).success));
 export const GoogleSignInRequestSchema = z.strictObject({ nextPath: allowedReturnPath.optional() });
 export const ReauthenticateRequestSchema = z.discriminatedUnion("method", [
   z.strictObject({ method: z.literal("password"), password: CurrentPasswordSchema, action: z.literal("delete_account") }),
