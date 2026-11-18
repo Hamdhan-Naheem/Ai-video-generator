@@ -1,10 +1,11 @@
+import {LightEducation} from './LightEducation.js';
 import React from 'react';
 import {AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import type {VideoProps} from '../contracts.js';
 import {Teacher} from './Teacher.js';
 import {SolarVideo} from './SolarVideo.js';
 
-export const EducationVideo:React.FC<VideoProps>=(props)=>props.visualStyle==='solar-energy'?<SolarVideo {...props}/>:<DiagramVideo {...props}/>;
+export const EducationVideo:React.FC<VideoProps>=(props)=>(props.visualStyle==='education-light'||props.scenes.some(s=>s.plan.animation))?<LightEducation {...props}/>:props.visualStyle==='solar-energy'?<SolarVideo {...props}/>:<DiagramVideo {...props}/>;
 const DiagramVideo:React.FC<VideoProps>=(props)=>{
   const frame=useCurrentFrame();const seconds=frame/30;const portrait=props.format==='portrait';
   const scene=props.scenes.find(s=>frame>=s.startFrame&&frame<s.startFrame+s.durationFrames)??props.scenes.at(-1)!;

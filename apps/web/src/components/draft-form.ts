@@ -1,0 +1,2 @@
+import type {ProjectDto,DraftInput,Preferences} from "@contracts";
+export type DraftFormBinding={projectId?:string;draftVersion?:number;uploadBusy:boolean;onUploadBusy:(busy:boolean)=>void;onUploadConflict:()=>void;onUploadSnapshot:(project:ProjectDto,expectedVersion:number)=>void;input:DraftInput;preferences:Preferences;title:string;pending:boolean;conflict:boolean;onTitleChange:(value:string)=>void;onDirty:()=>void;onGenerate?:(input:unknown,preferences:unknown,acknowledgments:unknown)=>void;onSave:(input:unknown,preferences:unknown)=>void};

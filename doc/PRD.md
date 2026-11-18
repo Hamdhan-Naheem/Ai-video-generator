@@ -3,13 +3,27 @@
 # AI Video Studio — Product Requirements Document
 
 **Status: FINAL — APPROVED PRODUCT BASELINE**  
-**Version:** 1.1 — user-approved authentication revision, 24 October 2026  
-**Date:** 23 October 2026  
+**Version:** 1.4 — resource and security safeguards, 12 November 2026
+**Date:** 12 November 2026
 **Working name:** AI Video Studio (placeholder)  
 **Owner:** Project creator  
 **Purpose:** Approved requirements and implementation reference for V1.
 
 The user explicitly approved finalization on 23 October 2026. This document defines the agreed V1 scope and adopts the documented defaults below as the implementation baseline. Account access, free-tier eligibility, Google OAuth configuration, and hardware performance remain implementation verification tasks, not unapproved product requirements. No paid services or unverified capabilities are implied by approval. Changes to scope, spending, retention, or provider policy must be recorded as revisions.
+
+> **Storage decision — 7 November 2026:** The user selected private Supabase Storage for the first Education release, alongside Supabase Auth and PostgreSQL. This supersedes the 6 November R2 target. R-02 is Deferred for showcase, not Complete; no R2 integration is required for this release. Existing local Storage integration is retained, while hosted setup and release verification remain unfinished. The [project tracker](PROJECT-TRACKER.md) records the current implementation order.
+
+The Education-only release scope remains unchanged: Software/Branding generation and Google sign-in are deferred; existing forms/drafts remain. The full three-mode product vision is retained for later releases.
+
+### First deployment acceptance boundary
+
+- English Education generation, 60/75/90-second targets, 720p landscape/portrait at 30 fps, narration, teacher animation and synchronized captions. No new duration or quality guarantees.
+- Email/password sessions, owned drafts including confirmed deletion, clear queue/progress/offline/failure/cancel states, private result playback and MP4/SRT/VTT downloads, and reopening retained results.
+- Private media remains owner-authorized with read grants no longer than 60 seconds; successful media retains the existing seven-day expiry. Cleanup, usage limits and prevention of late publication after cancellation/deletion are launch requirements.
+- Software showcase and Product branding generation are unavailable in this release. Keep their existing forms/drafts; label entry points **Coming soon** and say they will be available in a future release. Do not imply the next deployment is guaranteed. Enforce availability server-side as well as in the UI.
+- Google sign-in, revisions/regeneration, alternate-orientation management, burned-caption export and advanced operator UI are deferred for this release. Both output orientations remain available on initial Education creation.
+- Vercel serves the web/lightweight API; a separate worker generates videos. The initial worker is the creator's computer and must be online. Always-on hosted generation requires a separately approved hosting decision; it is not supplied by object storage.
+- See [Education showcase release plan](EDUCATION-RELEASE.md) for the ordered implementation and deployment gates. This task changes documentation only.
 
 ## 1. Product definition
 
@@ -54,7 +68,7 @@ The product uses existing AI services and programmatic animation. It does not re
 | Processing location | Confirmed | Creator's computer initially; available while it is on |
 | Aspect ratios | Confirmed | Portrait and landscape in version 1 |
 | Resolution | Approved baseline | 1280×720 landscape and 720×1280 portrait, 30 fps |
-| Database/auth/storage | Approved | Supabase PostgreSQL, Auth, and private Storage |
+| Database/auth/storage | Revised 7 November 2026 | Hosted Supabase PostgreSQL, Auth and private Storage; retain current local integration and verify hosted setup. R2 deferred from the first release. |
 | Narration provider | Confirmed | Gemini TTS primary; automatically fall back to eligible ElevenLabs free API access on quota exhaustion or qualifying failure; no Kokoro |
 | Caption timing | Approved implementation | Remotion caption tools with local Whisper.cpp invoked from Node.js; no Python |
 | Web hosting | Confirmed | Vercel Hobby for the personal noncommercial prototype; local worker remains separate |
@@ -261,14 +275,14 @@ Remotion renders teacher poses and mouth changes on the narration timeline. Use 
 - **Node.js:** orchestrator and local processing worker; Remotion rendering and job control.
 - **Node.js caption processing:** Remotion Whisper.cpp integration and caption utilities; no Python.
 - **Teacher lip sync:** Node.js invokes the non-Python Rhubarb helper, then supplies its timing data to Remotion. All custom orchestration remains TypeScript; no Python setup or service is introduced.
-- **Supabase:** selected managed PostgreSQL, Auth, and private object Storage.
+- **Supabase:** selected managed PostgreSQL, Auth and private object Storage. R2 is deferred from the first release.
 - **Durable PostgreSQL job queue:** initial small-volume queue with leases and heartbeat; avoid a separate Redis dependency until needed.
 
 ```mermaid
 flowchart LR
   U[Browser: Next.js UI] --> A[Next.js API / authentication]
   A --> D[(PostgreSQL: projects and jobs)]
-  U --> S[Private object storage via scoped upload]
+  U --> S[Private Supabase Storage via scoped upload]
   W[Local Node.js worker] -->|Outbound claim and heartbeat| A
   W --> S
   W --> G[Gemini planning and TTS]
@@ -292,17 +306,17 @@ Vercel Hobby is the confirmed hosting choice for the Next.js frontend and lightw
 
 ## 10. PostgreSQL and video storage
 
-**Selected provider: Supabase Free for PostgreSQL, Auth, and private Storage.** This reduces integration work for a quota-limited learning prototype. Use PostgreSQL for structured metadata; store MP4s, images, audio, and caption files as objects. Save object keys, sizes, checksums, ownership, and expiry in the database. Never place video blobs or base64 media in project rows.
+**Approved target, revised 7 November 2026: hosted Supabase PostgreSQL, Auth and private Storage.** Retain the locally verified integration; hosted setup and release checks remain pending. R-02 R2 integration is deferred. Use PostgreSQL for structured metadata; store MP4s, images, audio, and caption files as objects. Save object keys, sizes, checksums, ownership, and expiry in the database. Never place video blobs or base64 media in project rows.
 
-Cloudflare R2 is NOT a selected V1 dependency. It appeared only as a storage comparison in the table below. No R2 account, keys, integration, or charges are required by this plan. The V1 storage path is Supabase alone; consider alternatives only after a later explicit decision.
+The 6 November R2 target was a documented proposal and was not implemented. The user selected Supabase Storage on 7 November to prioritize a smaller first release. No new database/storage migration or Cloudflare credentials are needed for that choice. Keep current quotas and privacy rules; verify actual hosted storage, per-file upload and separate cached/uncached egress allowances before deployment. File expiry must be paired with physical cleanup to reclaim capacity; it is not an automatic feature supplied by our seven-day policy. A free allowance is not unlimited usage or a generation-speed guarantee.
 
-Published free-plan comparison checked on 22 October 2026:
+Historical free-plan comparison checked on 22 October 2026 (not current allowance evidence; recheck before provisioning):
 
 | Option | Relevant published allowances | Assessment |
 |---|---|---|
-| Supabase Free | 500 MB database; 1 GB file storage; 5 GB uncached plus 5 GB cached egress; projects may pause after a week of inactivity | Selected integrated starting point; media storage is tight |
+| Supabase Free | 500 MB database; 1 GB file storage; 5 GB uncached plus 5 GB cached egress; projects may pause after a week of inactivity | Selected first-release provider for PostgreSQL/Auth/private media; verify hosted allowances and integration |
 | Neon Free | Pricing currently lists 1 GB PostgreSQL storage/project, 100 CU-hours/month/project, and backend offerings including object storage | Valid alternative; evaluate backend availability and integration before choosing it over Supabase |
-| Cloudflare R2 Standard | Free allowance includes 10 GB-month storage; request allowances; direct egress free; usage above allowances is billable | Potential later storage alternative, not the strict-zero-budget default |
+| Cloudflare R2 Standard | Free allowance includes 10 GB-month storage; request allowances; direct egress free; usage above allowances is billable | Deferred for showcase by 7 November decision; revisit if usage justifies migration |
 | Local PostgreSQL and local media | No hosted-service quota; uses the creator's hardware | Offline/dev fallback; availability and backup become the operator's responsibility |
 
 Sources: [Supabase pricing](https://supabase.com/pricing), [Supabase bandwidth](https://supabase.com/docs/guides/storage/serving/bandwidth), [Neon pricing](https://neon.com/pricing), [R2 pricing](https://developers.cloudflare.com/r2/pricing/).
@@ -554,3 +568,11 @@ The user reviewed the main desktop/mobile flows in the conversation and requeste
 - Product description stays optional under section 6.2; remove its required marker in the mockup. Software description and source media remain required; education requires topic and audience.
 - Account deletion is asynchronous. After acceptance, show “Account deletion requested” rather than claiming completed physical deletion. Immediately deny account access and sign out; cleanup continues idempotently. Do not add public cleanup-status lookup by email.
 - Existing source limits, ownership, three retained outputs, one active job including caption export, expiry, recovery limitation and release verification gates are unchanged. Privacy/source terms and a real contact route remain public-release work; no fabricated links/contact details.
+
+
+- **7 November 2026 — Revision 1.3:** user selected Supabase Auth/PostgreSQL/private Storage for the first Education release. The 6 November R2 target is superseded; R-02 remains deferred, not implemented or completed. No runtime, migration, quota or deployment changes accompany this decision.
+
+
+## Security safeguards — 12 November 2026
+
+The user requested lower showcase safeguards and approved the generation-history follow-up: 20 active drafts, 50 total project records, 50 stored generation revisions and 12 new generation jobs per account per UTC day. Daily external provider dispatch caps are 12 per account and 24 globally across planning and narration providers; failures/uncertain outcomes count. Existing retries preserve their job/checkpoints and per-job budgets. Internal source allocation history is bounded at 100 records per account. These are local enforcement safeguards, not a guarantee of that many successful videos. Existing 200 MB account/400 MB global storage allowances, three retained outputs, both orientations, 60/75/90-second options, Education-only execution and the no-paid-activation policy remain. See [implemented controls](SECURITY-CONTROLS.md). Hosted configuration and release acceptance remain unfinished.

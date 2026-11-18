@@ -1,0 +1,17 @@
+import {z} from "zod";
+import {DecimalStringSchema,IdSchema,IsoTimeSchema,ModeSchema,OrientationSchema,PreferencesSchema,VersionSchema,AcknowledgmentsSchema} from "./common.ts";
+import {GenerationInputSchema} from "./inputs.ts";
+import {StageSchema} from "./responses.ts";
+export const WorkerCapabilitiesSchema=z.strictObject({modes:z.array(ModeSchema).min(1).max(3).refine(v=>new Set(v).size===v.length),orientations:z.array(OrientationSchema).min(1).max(2).refine(v=>new Set(v).size===v.length),compositionVersion:z.string().regex(/^[a-zA-Z0-9_-]{1,40}$/),schemaVersions:z.array(z.number().int().min(1).max(100)).min(1).max(5).refine(v=>new Set(v).size===v.length)});
+export const LeaseTokenSchema=z.string().regex(/^[1-9][0-9]{0,18}$/).refine(v=>/^[1-9][0-9]{0,18}$/.test(v)&&BigInt(v)<=9223372036854775807n);
+export const WorkerHealthSchema=z.strictObject({executionReady:z.boolean().optional(),freeDiskBytes:DecimalStringSchema.max(20),freeMemoryBytes:DecimalStringSchema.max(20),toolVersions:z.strictObject({node:z.string().regex(/^[a-zA-Z0-9._+-]{1,40}$/)})});
+export const WorkerClaimRequestSchema=z.strictObject({instanceId:IdSchema,capabilities:WorkerCapabilitiesSchema});
+export const WorkerHeartbeatRequestSchema=z.strictObject({instanceId:IdSchema,health:WorkerHealthSchema,assignment:z.strictObject({jobId:IdSchema,leaseToken:LeaseTokenSchema}).optional()});
+export const WorkerReleaseRequestSchema=z.strictObject({instanceId:IdSchema,jobId:IdSchema,leaseToken:LeaseTokenSchema,reason:z.enum(["adapter_pending","stopping"])});
+export const FrozenInputSchema=z.strictObject({input:GenerationInputSchema,preferences:PreferencesSchema,acknowledgments:AcknowledgmentsSchema.extend({acceptedAt:IsoTimeSchema}),draftVersion:VersionSchema});
+export const WorkerAssignmentSchema=z.strictObject({jobId:IdSchema,projectId:IdSchema,revisionId:IdSchema,kind:z.literal("generation"),stage:StageSchema,leaseToken:LeaseTokenSchema,leaseExpiresAt:IsoTimeSchema,serverTime:IsoTimeSchema,heartbeatIntervalSeconds:z.literal(20),input:z.strictObject({schemaVersion:z.literal(1),inputHash:z.string().regex(/^[a-f0-9]{64}$/),inputAssetIds:z.array(IdSchema).max(9),manifest:FrozenInputSchema}),budgets:z.strictObject({maxExternalAttempts:z.literal(24),usedExternalAttempts:z.number().int().min(0).max(24),maxRepairs:z.literal(2),usedRepairs:z.number().int().min(0).max(2),maxActiveMs:z.literal("1800000"),usedActiveMs:DecimalStringSchema}),checkpoints:z.array(z.strictObject({id:IdSchema,stage:StageSchema,unitKey:z.string().max(100),dependencyHash:z.string().regex(/^[a-f0-9]{64}$/),producerVersion:z.string().min(1).max(80)})).max(32)});
+export const WorkerHeartbeatSchema=z.strictObject({serverTime:IsoTimeSchema,leaseExpiresAt:IsoTimeSchema.nullable(),cancelRequested:z.boolean(),claimsPaused:z.boolean()});
+export const WorkerReleaseSchema=z.strictObject({released:z.literal(true),status:z.enum(["waiting_worker","cancelled","needs_input","failed"]),serverTime:IsoTimeSchema});
+export const WorkerConnectionSchema=z.strictObject({origin:z.string().url(),workerId:IdSchema,credentialId:IdSchema,token:z.string().regex(/^wkr_[a-zA-Z0-9_-]{43}$/),expiresAt:IsoTimeSchema});
+export type WorkerAssignment=z.infer<typeof WorkerAssignmentSchema>;
+export type WorkerCapabilities=z.infer<typeof WorkerCapabilitiesSchema>;

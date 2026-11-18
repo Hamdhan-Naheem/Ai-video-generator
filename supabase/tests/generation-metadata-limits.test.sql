@@ -1,0 +1,25 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+set local search_path=public,extensions,pg_temp;
+select no_plan();
+delete from private.provider_daily_usage;
+insert into auth.users(id,email) values('b1250000-0000-4000-8000-000000000001','history-cap@example.invalid');
+insert into public.projects(id,owner_id,title,mode) values('b1250000-0000-4000-8000-000000000011','b1250000-0000-4000-8000-000000000001','History fixture','education');
+insert into public.revisions(id,project_id,owner_id,revision_number,input_hash,request_kind,target_seconds,orientation,voice_profile_id,schema_version,prompt_version,composition_version)
+select ('b1250000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'b1250000-0000-4000-8000-000000000011','b1250000-0000-4000-8000-000000000001',n,repeat('a',64),'initial',60,'landscape','Kore',1,'v1','v1' from generate_series(101,150)n;
+select throws_ok($$insert into public.revisions(project_id,owner_id,revision_number,input_hash,request_kind,target_seconds,orientation,voice_profile_id,schema_version,prompt_version,composition_version) values('b1250000-0000-4000-8000-000000000011','b1250000-0000-4000-8000-000000000001',151,repeat('a',64),'initial',60,'landscape','Kore',1,'v1','v1')$$,'P2102',null::text,'New revision cannot exceed history cap');
+insert into public.jobs(project_id,owner_id,revision_id,kind,status,finished_at) select 'b1250000-0000-4000-8000-000000000011','b1250000-0000-4000-8000-000000000001',('b1250000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'generation','cancelled',now() from generate_series(101,112)n;
+select throws_ok($$insert into public.jobs(project_id,owner_id,revision_id,kind) values('b1250000-0000-4000-8000-000000000011','b1250000-0000-4000-8000-000000000001','b1250000-0000-4000-8000-000000000113','generation')$$,'P2103',null::text,'Repeated cancellation still consumes daily admission');
+select lives_ok($$update public.jobs set attempt_count=attempt_count+1 where owner_id='b1250000-0000-4000-8000-000000000001'$$,'Existing job updates do not consume new admission');
+select is((select coalesce(sum(attempts),0)::integer from private.provider_daily_usage),0,'Admission count is independent of provider usage');
+set constraints all immediate;
+alter table public.projects disable trigger projects_metadata_limit;
+update public.projects set draft_input=jsonb_build_object('referenceNotes',repeat('x',70000)) where id='b1250000-0000-4000-8000-000000000011';
+set constraints all immediate;
+alter table public.projects enable trigger projects_metadata_limit;
+select set_config('request.jwt.claims','{"sub":"b1250000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+select lives_ok($$select public.update_project_draft('b1250000-0000-4000-8000-000000000011',(select draft_version from public.projects where id='b1250000-0000-4000-8000-000000000011'),'Legacy RPC edit',(select draft_input from public.projects where id='b1250000-0000-4000-8000-000000000011'),'{}')$$,'Actual save RPC preserves unchanged oversized legacy input');
+select lives_ok($$update public.projects set title='Legacy still editable' where id='b1250000-0000-4000-8000-000000000011'$$,'Unchanged legacy input does not block title edits');
+select throws_ok($$update public.projects set draft_input=jsonb_build_object('referenceNotes',repeat('y',70000)) where id='b1250000-0000-4000-8000-000000000011'$$,'22023',null::text,'Changed oversized input remains rejected');
+select lives_ok($$update public.projects set draft_input='{}' where id='b1250000-0000-4000-8000-000000000011'$$,'Legacy payload can shrink to fit new limit');
+select * from finish();rollback;

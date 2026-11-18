@@ -1,0 +1,10 @@
+import {spawnSync,execFileSync} from "node:child_process";
+import {readFileSync,writeFileSync} from "node:fs";
+import {fileURLToPath} from "node:url";
+const root=fileURLToPath(new URL("../",import.meta.url));
+const status=spawnSync(process.execPath,[root+"node_modules/supabase/dist/supabase.js","status","-o","json"],{cwd:root,encoding:"utf8",windowsHide:true});if(status.status!==0)throw Error("Start the local Supabase stack first.");
+const values=JSON.parse(status.stdout);if(values.API_URL!=="http://127.0.0.1:55421"||!values.SERVICE_ROLE_KEY)throw Error("Only the expected local stack is supported.");
+const path=root+"apps/web/.env.local";let text=readFileSync(path,"utf8");if(!/^SUPABASE_URL=http:\/\/127\.0\.0\.1:55421\s*$/m.test(text))throw Error("Remote configuration left unchanged.");
+text=text.replace(/^SUPABASE_SERVICE_ROLE_KEY=.*(?:\r?\n|$)/m,"");writeFileSync(path,text.trimEnd()+"\nSUPABASE_SERVICE_ROLE_KEY="+values.SERVICE_ROLE_KEY+"\n");
+execFileSync("docker",["exec","-i","supabase_db_ai-video-studio-local","psql","-X","-U","postgres","-d","postgres","-v","ON_ERROR_STOP=1","-q"],{input:"begin;update public.usage_accounts set byte_limit=400000000 where scope='global' and byte_limit=0;update public.app_settings set limits=jsonb_set(limits,'{globalByteLimitConfigured}','true') where id='global' and exists(select 1 from public.usage_accounts where scope='global' and byte_limit>0);commit;",windowsHide:true,stdio:["pipe","pipe","pipe"]});
+console.log("Configured ignored server-only local Storage cleanup credential and local storage budget. No credentials printed or remote services changed.");

@@ -1,0 +1,49 @@
+import path from 'node:path';
+import {test,expect,type BrowserContext} from '@playwright/test';
+import {execFileSync} from 'node:child_process';
+import {randomUUID} from 'node:crypto';
+const origin=`http://127.0.0.1:${process.env.PLAYWRIGHT_PORT??'3100'}`;
+function sql(input:string){return execFileSync('docker',['exec','-i','supabase_db_ai-video-studio-local','psql','-X','-U','postgres','-d','postgres','-Atq','-v','ON_ERROR_STOP=1'],{input,encoding:'utf8',windowsHide:true,stdio:['pipe','pipe','pipe']}).trim();}
+const owners:string[]=[];let originalPause='true';
+async function post(context:BrowserContext,path:string,body:unknown,key?:string){const csrf=(await(await context.request.get('/api/v1/auth/csrf')).json()).data.csrfToken;return context.request.post(`/api/v1/${path}`,{data:body,headers:{Origin:origin,'X-CSRF-Token':csrf,...(key?{'Idempotency-Key':key}:{})}});}
+async function fixture(context:BrowserContext,status='failed',code='MEDIA_PROCESSING_FAILED'){
+ const signup=await post(context,'auth/sign-up',{email:`w18-${randomUUID()}@example.invalid`,password:'Recovery-fixture-2026!',displayName:'Recovery test'});expect(signup.status()).toBe(201);const owner=(await signup.json()).data.user.id as string;owners.push(owner);expect(owner).toMatch(/^[a-f0-9-]{36}$/);
+ sql(`insert into public.usage_accounts(scope,owner_id,byte_limit,output_limit) values('user','${owner}',400000000,3);`);
+ const created=await post(context,'projects',{mode:'education',title:'Turbines',draftInput:{mode:'education',topic:'How turbines work',audience:'beginner',intendedUse:'personal-learning',sources:[]},preferences:{targetSeconds:60,orientation:'landscape',voiceProfileId:'Kore'}},randomUUID());expect(created.status()).toBe(201);const project=(await created.json()).data;
+ expect(sql(`select (owner_id='${owner}')::text||':'||draft_state from public.projects where id='${project.id}'`)).toBe('true:active');const queued=await post(context,`projects/${project.id}/generations`,{draftVersion:project.draftVersion,preferences:{targetSeconds:60,orientation:'landscape',voiceProfileId:'Kore'},acknowledgments:{sourceRights:true,externalAiProcessing:true,policyVersion:'v1'}},randomUUID());expect(queued.status(),JSON.stringify(await queued.json())).toBe(202);const job=(await queued.json()).data.jobId as string;
+ sql(`begin;update public.usage_accounts a set reserved_bytes=a.reserved_bytes-r.bytes_remaining,reserved_outputs=a.reserved_outputs-r.output_slots_remaining from public.usage_reservations r where r.job_id='${job}' and (a.scope='global' or a.owner_id='${owner}');update public.usage_reservations set state='released',bytes_remaining=0,output_slots_remaining=0 where job_id='${job}';update public.jobs set status='${status}',safe_error_code='${code}',finished_at=now(),provider_attempt_count=4,repair_count=1,active_ms=12000,attempt_count=1 where id='${job}';update public.revisions set status='${status}' where id=(select revision_id from public.jobs where id='${job}');commit;`);
+ return{owner,project:project.id as string,job};
+}
+test.describe('W18 bounded recovery',()=>{
+ test.skip(process.env.W05_AUTH_TESTS!=='1','Local Supabase required');
+ test.beforeAll(()=>{expect(sql("select count(*) from public.jobs where status in ('running','cancel_requested')")).toBe('0');originalPause=sql("select claims_paused from public.app_settings where id='global'")==='t'?'true':'false';sql("update public.app_settings set claims_paused=true where id='global'");});
+ test.afterEach(()=>{
+  if(!owners.length)return;const ids=owners.map(v=>`'${v}'`).join(',');sql(`begin;update public.usage_accounts a set reserved_bytes=a.reserved_bytes-x.bytes,reserved_outputs=a.reserved_outputs-x.outputs from(select coalesce(sum(bytes_remaining),0) bytes,coalesce(sum(output_slots_remaining),0) outputs from public.usage_reservations where owner_id in(${ids}) and state='reserved')x where a.scope='global';update public.usage_accounts set reserved_bytes=0,reserved_outputs=0 where owner_id in(${ids});update public.usage_reservations set state='released',bytes_remaining=0,output_slots_remaining=0 where owner_id in(${ids}) and state='reserved';update public.jobs set status='failed',finished_at=now(),safe_error_code='MEDIA_PROCESSING_FAILED' where owner_id in(${ids}) and status in ('queued','waiting_worker');commit;`);
+ });
+ test.afterAll(()=>{
+  try{if(owners.length){const ids=owners.map(v=>`'${v}'`).join(',');sql(`begin;update public.usage_accounts a set reserved_bytes=a.reserved_bytes-x.bytes,reserved_outputs=a.reserved_outputs-x.outputs from(select coalesce(sum(bytes_remaining),0) bytes,coalesce(sum(output_slots_remaining),0) outputs from public.usage_reservations where owner_id in(${ids}) and state='reserved')x where a.scope='global';delete from public.usage_ledger where owner_id in(${ids});delete from public.usage_reservations where owner_id in(${ids});delete from public.job_events where job_id in(select id from public.jobs where owner_id in(${ids}));delete from public.idempotency_requests where owner_id in(${ids});delete from public.jobs where owner_id in(${ids});delete from public.revisions where owner_id in(${ids});delete from public.projects where owner_id in(${ids});delete from public.usage_accounts where owner_id in(${ids});delete from public.profiles where id in(${ids});delete from auth.users where id in(${ids});commit;`);}}finally{sql(`update public.app_settings set claims_paused=${originalPause} where id='global'`);}
+ });
+ test('lost retry response recovers one reservation and keeps unsaved input',async({page,context})=>{
+  const f=await fixture(context);await page.goto(`/projects/${f.project}/progress`);await expect(page.getByRole('button',{name:'Retry generation',exact:true})).toBeVisible();const editor=await context.newPage();await editor.goto(`/projects/${f.project}`);const topic=editor.getByLabel('What would you like to explain?',{exact:false});await topic.fill('Unsaved corrected topic');await page.bringToFront();
+  let requests=0;await page.route(`**/api/v1/jobs/${f.job}/retry`,async route=>{requests++;if(requests===1){await route.fetch();await route.abort('failed');}else await route.continue();});
+  await page.getByRole('button',{name:'Retry generation',exact:true}).click();await expect(page.getByRole('button',{name:'Check retry request',exact:true})).toBeVisible();await expect(topic).toHaveValue('Unsaved corrected topic');
+  // Focus checks must not unlock a second Generate while retry outcome is uncertain.
+  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  await page.getByRole('button',{name:'Check retry request',exact:true}).click();await expect.poll(()=>requests).toBe(2);await expect(page.getByRole('button',{name:'Check retry request',exact:true})).toHaveCount(0);
+  expect(sql(`select count(*) from public.usage_ledger where owner_id='${f.owner}' and operation_key like 'retry:%'`)).toBe('1');expect(sql(`select count(*) from public.revisions where owner_id='${f.owner}'`)).toBe('1');expect(sql(`select provider_attempt_count||':'||repair_count||':'||active_ms from public.jobs where id='${f.job}'`)).toBe('4:1:12000');await expect(topic).toHaveValue('Unsaved corrected topic');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ });
+ test('needs input returns focus to intact form; foreign retry and extra fields rejected',async({page,context,browser})=>{
+  const f=await fixture(context,'needs_input','INPUT_INVALID');await page.goto(`/projects/${f.project}/progress`);await expect(page.getByText('Your input needs attention',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Retry generation',exact:true})).toHaveCount(0);await page.getByRole('link',{name:'Edit saved draft',exact:true}).last().click();await expect(page.getByLabel('What would you like to explain?',{exact:false})).toBeVisible();
+  const invalid=await post(context,`jobs/${f.job}/retry`,{resetBudget:true},randomUUID());expect(invalid.status()).toBe(422);
+  const other=await browser.newContext({baseURL:origin});try{const otherFixture=await fixture(other);const foreign=await post(other,`jobs/${f.job}/retry`,{},randomUUID());expect(foreign.status()).toBe(404);expect(otherFixture.job).not.toBe(f.job);}finally{await other.close();}
+  await page.getByRole('main').screenshot({path:path.resolve(__dirname,`../../../.cache/recovery-needs-input-${test.info().project.name}.png`)});
+ });
+ test('concurrent retry requests reserve once and new keys cannot duplicate',async({context})=>{
+  const f=await fixture(context),key=randomUUID();const results=await Promise.all([post(context,`jobs/${f.job}/retry`,{},key),post(context,`jobs/${f.job}/retry`,{},key)]);expect(results.map(r=>r.status())).toEqual([202,202]);
+  const receipts=await Promise.all(results.map(r=>r.json()));expect(receipts.map(v=>v.data.reused).sort()).toEqual([false,true]);const extra=await post(context,`jobs/${f.job}/retry`,{},randomUUID());expect(extra.status()).toBe(409);expect(sql(`select reserved_outputs from public.usage_accounts where owner_id='${f.owner}'`)).toBe('1');
+ });
+ test('unsafe provider outcomes show operator guidance and exhausted budgets stay stopped',async({page,context})=>{
+  const f=await fixture(context,'failed','PROVIDER_OUTCOME_UNKNOWN');await page.goto(`/projects/${f.project}/progress`);await expect(page.getByText(/uncertain provider response/)).toBeVisible();await expect(page.getByRole('button',{name:'Retry generation',exact:true})).toHaveCount(0);
+  sql(`update public.jobs set provider_attempt_count=23 where id='${f.job}'`);await page.reload();await expect(page.getByText(/reached its recovery limits/)).toBeVisible();await expect(page.getByRole('link',{name:'Edit saved draft',exact:true}).last()).toBeVisible();const result=await post(context,`jobs/${f.job}/retry`,{},randomUUID());expect(result.status()).toBe(409);
+ });
+});

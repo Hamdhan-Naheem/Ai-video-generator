@@ -1,22 +1,27 @@
 import path from 'node:path';
+import {withPrivateBundle} from './maintenance/workspaces.ts';
 import {setDefaultResultOrder} from 'node:dns';
-import {availableParallelism,freemem} from 'node:os';
+import {renderConcurrency} from './worker/resources.ts';
 import {bundle} from '@remotion/bundler';
 import {renderMedia, renderStill, selectComposition} from '@remotion/renderer';
 import {VideoProps,validateVideoProps} from './contracts.js';
 import {root, exists} from './storage.js';
 import {probe,browserPath} from './media.js';
 
-export async function renderVideo(run:string,props:VideoProps,stillOnly=false){
+export async function renderVideo(run:string,props:VideoProps,stillOnly=false,privateWorkspace=false):Promise<{output:string;duration:number;bytes:number;frameWorkers:number}|undefined>{
+ if(privateWorkspace)return withPrivateBundle(root,run,outDir=>renderVideoInner(run,props,stillOnly,outDir));
+ return renderVideoInner(run,props,stillOnly);
+}
+async function renderVideoInner(run:string,props:VideoProps,stillOnly:boolean,outDir?:string){
   // Remotion's local asset server binds IPv4 on this Windows host.
   setDefaultResultOrder('ipv4first');
   props=validateVideoProps(props);
-  const serveUrl=await bundle({entryPoint:path.join(root,'src','video','index.tsx'),publicDir:path.join(run,'public'),webpackOverride:config=>({...config,resolve:{...config.resolve,extensionAlias:{...config.resolve?.extensionAlias,'.js':['.js','.ts','.tsx']}}})});
+  const serveUrl=await bundle({...(outDir?{outDir,enableCaching:false,symlinkPublicDir:false}:{}),entryPoint:path.join(root,'src','video','index.tsx'),publicDir:path.join(run,'public'),webpackOverride:config=>({...config,resolve:{...config.resolve,extensionAlias:{...config.resolve?.extensionAlias,'.js':['.js','.ts','.tsx']}}})});
   const browserExecutable=await browserPath();
   const composition=await selectComposition({serveUrl,id:'Education',inputProps:props,browserExecutable});
   if(stillOnly){await renderStill({serveUrl,composition,inputProps:props,browserExecutable,output:path.join(run,`preview-${props.format}.png`),frame:Math.min(600,props.durationFrames-1)});return;}
   const output=path.join(run,`${props.format}-${props.burnedCaptions?'captioned':'clean'}.mp4`);
-  const concurrency=Math.max(1,Math.min(4,availableParallelism(),Math.floor(freemem()/800_000_000)));let lastProgress=-1;
+  const concurrency=renderConcurrency();let lastProgress=-1;
   console.log(`Rendering with ${concurrency} frame workers.`);
   await renderMedia({serveUrl,composition,inputProps:props,browserExecutable,codec:'h264',audioCodec:'aac',outputLocation:output,concurrency,crf:23,onProgress:({progress})=>{const quarter=Math.floor(progress*4);if(quarter>lastProgress){lastProgress=quarter;console.log(`Render ${Math.min(100,quarter*25)}%`);}}});
   const info=await probe(output);const video=info.streams.find(s=>s.codec_type==='video');

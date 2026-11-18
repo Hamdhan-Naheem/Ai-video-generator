@@ -1,0 +1,81 @@
+begin;
+set local search_path=public,extensions,pg_temp;
+select no_plan();
+-- All availability/capacity changes and synthetic rows roll back together.
+update public.app_settings set generation_paused=false,claims_paused=true,limits=limits||'{"globalByteLimitConfigured":true}' where id='global';
+update public.usage_accounts set byte_limit=greatest(byte_limit,used_bytes+reserved_bytes+167772160) where scope='global';
+insert into auth.users(id,email) values('d1360000-0000-4000-8000-000000000001','mode-guard@example.invalid');
+insert into public.usage_accounts(scope,owner_id,byte_limit,output_limit) values('user','d1360000-0000-4000-8000-000000000001',400000000,3);
+insert into public.projects(id,owner_id,title,mode,draft_input) values
+('d1360000-0000-4000-8000-000000000011','d1360000-0000-4000-8000-000000000001','Mode fixture','education','{"topic":"Energy","audience":"beginner","intendedUse":"personal-learning","sources":[]}'),
+('d1360000-0000-4000-8000-000000000012','d1360000-0000-4000-8000-000000000001','Mode fixture','software','{"softwareName":"App","brief":"Explain its features","intendedUse":"personal-learning","sources":[]}'),
+('d1360000-0000-4000-8000-000000000013','d1360000-0000-4000-8000-000000000001','Mode fixture','branding','{"productName":"Bag","intendedUse":"personal-learning","sources":[]}');
+select set_config('request.jwt.claims','{"sub":"d1360000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+select public.reserve_source_upload('d1360000-0000-4000-8000-000000000012',1,'mode-software-source',repeat('a',64),'fixture.png','image/png',68,'image');
+select public.reserve_source_upload('d1360000-0000-4000-8000-000000000013',1,'mode-branding-source',repeat('b',64),'fixture.png','image/png',68,'image');
+select ok(private.complete_generation_input(draft_input||jsonb_build_object('mode',mode,'title',title),mode),mode||' fixture is complete before testing availability') from public.projects where owner_id='d1360000-0000-4000-8000-000000000001' order by mode;
+create temporary table mode_before as select used_bytes,reserved_bytes,retained_outputs,reserved_outputs from public.usage_accounts where scope='global';
+-- The invoker cannot SELECT projects directly; use fixed fixture IDs in this
+-- session-local helper while executing the real RPC as authenticated.
+create function pg_temp.mode_enqueue(m text) returns jsonb language sql as $$
+select public.enqueue_generation(case m when 'education' then 'd1360000-0000-4000-8000-000000000011'::uuid when 'software' then 'd1360000-0000-4000-8000-000000000012'::uuid else 'd1360000-0000-4000-8000-000000000013'::uuid end,'mode-'||m,jsonb_build_object('draftVersion',case when m='education' then 1 else 2 end,'preferences','{"targetSeconds":60,"orientation":"landscape","voiceProfileId":"Kore"}'::jsonb,'acknowledgments','{"sourceRights":true,"externalAiProcessing":true,"policyVersion":"v1"}'::jsonb));
+$$;
+grant execute on function pg_temp.mode_enqueue(text) to authenticated;
+select set_config('request.jwt.claims','{"sub":"d1360000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+update public.app_settings set limits=limits-'enabledGenerationModes' where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('education')$test$,'P1402','This generation mode is not enabled','education denied with missing mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','software denied with missing mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','branding denied with missing mode configuration');
+reset role;
+update public.app_settings set limits=jsonb_set(limits,'{enabledGenerationModes}','null'::jsonb) where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('education')$test$,'P1402','This generation mode is not enabled','education denied with null mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','software denied with null mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','branding denied with null mode configuration');
+reset role;
+update public.app_settings set limits=jsonb_set(limits,'{enabledGenerationModes}','[]'::jsonb) where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('education')$test$,'P1402','This generation mode is not enabled','education denied with empty mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','software denied with empty mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','branding denied with empty mode configuration');
+reset role;
+update public.app_settings set limits=jsonb_set(limits,'{enabledGenerationModes}','{"education":true,"software":true,"branding":true}'::jsonb) where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('education')$test$,'P1402','This generation mode is not enabled','education denied with object mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','software denied with object mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','branding denied with object mode configuration');
+reset role;
+update public.app_settings set limits=jsonb_set(limits,'{enabledGenerationModes}','"education"'::jsonb) where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('education')$test$,'P1402','This generation mode is not enabled','education denied with scalar mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','software denied with scalar mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','branding denied with scalar mode configuration');
+reset role;
+update public.app_settings set limits=jsonb_set(limits,'{enabledGenerationModes}','["future-mode"]'::jsonb) where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('education')$test$,'P1402','This generation mode is not enabled','education denied with unknown mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','software denied with unknown mode configuration');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','branding denied with unknown mode configuration');
+reset role;
+update public.app_settings set limits=limits||'{"enabledGenerationModes":["education"]}' where id='global';
+set local role authenticated;
+select throws_ok($test$select pg_temp.mode_enqueue('software')$test$,'P1402','This generation mode is not enabled','Education-only release denies direct Software RPC');
+select throws_ok($test$select pg_temp.mode_enqueue('branding')$test$,'P1402','This generation mode is not enabled','Education-only release denies direct Branding RPC');
+reset role;
+select is((select count(*)::integer from public.jobs where owner_id='d1360000-0000-4000-8000-000000000001'),0,'Disabled modes take no active-job slot');
+select is((select count(*)::integer from public.revisions where owner_id='d1360000-0000-4000-8000-000000000001'),0,'Disabled modes create no revisions');
+select is((select count(*)::integer from public.usage_reservations where owner_id='d1360000-0000-4000-8000-000000000001' and kind='generation'),0,'Disabled modes create no reservations');
+select is((select count(*)::integer from public.idempotency_requests where owner_id='d1360000-0000-4000-8000-000000000001' and operation like 'enqueue_generation:%'),0,'Disabled modes create no receipts');
+select is((select row(used_bytes,reserved_bytes,retained_outputs,reserved_outputs)::text from public.usage_accounts where scope='global'),(select row(used_bytes,reserved_bytes,retained_outputs,reserved_outputs)::text from mode_before),'Rejected modes preserve global accounting');
+set local role authenticated;
+select lives_ok($test$select pg_temp.mode_enqueue('education')$test$,'Explicitly enabled Education is admitted');
+reset role;
+update public.app_settings set limits=limits-'enabledGenerationModes' where id='global';
+set local role authenticated;
+select is(pg_temp.mode_enqueue('education')->>'reused','true','Existing receipt recovery survives disabled/missing mode configuration');
+reset role;
+select is((select count(*)::integer from public.jobs where owner_id='d1360000-0000-4000-8000-000000000001'),1,'Receipt replay cannot allocate another job');
+select is((select reserved_outputs from public.usage_accounts where owner_id='d1360000-0000-4000-8000-000000000001'),1,'Only explicit Education reserves one output');
+select * from finish();
+rollback;

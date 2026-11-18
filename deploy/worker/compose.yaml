@@ -1,0 +1,38 @@
+services:
+  worker:
+    image: ai-video-worker:local
+    platform: linux/amd64
+    build:
+      context: ../..
+      dockerfile: deploy/worker/Dockerfile
+    restart: unless-stopped
+    stop_grace_period: 45s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 2
+    mem_limit: 4g
+    pids_limit: 256
+    shm_size: 256m
+    tmpfs:
+      - /tmp:size=536870912,mode=1777
+    volumes:
+      - runs:/app/local-runs
+      - cache:/app/.cache
+    secrets:
+      - source: connection
+        target: connection.json
+      - source: providers
+        target: /app/.env
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+secrets:
+  connection:
+    file: ${WORKER_CONNECTION_FILE:?Set WORKER_CONNECTION_FILE to a private absolute file path}
+  providers:
+    file: ${WORKER_PROVIDER_FILE:?Set WORKER_PROVIDER_FILE to a private provider-only env file}
+volumes:
+  runs:
+  cache:

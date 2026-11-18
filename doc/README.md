@@ -7,9 +7,22 @@ Keep the useful project documents in GitHub so a fresh checkout includes the req
 | Document | Purpose |
 |---|---|
 | [PROJECT-TRACKER.md](PROJECT-TRACKER.md) | Current status, evidence, remaining features and exact next task |
-| [PRD.md](PRD.md) | Approved product requirements |
+| [PREDEPLOY-REVIEW.md](PREDEPLOY-REVIEW.md) | Pre-deployment local code/security audit, open findings, evidence and correction order |
+| [SECURITY-CONTROLS.md](SECURITY-CONTROLS.md) | Implemented abuse/metadata/provider limits, browser policy, verification and remaining hosted checks |
+| [PRD.md](PRD.md) | Approved product requirements and first-release scope amendment |
+| [EDUCATION-RELEASE.md](EDUCATION-RELEASE.md) | Education showcase Supabase deployment target, scope, sequence and launch gates; R2 deferred |
 | [SYSTEM-ARCHITECTURE.md](SYSTEM-ARCHITECTURE.md) | Current application architecture |
 | [DATABASE-DESIGN.md](DATABASE-DESIGN.md) | Data model and ownership rules |
+| [LOCAL-DATABASE.md](LOCAL-DATABASE.md) | Local Supabase commands, pgAdmin connection, migrations and ownership tests |
+| [EDUCATION-GENERATION.md](EDUCATION-GENERATION.md) | Education execution, local activation, budgets, verification and manual QA |
+| [OPERATOR-CONTROLS.md](OPERATOR-CONTROLS.md) | Protected W30 operational API/private CLI, pause/repair, security boundaries and verification |
+| [LINUX-WORKER.md](LINUX-WORKER.md) | Linux x86_64 Docker packaging, offline native/render checks, resource evidence and hosted setup boundaries |
+| [LOCAL-WORKER.md](LOCAL-WORKER.md) | Outbound local worker setup, credentials, leases and verification |
+| [RELEASE-QA.md](RELEASE-QA.md) | W-29 shared-failure/conflict/keyboard checks, evidence and manual QA |
+| [PUBLIC-PAGES.md](PUBLIC-PAGES.md) | W-27 public routes, approved sample/contact publication, provenance and release boundaries |
+| [LOCAL-WORKSPACE-CLEANUP.md](LOCAL-WORKSPACE-CLEANUP.md) | Registered local worker cleanup, locks, render-bundle disposal, preserved legacy data and watcher commands |
+| [VIDEO-DELETION-ACCOUNT.md](VIDEO-DELETION-ACCOUNT.md) | Completed-video deletion, resource usage, account menu and manual checks |
+| [MEDIA-RETENTION.md](MEDIA-RETENTION.md) | Private Storage retention watcher, accounting, safe retries and local/hosted boundaries |
 | [API-DESIGN.md](API-DESIGN.md) | API contracts and behavior |
 | [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Approved desktop/mobile colors, typography and components |
 | [UI-RECONCILIATION.md](UI-RECONCILIATION.md) | Reviewed flows and corrections for implementation |
@@ -21,6 +34,7 @@ Keep the useful project documents in GitHub so a fresh checkout includes the req
 | Document | Purpose |
 |---|---|
 | [LOCAL-SETUP.md](LOCAL-SETUP.md) | Local pipeline environment/setup history |
+| [TOPIC-VISUALS.md](TOPIC-VISUALS.md) | Supported Education sorting/LLM animations, safety boundaries and synthetic preview checks |
 | [PIPELINE-USAGE.md](PIPELINE-USAGE.md) | Working CLI commands |
 | [PROTOTYPE-FINDINGS.md](PROTOTYPE-FINDINGS.md) | Actual live/mocked validation and limits |
 | [SOFTWARE-SHOWCASE.md](SOFTWARE-SHOWCASE.md) | Source-specific accepted software sample |

@@ -1,0 +1,24 @@
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!src/
+!src/**
+!shared/
+!shared/**
+!scripts/
+!scripts/worker-container-check.ts
+!deploy/
+!deploy/worker/
+!deploy/worker/Dockerfile
+!deploy/worker/Dockerfile.dockerignore
+# Defense in depth if a source subtree gains local credentials or generated media.
+**/.env*
+**/*credential*
+**/node_modules
+**/.cache
+**/local-runs
+**/*.wav
+**/*.mp4
+**/*.pem
+**/*.key

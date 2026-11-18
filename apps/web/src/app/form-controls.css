@@ -1,0 +1,69 @@
+/* Shared controls follow the Stitch Education/Settings references and approved tokens. */
+.form-field { min-width: 0; margin: 0 0 24px; }
+.field-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.field-heading label, .choice-field legend { font-size: 13px; font-weight: 600; }
+.required-marker { color: var(--primary); }
+.field-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.form-control { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--control-border); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; line-height: 1.6; }
+textarea.form-control { resize: vertical; min-height: 110px; }
+select.form-control { padding-right: 32px; }
+.form-control::placeholder { color: var(--muted); opacity: 1; }
+.form-control[aria-invalid="true"] { border-color: #a33232; }
+.form-control:disabled { background: var(--canvas); color: var(--muted); cursor: not-allowed; }
+.form-control[readonly] { background: var(--selection); }
+.field-control { position: relative; }
+.field-control:has(> svg) .form-control { padding-right: 40px; }
+.field-control > svg { position: absolute; right: 12px; top: 14px; color: var(--muted); pointer-events: none; }
+.field-hint { color: var(--muted); font-size: 11px; line-height: 1.7; margin-top: 6px; }
+.field-error { display: flex; align-items: flex-start; gap: 6px; color: #a33232; font-size: 12px; line-height: 1.6; margin-top: 6px; }
+.field-error svg { flex: none; margin-top: 2px; }
+.password-control .form-control { padding-right: 52px; }
+.password-toggle { position: absolute; right: 1px; top: 1px; width: 44px; height: calc(100% - 2px); min-height: 44px; display: grid; place-items: center; background: transparent; border: 0; border-radius: 9px; color: var(--muted); cursor: pointer; }
+.password-toggle:disabled { cursor: not-allowed; }
+.choice-field { border: 0; padding: 0; }
+.choice-field legend { padding: 0; margin-bottom: 8px; }
+.choice-field > .field-hint { margin: 0 0 10px; }
+.choice-options { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.choice-card { display: flex; align-items: flex-start; gap: 8px; min-width: 0; min-height: 64px; padding: 12px; border: 1px solid var(--control-border); border-radius: 10px; background: var(--surface); cursor: pointer; }
+.choice-card:has(input:checked) { background: var(--selection); border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.choice-card:has(input:focus-visible) { outline: 3px solid var(--primary); outline-offset: 3px; }
+.choice-card:has(input:disabled) { opacity: .65; cursor: not-allowed; }
+.choice-card input, .checkbox-field input { accent-color: var(--primary); width: 18px; height: 18px; flex: none; margin: 2px 0 0; }
+.choice-card strong { display: block; font-size: 12px; font-weight: 600; }
+.choice-card small { display: block; font-size: 11px; line-height: 1.5; color: var(--muted); margin-top: 4px; }
+.choice-compact { grid-template-columns: repeat(auto-fit,minmax(80px,1fr)); }
+.choice-compact .choice-card { align-items: center; padding: 10px 8px; gap: 6px; }
+.checkbox-field > label { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 10px 0; font-size: 13px; cursor: pointer; }
+.checkbox-field:has(input:disabled) > label { cursor: not-allowed; color: var(--muted); }
+.checkbox-field > .field-hint, .checkbox-field > .field-error { margin-left: 28px; }
+.button { border: 1px solid transparent; cursor: pointer; }
+.button-quiet { color: var(--muted); background: transparent; }
+.button-quiet:hover { background: var(--selection); }
+.button:disabled, .ui-panel .button:disabled, .ui-dialog .button:disabled { opacity: .55; cursor: not-allowed; }
+.button-primary:disabled:hover { background: var(--primary); }
+.button[aria-busy="true"] { cursor: wait; }
+.ui-spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: control-spin .8s linear infinite; }
+@keyframes control-spin { to { transform: rotate(360deg); } }
+.notice-message { display: flex; align-items: flex-start; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.notice-message > svg { flex: none; }
+.ui-notice { flex-wrap: wrap; }
+.ui-notice .button { margin-left: 24px; font-size: 12px; }
+.ui-success { background: #eaf3ed; color: #216347; }
+.ui-warning { background: #faf0df; color: #80531b; }
+.ui-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 100px; background: var(--selection); color: var(--muted); font-size: 12px; }
+.ui-status-success { background: #eaf3ed; color: #216347; }
+.ui-status-warning { background: #faf0df; color: #80531b; }
+.ui-status-error { background: #fbeaea; color: #a33232; }
+.control-preview-grid { display: grid; grid-template-columns: minmax(0,7fr) minmax(0,5fr); gap: 24px; align-items: start; }
+.control-preview-panel { padding: 24px; min-width: 0; }
+.control-preview-panel h2 { font-size: 18px; margin-bottom: 24px; }
+.control-preview-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.control-preview-statuses { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+.optional-fields { border-top: 1px solid var(--border); padding: 12px 0; margin-bottom: 16px; }
+.optional-fields summary { cursor: pointer; min-height: 44px; padding: 10px 0; font-size: 13px; font-weight: 600; }
+.optional-fields[open] summary { margin-bottom: 12px; }
+.feedback-slot > p { margin-top: 16px; font-size: 13px; color: var(--muted); }
+@media (max-width: 1100px) { .control-preview-grid { grid-template-columns: 1fr; } }
+@media (max-width: 767px) { .control-preview-panel { padding: 16px; } .choice-options:not(.choice-compact) { grid-template-columns: 1fr; } .choice-compact .choice-card { flex-direction: column; text-align: center; } .control-preview-actions { flex-direction: column; } .control-preview-actions > .button { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .ui-spinner { animation: none; } .button { transition: none; } }
+.choice-compact:has(> :nth-child(3)) { grid-template-columns: repeat(3,minmax(0,1fr)); }

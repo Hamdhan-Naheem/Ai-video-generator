@@ -13,8 +13,8 @@ The tracker records progress; it does not override product requirements. Direct 
 
 - First working prototype: educational topic and audience → AI script/storyboard → AI narration → timed captions → 2D teacher mouth cues and diagrams → MP4.
 - The initial hydroelectric prototype and accepted solar/software samples already exist. Do not restart these completed tasks or make new provider requests merely because an older plan describes them as next steps. Both landscape and portrait remain V1 requirements.
-- The local CLI pipeline is implemented and the web scaffold is verified. Continue the current small milestone in the tracker; authentication, persistence and full web generation remain unfinished.
-- The full application architecture and UI reconciliation are documented. Implement the website/cloud integration incrementally; all three generation modes remain V1 scope.
+- The local CLI and web Education generation are verified locally through W-16, including email sessions, owned drafts, queue and worker execution. Production deployment and release hardening remain unfinished; R2 is deferred from the first release. Continue the current small milestone in the tracker.
+- The full product retains three generation modes, but the first recruiter-showcase release enables Education only. Software/Branding generation and Google sign-in are deferred for this release; preserve their existing forms/drafts and show Coming soon with a future-release explanation rather than promising the next deployment. See doc/EDUCATION-RELEASE.md.
 - English only, 60–90-second output, 720p portrait/landscape at 30 fps. No background music, cinematic footage, billing, subscriptions, or voice cloning in V1.
 
 ## Technology constraints
@@ -43,7 +43,7 @@ The tracker records progress; it does not override product requirements. Direct 
 ## Persistence and execution
 
 - Prototype: filesystem JSON/checkpoints and media under ignored local run directories; no PostgreSQL or browser localStorage is needed initially.
-- Full application: Supabase PostgreSQL for metadata/jobs, private Supabase Storage for binary media, Supabase Auth for users. No R2 dependency.
+- Approved deployment target (7 November 2026): hosted Supabase PostgreSQL for metadata/jobs, Supabase Auth for users and private Supabase Storage for binary media; Vercel web/light APIs and a separate worker. R2 is deferred for the showcase, superseding the 6 November target; Neon/Amazon RDS are not required. Retain the locally verified Storage integration and existing migrations/data. Hosted setup and verification are still required; no storage migration is authorized or needed by this decision.
 - Vercel hosts the eventual web app/lightweight API; the creator's local worker performs heavy processing and rendering through outgoing connections.
 - Preserve completed validated checkpoints across restarts. A provider/voice change invalidates narration and dependent timing/render data.
 - Separate actual provider calls from mocks. Label sample/fixture outputs explicitly. Never present simulated speech, guessed timestamps, or a mock render as a successful live pipeline.
@@ -57,6 +57,13 @@ The tracker records progress; it does not override product requirements. Direct 
 - For document-only changes, verify links and consistency; no live provider requests are needed.
 - For live tests, use small bounded inputs and record whether the result was live or mocked, the model/tool versions, quality, and limitations. Never log keys.
 - Report what changed, what was actually checked, and what remains unverified. Avoid claiming work is complete based solely on a plan, configuration file, or dependency install.
+
+## Education showcase release — 6 November 2026
+
+- W-17 progress, W-18 recovery, W-19 cancellation, W-24D draft deletion and availability messaging are verified locally. W-20 private results and W-23 retained-video listing/reopening are verified locally. The W-24 private Storage-retention slice is verified locally; operate the private watcher as documented in doc/MEDIA-RETENTION.md. W-27 public landing/help/release content is verified locally. W-29 shared failures/accessibility is verified locally. Registered local-workspace lifecycle is verified locally; see doc/LOCAL-WORKSPACE-CLEANUP.md. Essential W-30 operational controls are verified locally; next is guided user-run W-31 deployment preparation and remaining R-05 checks in doc/EDUCATION-RELEASE.md. R-03/R-04 are Complete locally and R-02 R2 integration remains deferred; do not mark a parent milestone Complete from a partial slice. Full W-24 remains unfinished.
+- Keep job state, ownership, quotas, leases and asset manifests in PostgreSQL; binary files live in private Supabase Storage. Keep provider/storage secrets server-side. The separate worker remains required and local availability must be disclosed. No Cloudflare credentials are needed for this release.
+- Preserve private access, maximum 60-second media grants, seven-day successful-media retention, existing budgets, both orientations and 60/75/90-second options. No paid activation, hosted-worker purchase or deployment is authorized by documentation approval.
+- Record hosted target architecture separately from locally verified behavior. Preserve accepted deletion/Coming soon evidence; a documentation or provider decision does not complete hosted setup, automatic retention cleanup or deployment. Verify per-file upload and separate storage/egress limits before release without increasing current budgets.
 
 ## Maintaining project progress
 
@@ -103,7 +110,7 @@ The tracker records progress; it does not override product requirements. Direct 
 - Email/password registration has no email verification; disclose no automatic recovery for forgotten email-only passwords. Google recovers Google credentials, not arbitrary app accounts.
 - No manual identity linking/unlinking or email changes in V1. Treat email addresses from password signup as self-declared; Supabase implicit confirmation is not mailbox proof. Verify provider automatic-linking/pre-registration collision behavior before public launch, including direct Auth calls.
 - Preserve private user-ID ownership and all global/per-user generation limits with public signup. Method-aware fresh reauthentication protects sensitive actions.
-- Read revision 1.1 of PRD, SYSTEM-ARCHITECTURE, API-DESIGN and DATABASE-DESIGN; historical invitation/SMTP requirements are superseded.
+- Read the latest dated revisions of PRD, SYSTEM-ARCHITECTURE, API-DESIGN and DATABASE-DESIGN; historical invitation/SMTP and R2-first-release requirements are superseded.
 
 ## Selected UI foundation — 24 October 2026
 
@@ -130,3 +137,22 @@ The tracker records progress; it does not override product requirements. Direct 
 - The user reported that generic scaffold pages do not match Stitch. Read doc/UI-IMPLEMENTATION-AUDIT.md. Technical scaffold completion does not mean page designs are implemented or visually approved.
 - W-01V implements the confirmed Dashboard desktop/mobile composition and the user accepted its compact refinement. The remaining three page references are recorded in doc/UI-PAGE-HANDOFF.md; user confirmation precedes their implementation with W-02 shared controls. Follow the confirmed Stitch reference structure and approved reconciliation for later pages; do not replace designed page content with generic foundation cards.
 - Verify visual layout at comparable desktop/mobile widths as well as functional checks. Preserve desktop/mobile token parity and clearly identify fixture identity, projects and processing availability until backend integration.
+
+
+## Shared abuse and metadata safeguards — 12 November 2026
+
+- Use the implemented shared PostgreSQL auth limiter, not a process-local Map as the public-release control. Never trust arbitrary forwarded IP headers outside the configured Vercel boundary. Keep direct Supabase Auth/hosted verification as a release gate.
+- Preserve the lower user-approved metadata/new-job/daily-AI bounds in doc/SECURITY-CONTROLS.md, exact ownership, global-first locking, dispatch receipts and conservative byte reservations. Do not increase credentials or allowances without authorization. A retry does not create a new job budget, and cached-only recovery must not require a new AI allowance.
+- Preserve per-document nonces, private media origin restrictions and document replacement after confirmed auth actions. Native expiry and unsaved-edit handling remain separate.
+- Keep Remotion package versions aligned and verify the targeted lint dependency override when updating. No automatic force-fix/downgrade or provider calls are needed to test a dependency patch.
+
+## Linux worker preparation — 13 November 2026
+
+- User approved Linux x86_64 Docker packaging, native-tool/offline render checks and resource measurement before remaining W-30. Follow doc/LINUX-WORKER.md; pipeline:tools remains Windows-only. ARM, hosted pairing, cloud/trial provisioning, billing and fresh AI calls are not authorized by packaging approval.
+- Keep credentials/private media out of Docker build context and image layers. Use separate runtime read-only connection/provider-file mounts, preserve outbound HTTPS control and existing leases/checkpoints/limits. Report actual cgroup resource evidence separately from fresh live generation or hosted acceptance.
+
+## Protected operator controls — 13 November 2026
+
+- Essential W30 API/private CLI is Complete locally; follow doc/OPERATOR-CONTROLS.md. Advanced admin UI and broader credential/outcome administration remain deferred. The user will perform deployment; next is W31 runbook/preparation and hosted acceptance, not autonomous cloud activation.
+- Never auto-promote real accounts or trust signup metadata for operator authority. Preserve early role rejection before global resource locks and locked rechecks. Keep internal operations private, user media owner-scoped, flags versioned, exact receipts bounded, and budget/fence/checkpoint history intact. Unknown provider outcomes require review, not a reset/refund.
+- Operator CLI passwords belong only in a private owner-readable config, never arguments/logs/browser bundles/images. Use the documented TypeScript-enabled npm launcher, ephemeral cookies/CSRF and local-session signout. Do not treat local acceptance or stored provider counters as hosted sign-off/live provider balance.
