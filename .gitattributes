@@ -1,0 +1,4 @@
+
+# SQL function bodies must have consistent line endings for guarded migrations.
+supabase/migrations/*.sql text eol=lf
+deploy/database/*.sql text eol=lf
