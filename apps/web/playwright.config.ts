@@ -1,5 +1,8 @@
+import {createRequire} from "node:module";
+import {join} from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
+const nextCli = createRequire(join(__dirname,"package.json")).resolve("next/dist/bin/next");
 const port = process.env.PLAYWRIGHT_PORT ?? "3100";
 if (!["3000", "3100"].includes(port)) throw new Error("Unexpected local test port");
 const origin = `http://127.0.0.1:${port}`;
@@ -17,7 +20,7 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
   ],
   webServer: {
-    command: `"${process.execPath}" ../../node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port ${port}`,
+    command: `"${process.execPath}" "${nextCli}" dev --hostname 127.0.0.1 --port ${port}`,
     url: `${origin}/preview/dashboard`,
     reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === "1",
     timeout: 240_000,

@@ -316,3 +316,5 @@ Production HTML now receives a per-document nonce/CSP and renders dynamically so
 The production `apps/web/tsconfig.json` excludes `e2e` and `playwright.config.ts`. Browser fixtures require local-only tools such as Docker and root FFmpeg dependencies, which are not web runtime requirements and need not be installed by Vercel's web workspace build. Strict application/shared-contract checking remains enabled during `next build`.
 
 `npm run web:typecheck` checks both the application and the dedicated `apps/web/tsconfig.e2e.json`; `npm run typecheck:e2e --workspace=@ai-video-studio/web` checks browser-test tooling explicitly after a full local dependency install. Browser test execution remains a separate check. Do not disable build type checking or add worker/native packages to the frontend to satisfy a fixture import.
+
+The Playwright launcher resolves the installed Next.js CLI from the web workspace instead of assuming it is hoisted into root node_modules. This supports both workspace-local and root-hoisted npm layouts after dependency updates.
