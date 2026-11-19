@@ -16,3 +16,9 @@ Implemented locally on 12 November 2026. `/` is now a public landing page, not a
 No new AI calls, cloud deployment, account changes, migrations, allowance increases, or messages to the public contact were performed. Existing account, ownership, private grants and worker controls remain intact. Robots stay `noindex` for the pre-release application. Provider privacy/terms links are informational, not a compliance certification. The privacy notice explicitly distinguishes generated-media access expiry, Storage cleanup, retained records, temporary local files and provider retention.
 
 W-29 accessibility/shared-failure checks and remaining R-05 lifecycle/security/hosted acceptance gates still apply. A local screenshot or successful build is not hosted deployment acceptance.
+
+## Hosted showcase voice preview
+
+The hosted preview now has a 12-second mono 24 kHz PCM fallback at `apps/web/assets/voice/kore-showcase.wav`. It is derived solely from the already-public, explicitly approved hydroelectric MP4 above, whose source hash is verified before extraction. `assets/voice/provenance.json` records source/output hashes and size. No original private recording or generated user media was copied, and no AI request was made.
+
+The existing authenticated `/api/v1/voices/Kore/preview` route prefers a valid private local sample when installed and otherwise reads this bounded curated fallback. It retains authentication, method validation, private/no-store responses and the fixed preview URL. Next.js file tracing explicitly includes only the curated fallback for the API route. The public source MP4 remains intentionally public; private sample originals remain ignored. Preview playback does not generate narration from the visitor's form.

@@ -1,96 +1,100 @@
-> Authentication revision approved on 24 October 2026: public email/password registration and Google sign-in; no invitations, SMTP, verification emails or password-reset emails in V1. Other product requirements remain unchanged.
+# AI Video Studio
 
-> Separate design documents: [Database design](doc/DATABASE-DESIGN.md) and [API design](doc/API-DESIGN.md). Review these, then Google Stitch UI and reconciliation before application implementation.
+A portfolio application that turns educational topics into narrated, illustrated videos. Built with Next.js, TypeScript, Gemini, Remotion and Supabase.
 
-> Application design (24 October 2026): [System architecture](doc/SYSTEM-ARCHITECTURE.md) describes the next phase. Education and software samples are user-accepted; the local web scaffold is implemented; cloud integration remains planned. See the [tracker](doc/PROJECT-TRACKER.md).
+**Live showcase:** https://hamdhan-ai-video-studio.vercel.app
 
-# AI Video Generator
+## Current showcase status
 
-A local education-video prototype implemented in TypeScript/Node.js. It turns a topic and audience into a Gemini storyboard and narration, measured captions, Rhubarb teacher mouth cues, and a Remotion MP4. No Python, background music, Supabase, or web deployment is required for this prototype.
+- The website and APIs are deployed on Vercel, with Supabase Auth, PostgreSQL and private Storage.
+- Visitors can create an email/password account, sign in, explore the forms, and save/reopen their own drafts.
+- An accepted hydroelectric Education video is available on the landing page. A short Kore voice preview is derived from this same approved public example; it does not synthesize speech for your current form.
+- **Live video generation is currently unavailable on the hosted showcase.** Full Education generation is implemented and has been demonstrated locally with a separate background worker. The form reflects server-reported availability and explains unavailable processing without starting a job.
+- The local Education workflow includes progress, bounded retry, cancellation, verified result playback and MP4/SRT/VTT downloads. Hosted end-to-end generation, worker pairing and remaining release checks are unfinished.
+- Software showcase and Product branding forms/drafts remain available; their generation and Google sign-in are deferred to a future release.
 
-The Next.js/Tailwind application lives in apps/web with local email sessions, owned drafts, private uploads and verified Education generation through an outgoing local worker. Read [Education setup and QA](doc/EDUCATION-GENERATION.md) before local activation. Google remains deferred; Software/Branding execution and full result/library flows remain later milestones. See the [project tracker](doc/PROJECT-TRACKER.md) for implementation status and remaining validation.
+This project is a recruiter/learning showcase. An always-on cloud worker has not been provisioned. A full demonstration can be run locally during an interview; the PC does not need to remain on for ordinary hosted website browsing. See the [project tracker](doc/PROJECT-TRACKER.md) for exact evidence and pending work.
 
-## Run in VS Code
+## How generation works
 
-Open this project root and use the terminal:
+1. A user supplies an educational topic, audience and preferences, then saves a draft.
+2. When processing is enabled, the server freezes the input and queues a job in PostgreSQL.
+3. The separate Node.js worker uses Gemini for the storyboard/script and primary narration. An eligible, explicitly configured ElevenLabs fallback is supported.
+4. Whisper.cpp supplies measured caption timing; Rhubarb derives the 2D teacher's mouth cues. Remotion renders allowlisted illustrated scenes into a verified MP4.
+5. The worker uploads media to private Supabase Storage. The signed-in owner can play or download results through short-lived grants.
+
+The generated project media has a seven-day availability period. The deliberately public demonstration assets are separate from private user media and do not follow that project expiry. Provider allowances and application limits still apply; no unlimited or always-free generation is promised.
+
+## Technology
+
+| Area | Tools |
+|---|---|
+| Web | Next.js, React, TypeScript, Tailwind CSS |
+| Authentication/data | Supabase Auth, PostgreSQL, row-level security |
+| Media | Private Supabase Storage |
+| AI | Gemini planning/TTS; eligible ElevenLabs narration fallback |
+| Video worker | Node.js, Remotion, FFmpeg/FFprobe, Whisper.cpp, Rhubarb |
+| Hosting | Vercel web/API; separate local worker for full demonstrations |
+
+## Local web development
+
+Use Node 24 and Docker Desktop with Linux containers. From the repository root:
+
+```powershell
+npm ci
+npm run db:start
+npm run db:migrate
+npm run web:auth:local
+npm run web:dev
+```
+
+Open http://127.0.0.1:3000. Local Supabase Studio is at http://127.0.0.1:55423. These loopback addresses refer to your own computer; they are not public deployment links. Local accounts/data are separate from hosted Supabase.
+
+Review [web development](doc/WEB-DEVELOPMENT.md) and [local database setup](doc/LOCAL-DATABASE.md) before changing configuration. `/preview/*` routes are disconnected design fixtures, not real account/project workflows. The setup helpers target the isolated local Docker stack; do not use them to configure the hosted database.
+
+## Local Education demonstration
+
+Use the existing private root `.env`, configured from `.env.example`. Never commit its values. Check the tool installation first:
 
 ```powershell
 npm run pipeline:doctor
+```
+
+See [Education generation](doc/EDUCATION-GENERATION.md), [local worker setup](doc/LOCAL-WORKER.md), and [Linux Docker worker](doc/LINUX-WORKER.md) for credential provisioning, native tools, limits and worker operation. Starting the web app alone does not start video processing. Hosted pairing needs separate hosted worker credentials; an existing localhost connection file cannot be reused by merely changing its URL.
+
+The standalone CLI pipeline also remains available:
+
+```powershell
 npm run pipeline:plan
 npm run pipeline:generate
 ```
 
-The demo commands share `local-runs/education-demo` and reuse valid completed stages. Edit `examples/education.json` to choose the input. If you change the topic or other immutable input, use a new run ID with the direct command below; do not overwrite an existing input snapshot.
+These commands can make real provider requests. The demo uses `examples/education.json` and `local-runs/education-demo`, reusing valid checkpoints. For changed inputs use a new run ID as described in [pipeline usage](doc/PIPELINE-USAGE.md). `pipeline:tools` installs the Windows native tools; the Dockerfile supplies the Linux equivalents. Existing private/generated artifacts stay ignored.
 
-```powershell
-node --import tsx --env-file-if-exists=.env src/cli.ts generate --input=examples/education.json --run=my-new-topic --captions
-```
-
-Use these exports after the demo timeline exists; they do not make additional AI requests:
-
-```powershell
-npm run pipeline:portrait
-npm run pipeline:clean
-```
-
-The demo is a 60-second beginner explanation of hydroelectric generation. MP4s, script, captions, mouth cues, timeline and verification report are under `local-runs/education-demo`. These private/generated artifacts are ignored by Git.
-
-## Install on a new machine
-
-```powershell
-npm ci --offline=false
-npm run pipeline:tools
-npm run pipeline:doctor
-```
-
-Configure the private root `.env` from `.env.example`; do not commit or share keys. The tools command downloads official non-Python native dependencies and an English model. It uses an installed compatible Chrome/Edge when found; otherwise Remotion provisions its rendering browser.
-
-Gemini Flash-Lite is the current planner because it passed the live test while the larger planner returned service failures. Gemini TTS remains primary; ElevenLabs is the eligible configured narration fallback. See [findings](doc/PROTOTYPE-FINDINGS.md) for actual tested versions and limitations.
-
-## Checks and documentation
+## Quality and security
 
 ```powershell
 npm run typecheck
 npm test
-npm run pipeline:verify
-npm run setup:check
+npm run web:typecheck
+npm run web:lint
+npm run web:build
+npm run web:test
 ```
 
-Provider configuration checks remain available as `npm run setup:providers`. They list models/voices; they do not establish generation quality.
+Browser tests that require local Supabase are opt-in; see the web guide. Production builds check application types separately from local E2E tooling. Do not run a web build and dev server concurrently.
 
-`pipeline:verify` checks all three demo exports after they exist, fully decodes them, and saves `verification.json`. Explicit export requests rerender the video; the AI/audio/timing/cue stages reuse valid checkpoints.
+Implemented safeguards include owned records with RLS, server-side validation, CSRF/Origin checks, private media grants, bounded jobs/provider usage, fenced worker leases and recovery checkpoints. Local verification and an npm audit result are not comprehensive production security sign-off. See [security controls](doc/SECURITY-CONTROLS.md) and [release plan](doc/EDUCATION-RELEASE.md).
 
-- [Pipeline usage, resume and cancellation](doc/PIPELINE-USAGE.md)
-- [Prototype findings](doc/PROTOTYPE-FINDINGS.md)
-- [Local setup and credentials](doc/LOCAL-SETUP.md)
-- [Project tracker](doc/PROJECT-TRACKER.md)
-- [Agent instructions](AGENTS.md)
-- [PRD](doc/PRD.md)
-- [Start Here](doc/START-HERE.md)
-- [Initial architecture](doc/INITIAL-ARCHITECTURE.md)
-- [Prototype plan](doc/PIPELINE-PROTOTYPE-PLAN.md)
+Never commit actual `.env` files, API keys, database passwords, worker connection files, private media, `node_modules` or generated caches. Committed `.env.example` files contain placeholders only. See [repository contents](doc/REPOSITORY-CONTENTS.md).
 
+## Documentation
 
-## Web application development
-
-The incremental Next.js application lives in `apps/web`. Start the local scaffold with `npm run web:dev` and open http://127.0.0.1:3000. Live application routes use real account/draft data; /preview routes remain disconnected design fixtures. Education execution requires the reviewed local setup described in doc/EDUCATION-GENERATION.md. See [web development](doc/WEB-DEVELOPMENT.md) for commands and [project tracker](doc/PROJECT-TRACKER.md) for feature status and the next task. Existing root pipeline commands remain available.
-
-
-## Local application database
-
-W-04 adds a separate local Supabase/PostgreSQL Docker stack. Start Docker Desktop, then run `npm run db:start`. Open Studio at http://127.0.0.1:55423. See [local database setup](doc/LOCAL-DATABASE.md) for pgAdmin, migrations, tests and safe reset commands. Local email authentication/session handling and the live /dashboard are connected to this stack. The dashboard reads owned project summaries, usage and worker availability; draft creation/editing is live at /projects/new and /projects/:id. The full video library, uploads and generation remain separate features. See [web setup](doc/WEB-DEVELOPMENT.md) and the [project tracker](doc/PROJECT-TRACKER.md). The standalone CLI pipeline still needs no database.
-
-## Repository and documentation map
-
-See [document map](doc/README.md) for current specifications and historical references, and [what belongs in GitHub](doc/REPOSITORY-CONTENTS.md) for source folders, generated files and local-only staging material.
-
-
-## Local email authentication
-
-After npm run db:start, run npm run web:auth:local to configure ignored web-only local settings, then npm run web:dev. Open http://127.0.0.1:3000/sign-up or /sign-in; /settings saves the signed-in user's full name. Google, explicit sign-out/expiry handling and generation integration remain later milestones. See doc/WEB-DEVELOPMENT.md for exact setup, API boundaries and opt-in local Auth browser checks. Never commit .env.local.
-
-
-W-11 local private upload setup and QA are documented in doc/WEB-DEVELOPMENT.md. Use node scripts/configure-local-uploads.mjs only for the existing local stack, after forward migrations; uploaded media and credentials stay ignored. Images/recordings are received privately, with actual decoding/generation still pending worker integration.
-
-
-W-15 local outbound worker setup, credential handling, leases, verification and manual checks are in [local worker](doc/LOCAL-WORKER.md). Worker control and W-16 Education execution are implemented locally; see doc/EDUCATION-GENERATION.md for activation and verification. Keep generation/claim pauses on.
+- [Project tracker and next task](doc/PROJECT-TRACKER.md)
+- [Requirements](doc/PRD.md)
+- [System architecture](doc/SYSTEM-ARCHITECTURE.md)
+- [Database design](doc/DATABASE-DESIGN.md) and [API design](doc/API-DESIGN.md)
+- [Education release scope](doc/EDUCATION-RELEASE.md)
+- [Prototype findings and accepted samples](doc/PROTOTYPE-FINDINGS.md)
+- [Public sample provenance](doc/PUBLIC-PAGES.md)
+- [Full document map](doc/README.md)

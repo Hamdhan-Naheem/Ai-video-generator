@@ -1,0 +1,10 @@
+{
+  "source": "public/samples/hydroelectric-education.mp4",
+  "sourceSha256": "1caf5032e3e642f6b16c4f1b7c21c1317816a4288e5fdf7073f469227b041722",
+  "provider": "gemini",
+  "voice": "Kore",
+  "excerptSeconds": 12,
+  "approval": "Derived only from the accepted hydroelectric video explicitly approved for public viewing; no private recording copied.",
+  "sha256": "5b376388b43a19d53ea9b50e0a5202c1fad8901da0636ab5b887836eff526e83",
+  "bytes": 576114
+}

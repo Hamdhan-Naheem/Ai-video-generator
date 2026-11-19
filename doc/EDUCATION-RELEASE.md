@@ -86,3 +86,9 @@ The user approved preparing a Linux x86_64 Docker worker and an offline native/r
 ## W30 essential controls — 13 November 2026
 
 Complete locally: protected operational API/private CLI, safe health/usage/paging, persisted operator limits, versioned pause/resume, exact receipts, expired-lease repair and safe audit. [Setup/evidence](OPERATOR-CONTROLS.md). Advanced admin UI/credential operations stay deferred. R-05 remains In progress and full W-24 remains unfinished. Next is W31 deployment preparation and guided manual hosting: the user performs deployment. Hosted/direct-Auth/edge/origin/cookie/header/secrets/maintenance/legacy lifecycle, actual remote generation/play/download and staged-load/rollback acceptance remain required; nothing is automatically provisioned or declared production-ready here.
+
+## Recruiter showcase deployment decision — 19 November 2026
+
+The user chose to keep the working Vercel/Supabase showcase without purchasing cloud worker hosting or running a continuously connected PC worker. Visitors may browse the approved public sample, create an account and save drafts. Hosted generation remains unavailable until a separately configured worker and reviewed limits are explicitly enabled. Full generation can be demonstrated locally during an interview. Google Cloud trial activation required an upfront payment and was not completed; AWS Free-plan eligibility was not established, and no AWS server was provisioned.
+
+The Education form must reflect server capabilities beside its disabled Generate action: checking status, check failure with a retry route, or unavailable processing with draft-saving guidance and an example link. These messages do not enable generation or replace server-side admission guards. The README records this deployment boundary; user-reported successful hosted auth and Next.js patch deployment do not complete hosted worker/retention/load/release acceptance.
