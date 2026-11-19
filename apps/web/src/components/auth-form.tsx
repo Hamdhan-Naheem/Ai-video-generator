@@ -30,9 +30,8 @@ export function AuthForm({signup=false,nextPath="/dashboard"}: {signup?:boolean;
     try {
       const body = signup ? {email,password,displayName:name} : {email,password};
       await accountRequest(signup ? "auth/sign-up" : "auth/sign-in",{method:"POST",body});
-      setPassword(""); setConfirm(""); window.location.replace(signup ? "/dashboard" : safeAccountReturn(nextPath));
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "We couldn’t connect. Please try again."); }
-    finally { submitting.current=false; setPending(false); }
+      setTouched({}); setPassword(""); setConfirm(""); window.location.replace(signup ? "/dashboard" : safeAccountReturn(nextPath));
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "We couldn’t connect. Please try again."); submitting.current=false; setPending(false); }
   }
   return <AuthFrame>
     <header className="auth-heading"><h1>{signup ? "Create an account" : "Welcome back"}</h1><p>{signup ? "Create narrated videos and keep your projects in one place." : "Sign in to create videos and access your projects."}</p></header>
