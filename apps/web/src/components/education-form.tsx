@@ -25,6 +25,7 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
   const [processing, setProcessing] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [generationEnabled,setGenerationEnabled]=useState(false);
+  const [generationStatus,setGenerationStatus]=useState<"checking"|"available"|"unavailable"|"error">("checking");
   const [generationError,setGenerationError]=useState("");
   const touch = (field: string) => setTouched(current => ({ ...current, [field]: true }));
   const topicError = touched.topic && !TopicSchema.safeParse(topic).success ? "Enter a topic you want to explain." : undefined;
@@ -78,7 +79,7 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
       </div>
 
       <aside className="education-settings-column" aria-label="Video settings and automatic features">
-        {draft ? <EducationSettings onGenerationAvailable={setGenerationEnabled} duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation} voice={voice} onVoiceChange={setVoice}/> : <VideoSettings prefix="education" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation}/> }
+        {draft ? <EducationSettings onGenerationAvailable={setGenerationEnabled} onAvailabilityStatus={setGenerationStatus} duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation} voice={voice} onVoiceChange={setVoice}/> : <VideoSettings prefix="education" duration={duration} onDurationChange={setDuration} orientation={orientation} onOrientationChange={setOrientation}/> }
         <section className="education-automatic ui-panel" aria-labelledby="automatic-title"><h2 id="automatic-title"><Icon name="layers" width="18" height="18" />Automatic generation</h2><p>Includes AI narration, automatic captions, illustrated scenes and a cartoon teacher synced with your topic.</p><ul>{["2D cartoon teacher", "Synchronized captions", "Illustrated scenes"].map(feature => <li key={feature}><Icon name="check" width="13" height="13" />{feature}</li>)}</ul></section>
       </aside>
 
@@ -89,7 +90,8 @@ export function EducationForm({draft}: {draft?:DraftFormBinding}={}) {
         </section>
         <div className="education-actions">
           <div className="education-action-buttons"><Button variant="secondary" pending={draft?.pending} pendingLabel="Saving draft…" disabled={!draft || draft.conflict} onClick={()=>draft?.onSave({...saved,mode:"education",topic,audience,intendedUse:intendedUse||undefined,learningObjective:objective,referenceNotes:notes,sources:[]},{...draft.preferences,targetSeconds:Number(duration),orientation,voiceProfileId:voice})} aria-describedby="education-action-hint">Save draft</Button><Button type="submit" disabled={!draft?.onGenerate||!generationEnabled||draft.pending||draft.conflict} aria-describedby="education-action-hint">Generate video<Icon name="arrow-right" width="18" height="18" /></Button></div>
-          <p id="education-action-hint" className="field-hint">{draft ? "Saving does not start AI processing. Generate requires available processing capacity and both acknowledgments." : "Draft saving and generation are not connected in this preview, even when all required fields are filled."}</p>
+          <p id="education-action-hint" className="field-hint" role="status">{draft ? generationStatus==="checking" ? "Checking generation availability… You can still save your draft." : generationStatus==="error" ? "Generation availability could not be checked. Retry video settings above. Your draft can still be saved." : generationStatus==="unavailable" ? "Live video generation is currently unavailable on this deployment. You can still edit and save your draft." : "Saving does not start AI processing. Generate requires available processing capacity and both acknowledgments." : "Draft saving and generation are not connected in this preview, even when all required fields are filled."}</p>
+          {draft&&generationStatus==="unavailable"&&<p className="field-hint"><a href="/samples/hydroelectric-education.mp4" target="_blank" rel="noopener noreferrer">Watch an example video (opens a new tab)</a>. Full generation can be demonstrated with the local processing worker.</p>}
         </div>
       </fieldset>
     </form>
